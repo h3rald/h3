@@ -1,7 +1,7 @@
-export default function Paginator() {
-  return (data) => {
-    const self = this;
-    self.app = data.app;
+import h3 from './h3.js';
+
+export default function Paginator(app) {
+  return function(data) {
     let page = data.page;
     const size = data.size;
     const total = data.total;
@@ -11,12 +11,12 @@ export default function Paginator() {
     function setPreviousPage() {
       page = page - 1;
       window.location.hash = `/?page=${page}`;
-      self.app.redraw();
+      app.redraw();
     }
     function setNextPage() {
       page = page + 1;
       window.location.hash = `/?page=${page}`;
-      self.app.redraw();
+      app.redraw();
     }
     return h3("div.paginator", [
       h3(`span.previous-page.fas.fa-arrow-left${previousClass}`, {

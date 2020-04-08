@@ -80,9 +80,6 @@ class VNode {
 
   // Renders the actual DOM Node corresponding to the current Virtual Node
   render() {
-    if (typeof this === "string") {
-      return document.createTextNode(this);
-    }
     const node = document.createElement(this.element);
     Object.keys(this.attributes).forEach((attr) => {
       if (attr.match(/^on/)) {
@@ -160,12 +157,12 @@ class VNode {
     var newmap = []; // Map positions of newvnode children in relation to oldvnode children
     var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
     if (newvnode.children) {
-      function mapChildren({ children }, { children }) {
+      function mapChildren(parent1, parent2) {
         const map = [];
-        for (let j = 0; j < children.length; j++) {
+        for (let j = 0; j < parent1.children.length; j++) {
           let found = false;
-          for (let k = 0; k < children.length; k++) {
-            if (equal(children[j], children[k])) {
+          for (let k = 0; k < parent2.children.length; k++) {
+            if (equal(parent1.children[j], parent2.children[k])) {
               map.push(k);
               found = true;
               break;

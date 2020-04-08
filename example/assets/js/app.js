@@ -25,15 +25,15 @@ export default function App(container) {
   };
 
   // Todo component
-  self.todo = h3.component(new Todo(self));
+  self.todo = Todo(self)
   // Paginator Component
-  self.paginator = h3.component(new Paginator(self));
+  self.paginator = Paginator(self)
 
   // Actual DOM creation/redrawing
   self.redraw = () => {
     self.save();
     const newTree = self.render();
-    h3.redraw(self.container.childNodes[0], newTree, self.view);
+    self.view.redraw(newTree);
     self.view = newTree;
   };
 
@@ -144,7 +144,7 @@ export default function App(container) {
   self.init = () => {
     self.load();
     self.view = self.render();
-    self.container.appendChild(h3.render(self.view));
+    self.container.appendChild(self.view.render());
   };
   // Initialize...
   self.init();
