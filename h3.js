@@ -1,33 +1,5 @@
-const h3 = function (...args) {
-  let elWithClasses;
-  const vnode = {
-    element: null,
-    attributes: {},
-    children: [],
-    classList: [],
-  };
-  if (args[0]) {
-    elWithClasses = String(args[0]);
-  }
-  if (args[1] && !args[2]) {
-    // assuming no attributes
-    if (args[1].constructor === Array) {
-      vnode.children = args[1];
-    } else {
-      vnode.attributes = args[1];
-    }
-  } else {
-    vnode.attributes = args[1] || {};
-    vnode.children = args[2] || [];
-  }
-  const parts = elWithClasses.split(".");
-  vnode.element = parts.shift();
-  vnode.classList = parts || [];
-  return vnode;
-};
-
 // Basic object equality
-h3.equal = (obj1, obj2) => {
+function equal(obj1, obj2) {
   if (
     (obj1 === null && obj2 === null) ||
     (obj1 === undefined && obj2 === undefined)
@@ -60,7 +32,7 @@ h3.equal = (obj1, obj2) => {
       return false;
     }
     for (let i = 0; i < obj1.length; i++) {
-      if (!h3.equal(obj1[i], obj2[i])) {
+      if (!equal(obj1[i], obj2[i])) {
         return false;
       }
     }
@@ -73,159 +45,186 @@ h3.equal = (obj1, obj2) => {
       if (!(key in obj2)) {
         return false;
       }
-      if (!h3.equal(obj1[key], obj2[key])) {
+      if (!equal(obj1[key], obj2[key])) {
         return false;
       }
     }
     return true;
   }
   return checkProperties(o1, o2) && checkProperties(o2, o1);
-};
+}
 
-// Render a real DOM element starting from a virtual node
-h3.render = (vnode) => {
-  if (typeof vnode === "string") {
-    return document.createTextNode(vnode);
-  }
-  const node = document.createElement(vnode.element);
-  Object.keys(vnode.attributes).forEach((attr) => {
-    if (attr.match(/^on/)) {
-      // Event listener
-      const event = attr.match(/^on(.+)$/)[1];
-      node.addEventListener(event, vnode.attributes[attr]);
-    } else if (attr === "value") {
-      node.value = vnode.attributes[attr];
+// Virtual Node Implementation with HyperScript-like syntax
+class VNode {
+  constructor(...args) {
+    this.element = null;
+    this.attributes = {};
+    this.children = [];
+    this.classList = [];
+    const elWithClasses = String(args[0]);
+    if (args[1] && !args[2]) {
+      // assuming no attributes
+      if (args[1].constructor === Array) {
+        this.children = args[1];
+      } else {
+        this.attributes = args[1];
+      }
     } else {
-      // Standard attributes
-      const a = document.createAttribute(attr);
-      a.value = vnode.attributes[attr];
-      node.setAttributeNode(a);
+      this.attributes = args[1] || {};
+      this.children = args[2] || [];
     }
-  });
-  // Classes
-  vnode.classList.forEach((c) => {
-    node.classList.add(c);
-  });
-  // Children
-  vnode.children.forEach((c) => {
-    node.appendChild(h3.render(c));
-  });
-  return node;
-};
-h3.redraw = (node, newvnode, oldvnode) => {
-  if (
-    oldvnode.constructor !== newvnode.constructor ||
-    oldvnode.element !== newvnode.element
-  ) {
-    // Different node types, replace the whole node (requires valid parent node)
-    node.parentNode.replaceChild(h3.render(newvnode), node);
-    oldvnode = newvnode;
-    return;
-  } else if (oldvnode.constructor === String && oldvnode !== newvnode) {
-    // String nodes, update value
-    node.data = newvnode;
-    oldvnode = newvnode;
-    return;
+    const parts = elWithClasses.split(".");
+    this.element = parts.shift();
+    this.classList = parts || [];
   }
-  if (!h3.equal(oldvnode.classList, newvnode.classList)) {
-    oldvnode.classList.forEach((c) => {
-      if (!newvnode.classList.includes(c)) {
-        node.classList.remove(c);
+
+  // Renders the actual DOM Node corresponding to the current Virtual Node
+  render() {
+    if (typeof this === "string") {
+      return document.createTextNode(this);
+    }
+    const node = document.createElement(this.element);
+    Object.keys(this.attributes).forEach((attr) => {
+      if (attr.match(/^on/)) {
+        // Event listener
+        const event = attr.match(/^on(.+)$/)[1];
+        node.addEventListener(event, this.attributes[attr]);
+      } else if (attr === "value") {
+        node.value = this.attributes[attr];
+      } else {
+        // Standard attributes
+        const a = document.createAttribute(attr);
+        a.value = this.attributes[attr];
+        node.setAttributeNode(a);
       }
     });
-    newvnode.classList.forEach((c) => {
-      if (!oldvnode.classList.includes(c)) {
-        node.classList.add(c);
-      }
+    // Classes
+    this.classList.forEach((c) => {
+      node.classList.add(c);
     });
-    oldvnode.classList = newvnode.classList;
+    // Children
+    this.children.forEach((c) => {
+      node.appendChild(
+        typeof c === "string" ? document.createTextNode(c) : c.render()
+      );
+    });
+    return node;
   }
-  if (!h3.equal(oldvnode.attributes, newvnode.attributes)) {
-    Object.keys(oldvnode.attributes).forEach((a) => {
-      if (!newvnode.attributes[a]) {
-        node.removeAttribute(a);
-      } else if (newvnode.attributes[a] !== oldvnode.attributes[a]) {
-        node.setAttribute(a, newvnode.attributes[a]);
-      }
-    });
-    Object.keys(newvnode.attributes).forEach((a) => {
-      if (!oldvnode.attributes[a]) {
-        node.setAttribute(a, newvnode.attributes[a]);
-      }
-    });
-    oldvnode.attributes = newvnode.attributes;
-  }
-  var newmap = []; // Map positions of newvnode children in relation to oldvnode children
-  var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
-  if (newvnode.children) {
-    function mapChildren({ children }, { children }) {
-      const map = [];
-      for (let j = 0; j < children.length; j++) {
-        let found = false;
-        for (let k = 0; k < children.length; k++) {
-          if (h3.equal(children[j], children[k])) {
-            map.push(k);
-            found = true;
-            break;
+
+  // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
+  update(newvnode) {
+    const oldvnode = this;
+    const node = this.element;
+    if (
+      oldvnode.constructor !== newvnode.constructor ||
+      oldvnode.element !== newvnode.element
+    ) {
+      // Different node types, replace the whole node (requires valid parent node)
+      node.parentNode.replaceChild(newvnode.render(), node);
+      oldvnode = newvnode;
+      return;
+    } else if (oldvnode.constructor === String && oldvnode !== newvnode) {
+      // String nodes, update value
+      node.data = newvnode;
+      oldvnode = newvnode;
+      return;
+    }
+    if (!equal(oldvnode.classList, newvnode.classList)) {
+      oldvnode.classList.forEach((c) => {
+        if (!newvnode.classList.includes(c)) {
+          node.classList.remove(c);
+        }
+      });
+      newvnode.classList.forEach((c) => {
+        if (!oldvnode.classList.includes(c)) {
+          node.classList.add(c);
+        }
+      });
+      oldvnode.classList = newvnode.classList;
+    }
+    if (!equal(oldvnode.attributes, newvnode.attributes)) {
+      Object.keys(oldvnode.attributes).forEach((a) => {
+        if (!newvnode.attributes[a]) {
+          node.removeAttribute(a);
+        } else if (newvnode.attributes[a] !== oldvnode.attributes[a]) {
+          node.setAttribute(a, newvnode.attributes[a]);
+        }
+      });
+      Object.keys(newvnode.attributes).forEach((a) => {
+        if (!oldvnode.attributes[a]) {
+          node.setAttribute(a, newvnode.attributes[a]);
+        }
+      });
+      oldvnode.attributes = newvnode.attributes;
+    }
+    var newmap = []; // Map positions of newvnode children in relation to oldvnode children
+    var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
+    if (newvnode.children) {
+      function mapChildren({ children }, { children }) {
+        const map = [];
+        for (let j = 0; j < children.length; j++) {
+          let found = false;
+          for (let k = 0; k < children.length; k++) {
+            if (equal(children[j], children[k])) {
+              map.push(k);
+              found = true;
+              break;
+            }
+          }
+          // node not in oldvnode
+          if (!found) {
+            map.push(-1);
           }
         }
-        // node not in oldvnode
-        if (!found) {
-          map.push(-1);
-        }
+        return map;
       }
-      return map;
-    }
-    var newmap = mapChildren(newvnode, oldvnode);
-    var oldmap = mapChildren(oldvnode, newvnode);
-    var notFoundInOld = newmap.indexOf(-1);
-    var notFoundInNew = oldmap.indexOf(-1);
-    if (
-      h3.equal(newmap, oldmap) &&
-      (notFoundInNew >= 0 || notFoundInOld >= 0)
-    ) {
-      // Something changed
-      for (let i = 0; i < newmap.length; i++) {
-        if (newmap[i] === -1) {
-          h3.redraw(
-            node.childNodes[i],
-            newvnode.children[i],
-            oldvnode.children[i]
-          );
-        }
-      }
-    } else {
+      var newmap = mapChildren(newvnode, oldvnode);
+      var oldmap = mapChildren(oldvnode, newvnode);
       var notFoundInOld = newmap.indexOf(-1);
       var notFoundInNew = oldmap.indexOf(-1);
-      while (notFoundInOld >= 0 || notFoundInNew >= 0) {
-        // First remove children not found in new map, then add the missing ones.
-        if (notFoundInNew >= 0) {
-          // while there are children not found in newvnode, remove them and re-check
-          node.removeChild(node.childNodes[notFoundInNew]);
-          oldvnode.children.splice(notFoundInNew, 1);
-          newmap = mapChildren(newvnode, oldvnode);
-          oldmap = mapChildren(oldvnode, newvnode);
-          notFoundInNew = oldmap.indexOf(-1);
-          notFoundInOld = newmap.indexOf(-1);
+      if (equal(newmap, oldmap) && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
+        // Something changed
+        for (let i = 0; i < newmap.length; i++) {
+          if (newmap[i] === -1) {
+            oldvnode.children[o].update(newnode.children[i]);
+          }
         }
-        if (notFoundInOld >= 0) {
-          // while there are children not found in oldvnode, add them and re-check
-          node.insertBefore(
-            h3.render(newvnode.children[notFoundInOld]),
-            node.childNodes[notFoundInOld]
-          );
-          oldvnode.children.splice(
-            notFoundInOld,
-            0,
-            newvnode.children[notFoundInOld]
-          );
-          newmap = mapChildren(newvnode, oldvnode);
-          oldmap = mapChildren(oldvnode, newvnode);
-          notFoundInNew = oldmap.indexOf(-1);
-          notFoundInOld = newmap.indexOf(-1);
+      } else {
+        var notFoundInOld = newmap.indexOf(-1);
+        var notFoundInNew = oldmap.indexOf(-1);
+        while (notFoundInOld >= 0 || notFoundInNew >= 0) {
+          // First remove children not found in new map, then add the missing ones.
+          if (notFoundInNew >= 0) {
+            // while there are children not found in newvnode, remove them and re-check
+            node.removeChild(node.childNodes[notFoundInNew]);
+            oldvnode.children.splice(notFoundInNew, 1);
+            newmap = mapChildren(newvnode, oldvnode);
+            oldmap = mapChildren(oldvnode, newvnode);
+            notFoundInNew = oldmap.indexOf(-1);
+            notFoundInOld = newmap.indexOf(-1);
+          }
+          if (notFoundInOld >= 0) {
+            // while there are children not found in oldvnode, add them and re-check
+            node.insertBefore(
+              newvnode.children[notFoundInOld].render(),
+              node.childNodes[notFoundInOld]
+            );
+            oldvnode.children.splice(
+              notFoundInOld,
+              0,
+              newvnode.children[notFoundInOld]
+            );
+            newmap = mapChildren(newvnode, oldvnode);
+            oldmap = mapChildren(oldvnode, newvnode);
+            notFoundInNew = oldmap.indexOf(-1);
+            notFoundInOld = newmap.indexOf(-1);
+          }
         }
       }
     }
   }
-};
-export default h3;
+}
+
+export default function (...args) {
+  return new VNode(...args);
+}
