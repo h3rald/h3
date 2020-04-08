@@ -1,0 +1,151 @@
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+  font-family: sans-serif;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+h1 {
+  margin: auto;
+  text-align: center;
+}
+
+.todo-list-container {
+  padding: 15px;
+}
+
+.add-todo-form {
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+}
+#new-todo {
+  font-size: 2rem;
+  height: 3rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+.submit-todo {
+  height: 3rem;
+  width: 4rem;
+  font-size: 2.5rem;
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  cursor: pointer;
+}
+.navigation-bar {
+  display: flex;
+  justify-content: center; 
+}
+#filter-text {
+  display: flex;
+  justify-content: space-around; 
+  font-size: 1em;
+  height: 2em;
+  width: 100%;
+}
+.paginator {
+  display: flex;
+  align-items: center;
+  justify-content: space-around; 
+  padding: 0 5px;
+  font-weight: bold;
+}
+
+.current-page {
+  padding: 0 5px;
+}
+
+.todo-list {
+  margin: 20px 0;
+}
+
+.todo-content {
+  cursor: pointer;
+}
+
+.todo-content.done {
+  text-decoration: line-through;
+  color: #666;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: flex-start;
+  padding: 5px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+}
+
+.todo-content {
+  display: flex;
+  justify-content: space-around;
+  padding: 5px 10px 5px 0;
+  width: 100%;
+}
+
+.todo-text {
+  text-align: left;
+  width: 100%;
+}
+
+.delete-todo {
+  display: flex;
+  cursor: pointer;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.error {
+  color: #FF3838;
+  background: #FFE6CC;
+  width: 100%;
+  border: 1px solid #FF3838;
+  padding: 5px;
+  margin: 5px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.error-message {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.dismiss-error {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.link {
+  cursor: pointer;
+}
+.disabled {
+  color: #CCCCCC;
+}
+
+@media (min-width: 750px) {
+  .todo-list-container {
+    width: 700px;
+    margin: auto;
+  }
+}
