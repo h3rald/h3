@@ -61,25 +61,42 @@ class VNode {
     this.attributes = {};
     this.children = [];
     this.classList = [];
-    const elWithClasses = String(args[0]);
-    if (args[1] && !args[2]) {
-      // assuming no attributes
-      if (args[1].constructor === Array) {
-        this.children = args[1];
-      } else {
-        this.attributes = args[1];
-      }
+    if (
+      args[0] &&
+      Object.prototype.toString.call(args[0]) === "[object Object]" &&
+      !args[1] &&
+      !args[2]
+    ) {
+      this.type = args[0].type;
+      this.value = args[0].value;
     } else {
-      this.attributes = args[1] || {};
-      this.children = args[2] || [];
+      this.type = "element";
+      const elWithClasses = String(args[0]);
+      if (args[1] && !args[2]) {
+        // assuming no attributes
+        if (args[1].constructor === Array) {
+          this.children = args[1];
+        } else {
+          this.attributes = args[1];
+        }
+      } else {
+        this.attributes = args[1] || {};
+        this.children = args[2] || [];
+      }
+      const parts = elWithClasses.split(".");
+      this.children = this.children.map((c) =>
+        typeof c === "string" ? new VNode({ type: "text", value: c }) : c
+      );
+      this.element = parts.shift();
+      this.classList = parts || [];
     }
-    const parts = elWithClasses.split(".");
-    this.element = parts.shift();
-    this.classList = parts || [];
   }
 
   // Renders the actual DOM Node corresponding to the current Virtual Node
   render() {
+    if (this.type === "text") {
+      return document.createTextNode(this.value);
+    }
     const node = document.createElement(this.element);
     Object.keys(this.attributes).forEach((attr) => {
       if (attr.match(/^on/)) {
@@ -101,9 +118,7 @@ class VNode {
     });
     // Children
     this.children.forEach((c) => {
-      node.appendChild(
-        typeof c === "string" ? document.createTextNode(c) : c.render()
-      );
+      node.appendChild(c.render());
     });
     return node;
   }
@@ -182,13 +197,15 @@ class VNode {
         // Something changed
         for (let i = 0; i < newmap.length; i++) {
           if (newmap[i] === -1) {
-            // TODO: refactor and handle text nodes properly.
-            if (typeof oldvnode.children[i] === 'string') {
-              console.log(oldvnode.children[i], newvnode.children[i]);
+            if (oldvnode.children[i].type === "text") {
+              console.log(oldvnode, newvnode);
               oldvnode.children[i] = newvnode.children[i];
-              node.childNodes[i].nodeValue = newvnode.children[i];
+              node.childNodes[i].nodeValue = newvnode.children[i].value;
             } else {
-              oldvnode.children[i].update(node.childNodes[i], newvnode.children[i]);
+              oldvnode.children[i].update(
+                node.childNodes[i],
+                newvnode.children[i]
+              );
             }
           }
         }
