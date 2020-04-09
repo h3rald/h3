@@ -5,11 +5,11 @@ export default function Todo(app) {
     const todoStateClass = data.done ? ".done" : ".todo";
     function toggle() {
       data.done = !data.done;
-      app.redraw();
+      app.update();
     }
     function remove() {
       app.todos = app.todos.filter(({ key }) => key !== data.key);
-      app.redraw();
+      app.update();
     }
     return h3("div.todo-item", { id: data.key }, [
       h3(`div.todo-content${todoStateClass}`, [

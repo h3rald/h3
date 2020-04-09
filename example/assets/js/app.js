@@ -29,11 +29,11 @@ export default function App(container) {
   // Paginator Component
   self.paginator = Paginator(self)
 
-  // Actual DOM creation/redrawing
-  self.redraw = () => {
+  // Actual DOM creation/updateing
+  self.update = () => {
     self.save();
     const newTree = self.render();
-    self.view.redraw(newTree);
+    self.view.update(self.container.childNodes[0], newTree);
     self.view = newTree;
   };
 
@@ -43,7 +43,7 @@ export default function App(container) {
     const newTodo = document.getElementById("new-todo");
     if (!newTodo.value) {
       self.emptyTodoError = true;
-      self.redraw();
+      self.update();
       document.getElementById("new-todo").focus();
       return;
     }
@@ -53,7 +53,7 @@ export default function App(container) {
       text: newTodo.value,
     });
     newTodo.value = "";
-    self.redraw();
+    self.update();
     document.getElementById("new-todo").focus();
   };
 
@@ -69,7 +69,7 @@ export default function App(container) {
   self.setFilter = (event) => {
     let filter = document.getElementById("filter-text");
     self.filter = filter.value;
-    self.redraw();
+    self.update();
     filter = document.getElementById("filter-text");
     filter.focus();
   };
@@ -84,7 +84,7 @@ export default function App(container) {
   // Clear error message
   self.clearError = () => {
     self.emptyTodoError = false;
-    self.redraw();
+    self.update();
     document.getElementById("new-todo").focus();
   };
 

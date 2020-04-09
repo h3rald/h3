@@ -109,9 +109,8 @@ class VNode {
   }
 
   // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
-  update(newvnode) {
+  update(node, newvnode) {
     const oldvnode = this;
-    const node = this.element;
     if (
       oldvnode.constructor !== newvnode.constructor ||
       oldvnode.element !== newvnode.element
@@ -183,7 +182,14 @@ class VNode {
         // Something changed
         for (let i = 0; i < newmap.length; i++) {
           if (newmap[i] === -1) {
-            oldvnode.children[o].update(newnode.children[i]);
+            // TODO: refactor and handle text nodes properly.
+            if (typeof oldvnode.children[i] === 'string') {
+              console.log(oldvnode.children[i], newvnode.children[i]);
+              oldvnode.children[i] = newvnode.children[i];
+              node.childNodes[i].nodeValue = newvnode.children[i];
+            } else {
+              oldvnode.children[i].update(node.childNodes[i], newvnode.children[i]);
+            }
           }
         }
       } else {

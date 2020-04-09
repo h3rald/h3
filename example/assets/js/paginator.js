@@ -11,12 +11,12 @@ export default function Paginator(app) {
     function setPreviousPage() {
       page = page - 1;
       window.location.hash = `/?page=${page}`;
-      app.redraw();
+      app.update();
     }
     function setNextPage() {
       page = page + 1;
       window.location.hash = `/?page=${page}`;
-      app.redraw();
+      app.update();
     }
     return h3("div.paginator", [
       h3(`span.previous-page.fas.fa-arrow-left${previousClass}`, {
