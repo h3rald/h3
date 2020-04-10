@@ -11,7 +11,7 @@ export default function EmptyTodoError(data, actions) {
       {
         onclick: clearError,
       },
-      ["✘"]
+      "✘"
     ),
   ]);
 }

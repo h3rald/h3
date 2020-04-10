@@ -102,7 +102,7 @@ const build = () => {
   const start = (page - 1) * pagesize;
   const end = Math.min(start + pagesize, filteredTodos.length);
   return h3("div#todolist.todo-list-container", [
-    h3("h1", ["To Do List"]),
+    h3("h1", "To Do List"),
     AddTodoForm({ addTodo, addTodoOnEnter }),
     EmptyTodoError({ displayEmptyTodoError }, { clearError }),
     NavigationBar({ filter, paginatorData }, { update, setFilter }),

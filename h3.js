@@ -52,16 +52,16 @@ export const equal = (obj1, obj2) => {
     return true;
   }
   return checkProperties(o1, o2) && checkProperties(o2, o1);
-}
+};
 
 /**
  * Mounts a VNode and renders it as a child of an existing DOM Element.
- * @param {string} id A unique ID of of an existing DOM Element. 
+ * @param {string} id A unique ID of of an existing DOM Element.
  * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
  */
 export const mount = (id, vnode) => {
   document.getElementById(id).appendChild(vnode.render());
-}
+};
 
 // Virtual Node Implementation with HyperScript-like syntax
 export class VNode {
@@ -83,20 +83,22 @@ export class VNode {
       const elSelector = String(args[0]);
       if (args[1] && !args[2]) {
         // assuming no attributes
-        if (args[1].constructor === Array) {
+        if (typeof args[1] === "string") {
+          this.children = [args[1]];
+        } else if (args[1].constructor === Array) {
           this.children = args[1];
         } else {
           this.attributes = args[1];
         }
       } else {
         this.attributes = args[1] || {};
-        this.children = args[2] || [];
+        this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
       }
-      const selectorRegex = /^([a-z0-9:_-]+)(#[a-z0-9:_-]+)?(\..+)?$/i
+      const selectorRegex = /^([a-z0-9:_-]+)(#[a-z0-9:_-]+)?(\..+)?$/i;
       const [, element, id, classes] = elSelector.match(selectorRegex);
       this.element = element;
       this.id = id && id.slice(1);
-      this.classList = classes && classes.split('.').slice(1) || [];
+      this.classList = (classes && classes.split(".").slice(1)) || [];
       this.children = this.children.map((c) =>
         typeof c === "string" ? new VNode({ type: "text", value: c }) : c
       );
@@ -141,7 +143,7 @@ export class VNode {
   update(data) {
     let { node, vnode } = data || {};
     if (!node && this.id) {
-      node = document.getElementById(this.id)
+      node = document.getElementById(this.id);
     }
     if (!vnode) {
       vnode = this.render();
