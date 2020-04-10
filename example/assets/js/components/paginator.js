@@ -1,4 +1,4 @@
-import h3 from "./h3.js";
+import h3 from "../h3.js";
 
 export default function Paginator(data, actions) {
   const { update } = actions;

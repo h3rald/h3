@@ -1,11 +1,13 @@
 import h3, { mount } from "./h3.js";
-import Paginator from "./paginator.js";
-import Todo from "./todo.js";
+import AddTodoForm from "./components/addTodoForm.js";
+import EmptyTodoError from "./components/emptyTodoError.js";
+import NavigationBar from "./components/navigationBar.js";
+import TodoList from "./components/todoList.js";
 
 let todos = [];
 let filteredTodos = [];
 let app;
-let emptyTodoError = false;
+let displayEmptyTodoError = false;
 let filter = "";
 let pagesize = 10;
 let page = 1;
@@ -27,26 +29,17 @@ const update = () => {
   app.update({ vnode: build() });
 };
 
-const toggle = (todo) => {
-  todo.done = !todo.done;
-  update();
-};
-const remove = (todo) => {
-  todos = todos.filter(({ key }) => key !== todo.key);
-  update();
-};
-
 // UI Methods
 // Add a todo item
 const addTodo = () => {
   const newTodo = document.getElementById("new-todo");
   if (!newTodo.value) {
-    emptyTodoError = true;
+    displayEmptyTodoError = true;
     update();
     document.getElementById("new-todo").focus();
     return;
   }
-  emptyTodoError = false;
+  displayEmptyTodoError = false;
   todos.unshift({
     key: `todo_${Date.now()}__${newTodo.value}`, // Make todos "unique-enough" to ensure they are processed correctly
     text: newTodo.value,
@@ -64,6 +57,15 @@ const addTodoOnEnter = (event) => {
   }
 };
 
+const toggleTodo = (todo) => {
+  todo.done = !todo.done;
+  update();
+};
+const removeTodo = (todo) => {
+  todos = todos.filter(({ key }) => key !== todo.key);
+  update();
+};
+
 // Set the todo filter.
 const setFilter = (event) => {
   let f = document.getElementById("filter-text");
@@ -73,16 +75,9 @@ const setFilter = (event) => {
   f.focus();
 };
 
-// Display todo items
-const displayTodos = () => {
-  const start = (page - 1) * pagesize;
-  const end = Math.min(start + pagesize, filteredTodos.length);
-  return filteredTodos.slice(start, end).map((t) => Todo(t, {toggle, remove}));
-};
-
 // Clear error message
 const clearError = () => {
-  emptyTodoError = false;
+  displayEmptyTodoError = false;
   update();
   document.getElementById("new-todo").focus();
 };
@@ -99,49 +94,19 @@ const build = () => {
   }
   // Recalculate page in case data is filtered.
   page = Math.min(Math.ceil(filteredTodos.length / pagesize), page) || 1;
-  const emptyTodoErrorClass = emptyTodoError ? "" : ".hidden";
   const paginatorData = {
     size: pagesize,
     page: page,
     total: filteredTodos.length,
   };
+  const start = (page - 1) * pagesize;
+  const end = Math.min(start + pagesize, filteredTodos.length);
   return h3("div#todolist.todo-list-container", [
     h3("h1", ["To Do List"]),
-    h3("form.add-todo-form", [
-      h3("input", {
-        id: "new-todo",
-        placeholder: "What do you want to do?",
-        autofocus: true,
-        onkeydown: addTodoOnEnter,
-      }),
-      h3(
-        "span.submit-todo",
-        {
-          onclick: addTodo,
-        },
-        ["+"]
-      ),
-    ]),
-    h3(`div.error${emptyTodoErrorClass}`, [
-      h3("span.error-message", ["Please enter a non-empty todo item."]),
-      h3(
-        "span.dismiss-error",
-        {
-          onclick: clearError,
-        },
-        ["✘"]
-      ),
-    ]),
-    h3("div.navigation-bar", [
-      h3("input", {
-        id: "filter-text",
-        placeholder: "Type to filter todo items...",
-        onkeyup: setFilter,
-        value: filter,
-      }),
-      Paginator(paginatorData, {update}),
-    ]),
-    h3("div.todo-list", displayTodos()),
+    AddTodoForm({ addTodo, addTodoOnEnter }),
+    EmptyTodoError({ displayEmptyTodoError }, { clearError }),
+    NavigationBar({ filter, paginatorData }, { update, setFilter }),
+    TodoList({ filteredTodos, start, end }, { toggleTodo, removeTodo }),
   ]);
 };
 load();
