@@ -1,41 +1,24 @@
-import h3, { mount } from "./h3.js";
+import h3, { mount, region } from "./h3.js";
 import AddTodoForm from "./components/addTodoForm.js";
 import EmptyTodoError from "./components/emptyTodoError.js";
 import NavigationBar from "./components/navigationBar.js";
 import TodoList from "./components/todoList.js";
 
+// Main application state
 let todos = [];
 let filteredTodos = [];
-let app;
 let displayEmptyTodoError = false;
 let filter = "";
 let pagesize = 10;
 let page = 1;
 
-// State management via localStorage
-const save = () => {
-  localStorage.setItem("h3_todo_list", JSON.stringify(todos));
-};
-const load = () => {
-  const lsTodos = localStorage.getItem("h3_todo_list");
-  if (lsTodos) {
-    todos = JSON.parse(lsTodos);
-  }
-};
-
-// Actual DOM creation/updateing
-const update = () => {
-  save();
-  app.update({ vnode: build() });
-};
-
 // UI Methods
 // Add a todo item
-const addTodo = () => {
+const addTodo = (updateError) => {
   const newTodo = document.getElementById("new-todo");
   if (!newTodo.value) {
     displayEmptyTodoError = true;
-    update();
+    updateError();
     document.getElementById("new-todo").focus();
     return;
   }
@@ -50,9 +33,9 @@ const addTodo = () => {
 };
 
 // Add a todo item when pressing enter in the input field.
-const addTodoOnEnter = (event) => {
+const addTodoOnEnter = (event, updateError) => {
   if (event.keyCode == 13) {
-    addTodo();
+    addTodo(updateError);
     event.preventDefault();
   }
 };
@@ -82,11 +65,16 @@ const clearError = () => {
   document.getElementById("new-todo").focus();
 };
 
+const refresh = () => {
+  update();
+}
+
 // Filtering function for todo items
 const filterTodos = ({ text }) => text.match(filter);
 
 // Main rendering function (creates virtual dom)
 const build = () => {
+  localStorage.setItem("h3_todo_list", JSON.stringify(todos));
   const hash = window.location.hash;
   filteredTodos = todos.filter(filterTodos);
   if (hash.match(/page=(\d+)/)) {
@@ -101,14 +89,21 @@ const build = () => {
   };
   const start = (page - 1) * pagesize;
   const end = Math.min(start + pagesize, filteredTodos.length);
+  const [error, updateError] = region(() => EmptyTodoError({ displayEmptyTodoError }, { clearError }))
   return h3("div#todolist.todo-list-container", [
     h3("h1", "To Do List"),
-    AddTodoForm({ addTodo, addTodoOnEnter }),
-    EmptyTodoError({ displayEmptyTodoError }, { clearError }),
-    NavigationBar({ filter, paginatorData }, { update, setFilter }),
+    AddTodoForm({ addTodo, addTodoOnEnter, updateError }),
+    error,
+    NavigationBar({ filter, paginatorData }, { refresh, setFilter }),
     TodoList({ filteredTodos, start, end }, { toggleTodo, removeTodo }),
   ]);
 };
-load();
-app = build();
+
+const storedTodos = localStorage.getItem("h3_todo_list");
+if (storedTodos) {
+  todos = JSON.parse(storedTodos);
+}
+
+const [app, update] = region(build);
+
 mount("app", app);

@@ -1,7 +1,7 @@
 import h3 from "../h3.js";
 
 export default function Paginator(data, actions) {
-  const { update } = actions;
+  const { refresh } = actions;
   let page = data.page;
   const size = data.size;
   const total = data.total;
@@ -11,12 +11,12 @@ export default function Paginator(data, actions) {
   function setPreviousPage() {
     page = page - 1;
     window.location.hash = `/?page=${page}`;
-    update();
+    refresh();
   }
   function setNextPage() {
     page = page + 1;
     window.location.hash = `/?page=${page}`;
-    update();
+    refresh();
   }
   return h3("div.paginator", [
     h3(

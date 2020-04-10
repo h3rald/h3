@@ -3,7 +3,7 @@ import Paginator from "./paginator.js";
 
 export default function NavigationBar(data, actions) {
   const { filter, paginatorData } = data;
-  const { setFilter, update } = actions;
+  const { setFilter, refresh } = actions;
   return h3("div.navigation-bar", [
     h3("input", {
       id: "filter-text",
@@ -11,6 +11,6 @@ export default function NavigationBar(data, actions) {
       onkeyup: setFilter,
       value: filter,
     }),
-    Paginator(paginatorData, { update }),
+    Paginator(paginatorData, { refresh }),
   ]);
 }

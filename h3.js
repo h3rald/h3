@@ -63,6 +63,14 @@ export const mount = (id, vnode) => {
   document.getElementById(id).appendChild(vnode.render());
 };
 
+export const region = (builder) => {
+  const vnode = builder();
+  if (!vnode.id) {
+    throw new Error("Region VNode does not have an ID.");
+  }
+  return [vnode, () => vnode.update({vnode: builder()})]
+}
+
 // Virtual Node Implementation with HyperScript-like syntax
 export class VNode {
   constructor(...args) {
