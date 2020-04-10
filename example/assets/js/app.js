@@ -1,10 +1,10 @@
-import h3 from "./h3.js";
+import h3, { mount } from "./h3.js";
 import Paginator from "./paginator.js";
 import Todo from "./todo.js";
 
 let todos = [];
 let filteredTodos = [];
-let view = null;
+let app;
 let emptyTodoError = false;
 let filter = "";
 let pagesize = 10;
@@ -24,21 +24,17 @@ const load = () => {
 // Actual DOM creation/updateing
 const update = () => {
   save();
-  view.update({ vnode: build() });
+  app.update({ vnode: build() });
 };
 
 const toggle = (todo) => {
   todo.done = !todo.done;
   update();
-}
+};
 const remove = (todo) => {
   todos = todos.filter(({ key }) => key !== todo.key);
   update();
-}
-// Todo component
-const todo = Todo({ toggle, remove });
-// Paginator Component
-const paginator = Paginator(update);
+};
 
 // UI Methods
 // Add a todo item
@@ -81,7 +77,7 @@ const setFilter = (event) => {
 const displayTodos = () => {
   const start = (page - 1) * pagesize;
   const end = Math.min(start + pagesize, filteredTodos.length);
-  return filteredTodos.slice(start, end).map(todo);
+  return filteredTodos.slice(start, end).map((t) => Todo(t, {toggle, remove}));
 };
 
 // Clear error message
@@ -143,11 +139,11 @@ const build = () => {
         onkeyup: setFilter,
         value: filter,
       }),
-      paginator(paginatorData),
+      Paginator(paginatorData, {update}),
     ]),
     h3("div.todo-list", displayTodos()),
   ]);
 };
 load();
-view = build();
-document.getElementById("app").appendChild(view.render());
+app = build();
+mount("app", app);
