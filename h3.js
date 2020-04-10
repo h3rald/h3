@@ -1,5 +1,5 @@
 // Basic object equality
-function equal(obj1, obj2) {
+export const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
     (obj1 === undefined && obj2 === undefined)
@@ -54,8 +54,29 @@ function equal(obj1, obj2) {
   return checkProperties(o1, o2) && checkProperties(o2, o1);
 }
 
+/**
+ * Creates an updatable region within a page, identified by a unique ID.
+ * @param {Function} builder A function returning a VNode object.
+ * @returns {Array[Element, Function]} The DOM element resulting by rendering the built VNode and a function used to update (rebuild) the element.
+ */
+export const region = (builder) => {
+  const vnode = builder();
+  if (!vnode.id) {
+    throw 'No ID specified for region VNode.';
+  }
+  return [vnode.render(), () => vnode.update(builder())];
+}
+/**
+ * Mounts a VNode and renders it as a child of an existing DOM Element.
+ * @param {string} id A unique ID of of an existing DOM Element. 
+ * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
+ */
+export const mount = (id, vnode) => {
+  document.getElementById(id).appendChild(vnode.render());
+}
+
 // Virtual Node Implementation with HyperScript-like syntax
-class VNode {
+export class VNode {
   constructor(...args) {
     this.element = null;
     this.attributes = {};

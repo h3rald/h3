@@ -32,10 +32,7 @@ export default function App(container) {
   // Actual DOM creation/updateing
   self.update = () => {
     self.save();
-    const newTree = self.render();
-    /*self.view.update({ node: self.container.childNodes[0], vnode: newTree });
-    self.view = newTree;*/
-    self.view.update({ vnode: newTree });
+    self.view.update({ vnode: self.build() });
   };
 
   // UI Methods
@@ -93,7 +90,7 @@ export default function App(container) {
   self.filterTodos = ({ text }) => text.match(self.filter);
 
   // Main rendering function (creates virtual dom)
-  self.render = () => {
+  self.build = () => {
     const hash = window.location.hash;
     self.filteredTodos = self.todos.filter(self.filterTodos);
     if (hash.match(/page=(\d+)/)) {
@@ -144,7 +141,7 @@ export default function App(container) {
   };
   self.init = () => {
     self.load();
-    self.view = self.render();
+    self.view = self.build();
     self.container.appendChild(self.view.render());
   };
   // Initialize...
