@@ -71,7 +71,7 @@ class VNode {
       this.value = args[0].value;
     } else {
       this.type = "element";
-      const elWithClasses = String(args[0]);
+      const elSelector = String(args[0]);
       if (args[1] && !args[2]) {
         // assuming no attributes
         if (args[1].constructor === Array) {
@@ -83,12 +83,14 @@ class VNode {
         this.attributes = args[1] || {};
         this.children = args[2] || [];
       }
-      const parts = elWithClasses.split(".");
+      const selectorRegex = /^([a-z0-9:_-]+)(#[a-z0-9:_-]+)?(\..+)?$/i
+      const [, element, id, classes] = elSelector.match(selectorRegex);
+      this.element = element;
+      this.id = id && id.slice(1);
+      this.classList = classes && classes.split('.').slice(1) || [];
       this.children = this.children.map((c) =>
         typeof c === "string" ? new VNode({ type: "text", value: c }) : c
       );
-      this.element = parts.shift();
-      this.classList = parts || [];
     }
   }
 
@@ -98,6 +100,9 @@ class VNode {
       return document.createTextNode(this.value);
     }
     const node = document.createElement(this.element);
+    if (this.id) {
+      node.id = this.id;
+    }
     Object.keys(this.attributes).forEach((attr) => {
       if (attr.match(/^on/)) {
         // Event listener
@@ -124,7 +129,15 @@ class VNode {
   }
 
   // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
-  update(node, newvnode) {
+  update(data) {
+    let { node, vnode } = data || {};
+    if (!node && this.id) {
+      node = document.getElementById(this.id)
+    }
+    if (!vnode) {
+      vnode = this.render();
+    }
+    const newvnode = vnode;
     const oldvnode = this;
     if (
       oldvnode.constructor !== newvnode.constructor ||
@@ -198,14 +211,13 @@ class VNode {
         for (let i = 0; i < newmap.length; i++) {
           if (newmap[i] === -1) {
             if (oldvnode.children[i].type === "text") {
-              console.log(oldvnode, newvnode);
               oldvnode.children[i] = newvnode.children[i];
               node.childNodes[i].nodeValue = newvnode.children[i].value;
             } else {
-              oldvnode.children[i].update(
-                node.childNodes[i],
-                newvnode.children[i]
-              );
+              oldvnode.children[i].update({
+                node: node.childNodes[i],
+                vnode: newvnode.children[i],
+              });
             }
           }
         }

@@ -25,16 +25,17 @@ export default function App(container) {
   };
 
   // Todo component
-  self.todo = Todo(self)
+  self.todo = Todo(self);
   // Paginator Component
-  self.paginator = Paginator(self)
+  self.paginator = Paginator(self);
 
   // Actual DOM creation/updateing
   self.update = () => {
     self.save();
     const newTree = self.render();
-    self.view.update(self.container.childNodes[0], newTree);
-    self.view = newTree;
+    /*self.view.update({ node: self.container.childNodes[0], vnode: newTree });
+    self.view = newTree;*/
+    self.view.update({ vnode: newTree });
   };
 
   // UI Methods
@@ -110,7 +111,7 @@ export default function App(container) {
       page: self.page,
       total: self.filteredTodos.length,
     };
-    return h3("div.todo-list-container", [
+    return h3("div#todolist.todo-list-container", [
       h3("h1", ["To Do List"]),
       h3("form.add-todo-form", [
         h3("input", {
