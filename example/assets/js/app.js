@@ -117,15 +117,23 @@ export default function App(container) {
           autofocus: true,
           onkeydown: self.addTodoOnEnter,
         }),
-        h3("span.submit-todo.fas.fa-plus-circle", {
-          onclick: self.addTodo,
-        }),
+        h3(
+          "span.submit-todo",
+          {
+            onclick: self.addTodo,
+          },
+          ["+"]
+        ),
       ]),
       h3(`div.error${emptyTodoErrorClass}`, [
         h3("span.error-message", ["Please enter a non-empty todo item."]),
-        h3("span.dismiss-error.fas.fa-times", {
-          onclick: self.clearError,
-        }),
+        h3(
+          "span.dismiss-error",
+          {
+            onclick: self.clearError,
+          },
+          ["✘"]
+        ),
       ]),
       h3("div.navigation-bar", [
         h3("input", {
@@ -139,12 +147,8 @@ export default function App(container) {
       h3("div.todo-list", self.displayTodos()),
     ]);
   };
-  self.init = () => {
-    self.load();
-    self.view = self.build();
-    self.container.appendChild(self.view.render());
-  };
-  // Initialize...
-  self.init();
+  self.load();
+  self.view = self.build();
+  container.appendChild(self.view.render());
 }
 new App(document.getElementById("app"));

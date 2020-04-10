@@ -15,7 +15,7 @@ export default function Todo(app) {
       h3(`div.todo-content${todoStateClass}`, [
         h3("span.todo-text", { onclick: toggle }, [data.text]),
       ]),
-      h3("span.delete-todo.fas.fa-trash", { onclick: remove }),
+      h3("span.delete-todo", { onclick: remove }, ["✘"]),
     ]);
   };
 }

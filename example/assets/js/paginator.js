@@ -1,7 +1,7 @@
-import h3 from './h3.js';
+import h3 from "./h3.js";
 
 export default function Paginator(app) {
-  return function(data) {
+  return function (data) {
     let page = data.page;
     const size = data.size;
     const total = data.total;
@@ -19,13 +19,21 @@ export default function Paginator(app) {
       app.update();
     }
     return h3("div.paginator", [
-      h3(`span.previous-page.fas.fa-arrow-left${previousClass}`, {
-        onclick: setPreviousPage,
-      }),
+      h3(
+        `span.previous-page${previousClass}`,
+        {
+          onclick: setPreviousPage,
+        },
+        ["←"]
+      ),
       h3("span.current-page", [`${String(page)}/${String(pages)}`]),
-      h3(`span.next-page.fas.fa-arrow-right${nextClass}`, {
-        onclick: setNextPage,
-      }),
+      h3(
+        `span.next-page${nextClass}`,
+        {
+          onclick: setNextPage,
+        },
+        ["→"]
+      ),
     ]);
   };
 }
