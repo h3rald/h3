@@ -285,6 +285,7 @@ const createStore = (modules) => {
   let store = {
     dispatch(event, data) {
       if (events[event]) {
+        if (event !== "log") this.dispatch("log", { event, data });
         let changes = {};
         let changed;
         events[event].forEach((i) => {
@@ -293,7 +294,7 @@ const createStore = (modules) => {
       }
     },
 
-    get: (arg) => arg ? state[arg] : state,
+    get: (arg) => (arg ? state[arg] : state),
 
     on(event, cb) {
       (events[event] || (events[event] = [])).push(cb);

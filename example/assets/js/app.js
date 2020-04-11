@@ -5,107 +5,28 @@ import NavigationBar from "./components/navigationBar.js";
 import TodoList from "./components/todoList.js";
 import store from "./store.js";
 
-// Main application state
-let todos = [];
-let filteredTodos = [];
-let displayEmptyTodoError = false;
-let filter = "";
-let pagesize = 10;
-let page = 1;
-
-// UI Methods
-// Add a todo item
-const addTodo = () => {
-  const newTodo = document.getElementById("new-todo");
-  if (!newTodo.value) {
-    store.dispatch('emptyTodoError.set');
-    store.dispatch('emptyTodoError.update');
-    document.getElementById("new-todo").focus();
-    return;
-  }
-  store.dispatch('emptyTodoError.clear');
-  todos.unshift({
-    key: `todo_${Date.now()}__${newTodo.value}`, // Make todos "unique-enough" to ensure they are processed correctly
-    text: newTodo.value,
-  });
-  newTodo.value = "";
-  update();
-  document.getElementById("new-todo").focus();
-};
-
-// Add a todo item when pressing enter in the input field.
-const addTodoOnEnter = (event, updateError) => {
-  if (event.keyCode == 13) {
-    addTodo(updateError);
-    event.preventDefault();
-  }
-};
-
-const toggleTodo = (todo) => {
-  todo.done = !todo.done;
-  update();
-};
-const removeTodo = (todo) => {
-  todos = todos.filter(({ key }) => key !== todo.key);
-  update();
-};
-
-// Set the todo filter.
-const setFilter = (event) => {
-  let f = document.getElementById("filter-text");
-  filter = f.value;
-  update();
-  f = document.getElementById("filter-text");
-  f.focus();
-};
-
-// Clear error message
-const clearError = () => {
-  displayEmptyTodoError = false;
-  update();
-  document.getElementById("new-todo").focus();
-};
-
-const refresh = () => {
-  update();
-}
-
-// Filtering function for todo items
-const filterTodos = ({ text }) => text.match(filter);
+//store.on("log", (state, data) => console.log(data, state));
 
 // Main rendering function (creates virtual dom)
 const build = () => {
+  const { todos, filteredTodos, filter } = store.get();
   localStorage.setItem("h3_todo_list", JSON.stringify(todos));
-  const hash = window.location.hash;
-  filteredTodos = todos.filter(filterTodos);
-  if (hash.match(/page=(\d+)/)) {
-    page = parseInt(hash.match(/page=(\d+)/)[1]);
-  }
-  // Recalculate page in case data is filtered.
-  page = Math.min(Math.ceil(filteredTodos.length / pagesize), page) || 1;
-  const paginatorData = {
-    size: pagesize,
-    page: page,
-    total: filteredTodos.length,
-  };
-  const start = (page - 1) * pagesize;
-  const end = Math.min(start + pagesize, filteredTodos.length);
-  const [error, updateError] = region(() => EmptyTodoError())
-  store.on("emptyTodoError.update", updateError);
+  store.dispatch("todos/filter", filter);
+  const [error, updateError] = region(EmptyTodoError);
+  store.on("error/update", updateError);
   return h3("div#todolist.todo-list-container", [
     h3("h1", "To Do List"),
-    AddTodoForm({ addTodo, addTodoOnEnter, updateError }),
+    AddTodoForm(),
     error,
-    NavigationBar({ filter, paginatorData }, { refresh, setFilter }),
-    TodoList({ filteredTodos, start, end }, { toggleTodo, removeTodo }),
+    NavigationBar(),
+    TodoList(),
   ]);
 };
 
-const storedTodos = localStorage.getItem("h3_todo_list");
-if (storedTodos) {
-  todos = JSON.parse(storedTodos);
-}
+store.dispatch("todos/load");
 
 const [app, update] = region(build);
+
+store.on("app/update", update);
 
 mount("app", app);
