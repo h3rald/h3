@@ -3,6 +3,7 @@ import AddTodoForm from "./components/addTodoForm.js";
 import EmptyTodoError from "./components/emptyTodoError.js";
 import NavigationBar from "./components/navigationBar.js";
 import TodoList from "./components/todoList.js";
+import store from "./store.js";
 
 // Main application state
 let todos = [];
@@ -14,15 +15,15 @@ let page = 1;
 
 // UI Methods
 // Add a todo item
-const addTodo = (updateError) => {
+const addTodo = () => {
   const newTodo = document.getElementById("new-todo");
   if (!newTodo.value) {
-    displayEmptyTodoError = true;
-    updateError();
+    store.dispatch('emptyTodoError.set');
+    store.dispatch('emptyTodoError.update');
     document.getElementById("new-todo").focus();
     return;
   }
-  displayEmptyTodoError = false;
+  store.dispatch('emptyTodoError.clear');
   todos.unshift({
     key: `todo_${Date.now()}__${newTodo.value}`, // Make todos "unique-enough" to ensure they are processed correctly
     text: newTodo.value,
@@ -89,7 +90,8 @@ const build = () => {
   };
   const start = (page - 1) * pagesize;
   const end = Math.min(start + pagesize, filteredTodos.length);
-  const [error, updateError] = region(() => EmptyTodoError({ displayEmptyTodoError }, { clearError }))
+  const [error, updateError] = region(() => EmptyTodoError())
+  store.on("emptyTodoError.update", updateError);
   return h3("div#todolist.todo-list-container", [
     h3("h1", "To Do List"),
     AddTodoForm({ addTodo, addTodoOnEnter, updateError }),

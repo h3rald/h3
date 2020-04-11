@@ -293,7 +293,7 @@ const createStore = (modules) => {
       }
     },
 
-    get: () => state,
+    get: (arg) => arg ? state[arg] : state,
 
     on(event, cb) {
       (events[event] || (events[event] = [])).push(cb);
