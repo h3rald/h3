@@ -16,7 +16,7 @@ export default function AddTodoForm() {
       text: newTodo.value,
     });
     newTodo.value = "";
-    store.dispatch("app/update");
+    store.dispatch("mainArea/update");
     document.getElementById("new-todo").focus();
   };
   const addTodoOnEnter = (event) => {

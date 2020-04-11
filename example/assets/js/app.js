@@ -7,26 +7,25 @@ import store from "./store.js";
 
 //store.on("log", (state, data) => console.log(data, state));
 
-// Main rendering function (creates virtual dom)
-const build = () => {
+const app = () => {
   const { todos, filteredTodos, filter } = store.get();
-  localStorage.setItem("h3_todo_list", JSON.stringify(todos));
-  store.dispatch("todos/filter", filter);
   const [error, updateError] = region(EmptyTodoError);
   store.on("error/update", updateError);
+  const [mainArea, updateMainArea] = region(() => {
+    store.dispatch("todos/filter", filter);
+    localStorage.setItem("h3_todo_list", JSON.stringify(todos));
+    return h3("div#main-area", [NavigationBar(), TodoList()]);
+  });
+  store.on("mainArea/update", () => {
+    updateMainArea();
+  });
   return h3("div#todolist.todo-list-container", [
     h3("h1", "To Do List"),
     AddTodoForm(),
     error,
-    NavigationBar(),
-    TodoList(),
+    mainArea,
   ]);
 };
 
 store.dispatch("todos/load");
-
-const [app, update] = region(build);
-
-store.on("app/update", update);
-
-mount("app", app);
+mount("app", app());

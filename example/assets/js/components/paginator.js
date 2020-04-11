@@ -19,14 +19,14 @@ export default function Paginator() {
     const newPage = page - 1;
     store.dispatch("pages/set", newPage);
     window.location.hash = `/?page=${newPage}`;
-    store.dispatch("app/update");
+    store.dispatch("mainArea/update");
   }
   function setNextPage() {
     const page = store.get('page');
     const newPage = page + 1;
     store.dispatch("pages/set", newPage);
     window.location.hash = `/?page=${newPage}`;
-    store.dispatch("app/update");
+    store.dispatch("mainArea/update");
   }
   return h3("div.paginator", [
     h3(

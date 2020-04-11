@@ -5,11 +5,11 @@ export default function Todo(data) {
   const todoStateClass = data.done ? ".done" : ".todo";
   const toggleTodo = (todo) => {
     store.dispatch("todos/toggle", data);
-    store.dispatch("app/update");
+    store.dispatch("mainArea/update");
   };
   const removeTodo = (todo) => {
     store.dispatch("todos/remove", data);
-    store.dispatch("app/update");
+    store.dispatch("mainArea/update");
   };
   return h3(`div#${data.key}.todo-item`, [
     h3(`div.todo-content${todoStateClass}`, [
