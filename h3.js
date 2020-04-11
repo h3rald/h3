@@ -1,5 +1,5 @@
 // Basic object equality
-export const equal = (obj1, obj2) => {
+const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
     (obj1 === undefined && obj2 === undefined)
@@ -59,20 +59,20 @@ export const equal = (obj1, obj2) => {
  * @param {string} id A unique ID of of an existing DOM Element.
  * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
  */
-export const mount = (id, vnode) => {
+const mount = (id, vnode) => {
   document.getElementById(id).appendChild(vnode.render());
 };
 
-export const region = (builder) => {
+const region = (builder) => {
   const vnode = builder();
   if (!vnode.id) {
     throw new Error("Region VNode does not have an ID.");
   }
-  return [vnode, () => vnode.update({vnode: builder()})]
-}
+  return [vnode, () => vnode.update({ vnode: builder() })];
+};
 
 // Virtual Node Implementation with HyperScript-like syntax
-export class VNode {
+class VNode {
   constructor(...args) {
     this.element = null;
     this.attributes = {};
@@ -276,6 +276,44 @@ export class VNode {
   }
 }
 
-export default function (...args) {
+// Simple store based on Storeon
+// https://github.com/storeon/storeon/blob/master/index.js
+const createStore = (modules) => {
+  let events = {};
+  let state = {};
+
+  let store = {
+    dispatch(event, data) {
+      if (events[event]) {
+        let changes = {};
+        let changed;
+        events[event].forEach((i) => {
+          state = { ...state, ...i(state, data) };
+        });
+      }
+    },
+
+    get: () => state,
+
+    on(event, cb) {
+      (events[event] || (events[event] = [])).push(cb);
+
+      return () => {
+        events[event] = events[event].filter((i) => i !== cb);
+      };
+    },
+  };
+
+  modules.forEach((i) => {
+    if (i) i(store);
+  });
+
+  return store;
+};
+
+const h3 = (...args) => {
   return new VNode(...args);
-}
+};
+
+export { createStore, region, mount };
+export default h3;
