@@ -54,23 +54,6 @@ const equal = (obj1, obj2) => {
   return checkProperties(o1, o2) && checkProperties(o2, o1);
 };
 
-/**
- * Mounts a VNode and renders it as a child of an existing DOM Element.
- * @param {string} id A unique ID of of an existing DOM Element.
- * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
- */
-const mount = (id, vnode) => {
-  document.getElementById(id).appendChild(vnode.render());
-};
-
-const region = (builder) => {
-  const vnode = builder();
-  if (!vnode.id) {
-    throw new Error("Region VNode does not have an ID.");
-  }
-  return [vnode, () => vnode.update({ vnode: builder() })];
-};
-
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   constructor(...args) {
@@ -278,32 +261,37 @@ class VNode {
 
 // Simple store based on Storeon
 // https://github.com/storeon/storeon/blob/master/index.js
+class Store {
+  constructor() {
+    this.events = {};
+    this.state = {};
+  }
+  dispatch(event, data) {
+    if (this.events[event]) {
+      if (event !== "log") this.dispatch("log", { event, data });
+      let changes = {};
+      let changed;
+      this.events[event].forEach((i) => {
+        this.state = { ...this.state, ...i(this.state, data) };
+      });
+    }
+  }
+
+  get(arg) {
+    return arg ? this.state[arg] : this.state;
+  }
+
+  on(event, cb) {
+    (this.events[event] || (this.events[event] = [])).push(cb);
+
+    return () => {
+      this.events[event] = this.events[event].filter((i) => i !== cb);
+    };
+  }
+}
+
 const createStore = (modules) => {
-  let events = {};
-  let state = {};
-
-  let store = {
-    dispatch(event, data) {
-      if (events[event]) {
-        if (event !== "log") this.dispatch("log", { event, data });
-        let changes = {};
-        let changed;
-        events[event].forEach((i) => {
-          state = { ...state, ...i(state, data) };
-        });
-      }
-    },
-
-    get: (arg) => (arg ? state[arg] : state),
-
-    on(event, cb) {
-      (events[event] || (events[event] = [])).push(cb);
-
-      return () => {
-        events[event] = events[event].filter((i) => i !== cb);
-      };
-    },
-  };
+  const store = new Store();
 
   modules.forEach((i) => {
     if (i) i(store);
@@ -312,9 +300,113 @@ const createStore = (modules) => {
   return store;
 };
 
+/**
+ * Mounts a VNode and renders it as a child of an existing DOM Element.
+ * @param {string} id A unique ID of of an existing DOM Element.
+ * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
+ */
+const createApp = (id, vnode) => {
+  document.getElementById(id).appendChild(vnode.render());
+};
+
+const createRegion = (builder) => {
+  const vnode = builder();
+  if (!vnode.id) {
+    throw new Error("Region VNode does not have an ID.");
+  }
+  return [vnode, () => vnode.update({ vnode: builder() })];
+};
+
+class Route {
+  constructor({ path, route, query, parts, fallback }) {
+    this.path = path;
+    this.route = route;
+    this.query = query;
+    this.parts = parts;
+    this.fallback = fallback;
+    this.params = {};
+    if (this.query) {
+      const rawParams = this.query.split("&");
+      rawParams.forEach((p) => {
+        const [name, value] = p.split("=");
+        this.params[decodeURIComponent(name)] = decodeURIComponent(value);
+      });
+    }
+  }
+}
+
+class Router {
+  constructor({ id, fallback, element, routes }) {
+    this.id = id;
+    this.element = element || document.getElementById(id);
+    if (!this.element) {
+      throw new Error(
+        `[Router] No view element specified, neither via element or id.`
+      );
+    }
+    if (!routes || Object.keys(routes).length === 0) {
+      throw new Error("[Router] No routes defined.");
+    }
+    this.fallback = fallback || Object.keys(routes)[0];
+    this.routes = routes;
+  }
+
+  start() {
+    const processPath = () => {
+      const path = window.location.hash.replace(/\?.+$/, "").slice(1);
+      const rawQuery = window.location.hash.match(/\?(.+)$/);
+      const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
+      const pathParts = path.split("/").slice(1);
+      let parts = {};
+      for (let route of Object.keys(this.routes)) {
+        let routeParts = route.split("/").slice(1);
+        let match = true;
+        let index = 0;
+        parts = {};
+        while (match && routeParts[index]) {
+          const rP = routeParts[index];
+          const pP = pathParts[index];
+          if (rP.startsWith(":") && pP) {
+            parts[rP.slice(1)] = pP;
+          } else {
+            match = rP === pP;
+          }
+          index++;
+        }
+        if (match) {
+          let fallback = false;
+          this.route = new Route({ query, path, route, parts, fallback });
+        }
+      }
+      if (!this.route) {
+        let route = this.fallback;
+        let fallback = true;
+        this.route = new Route({ query, path, route, parts, fallback });
+      }
+      // Display View
+      while (this.element.firstChild) {
+        this.element.removeChild(this.element.firstChild);
+      }
+      this.element.appendChild(this.routes[this.route.route].render());
+    };
+    processPath();
+    window.addEventListener("hashchange", processPath);
+  }
+
+  go(path, params) {
+    let query = Object.keys(params).map(p => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`).join('&');
+    query = query ? `?${query}` : '';
+    window.location.hash = `#${path}${query}`;
+  }
+}
+
+const createRouter = (data) => {
+  return new Router(data);
+};
+
 const h3 = (...args) => {
   return new VNode(...args);
 };
 
-export { createStore, region, mount };
+export { createStore, createRegion, createApp, createRouter };
 export default h3;
