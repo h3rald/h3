@@ -6,7 +6,7 @@ export default function AddTodoForm() {
     const newTodo = document.getElementById("new-todo");
     if (!newTodo.value) {
       store.dispatch("error/set");
-      store.dispatch("error/update");
+      store.dispatch("$update");
       document.getElementById("new-todo").focus();
       return;
     }
@@ -16,7 +16,7 @@ export default function AddTodoForm() {
       text: newTodo.value,
     });
     newTodo.value = "";
-    store.dispatch("mainArea/update");
+    store.dispatch("$update");
     document.getElementById("new-todo").focus();
   };
   const addTodoOnEnter = (event) => {

@@ -324,21 +324,13 @@ const createStore = (modules) => {
   return store;
 };
 
-/**
- * Mounts a VNode and renders it as a child of an existing DOM Element.
- * @param {string} id A unique ID of of an existing DOM Element.
- * @param {VNode} vnode The VNode to mount as child of the specified DOM element.
- */
-const createApp = (id, vnode) => {
-  document.getElementById(id).appendChild(vnode.render());
-};
 
-const createRegion = (builder) => {
+const createApp = (id, builder) => {
   const vnode = builder();
-  if (!vnode.id) {
-    throw new Error("Region VNode does not have an ID.");
-  }
-  return [vnode, () => vnode.update({ vnode: builder() })];
+  document.getElementById(id).appendChild(vnode.render());
+  return () => {
+    vnode.update({vnode: builder()});
+  };
 };
 
 class Route {
@@ -434,5 +426,5 @@ const h3 = (...args) => {
   return new VNode(...args);
 };
 
-export { createStore, createRegion, createApp, createRouter };
+export { createStore, createApp, createRouter };
 export default h3;
