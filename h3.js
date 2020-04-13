@@ -324,19 +324,10 @@ const createStore = (modules) => {
   return store;
 };
 
-
-const createApp = (id, builder) => {
-  const vnode = builder();
-  document.getElementById(id).appendChild(vnode.render());
-  return () => {
-    vnode.update({vnode: builder()});
-  };
-};
-
 class Route {
-  constructor({ path, route, query, parts, fallback }) {
+  constructor({ path, def, query, parts, fallback }) {
     this.path = path;
-    this.route = route;
+    this.def = def;
     this.query = query;
     this.parts = parts;
     this.fallback = fallback;
@@ -352,18 +343,18 @@ class Route {
 }
 
 class Router {
-  constructor({ id, fallback, element, routes }) {
-    this.id = id;
-    this.element = element || document.getElementById(id);
+  constructor({element, routes }) {
+    this.element = element;
     if (!this.element) {
       throw new Error(
-        `[Router] No view element specified, neither via element or id.`
+        `[Router] No view element specified.`
       );
     }
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
-    this.fallback = fallback || Object.keys(routes)[0];
+    const defs = Object.keys(routes);
+    this.fallback = defs[defs.length-1];
     this.routes = routes;
   }
 
@@ -374,8 +365,8 @@ class Router {
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
       const pathParts = path.split("/").slice(1);
       let parts = {};
-      for (let route of Object.keys(this.routes)) {
-        let routeParts = route.split("/").slice(1);
+      for (let def of Object.keys(this.routes)) {
+        let routeParts = def.split("/").slice(1);
         let match = true;
         let index = 0;
         parts = {};
@@ -391,19 +382,19 @@ class Router {
         }
         if (match) {
           let fallback = false;
-          this.route = new Route({ query, path, route, parts, fallback });
+          this.route = new Route({ query, path, def, parts, fallback });
         }
       }
       if (!this.route) {
-        let route = this.fallback;
+        let def = this.fallback;
         let fallback = true;
-        this.route = new Route({ query, path, route, parts, fallback });
+        this.route = new Route({ query, path, def, parts, fallback });
       }
       // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      this.element.appendChild(this.routes[this.route.route].render());
+      this.element.appendChild(this.routes[this.route.def].render());
     };
     processPath();
     window.addEventListener("hashchange", processPath);
@@ -418,13 +409,80 @@ class Router {
   }
 }
 
-const createRouter = (data) => {
-  return new Router(data);
-};
+// High Level API
 
 const h3 = (...args) => {
   return new VNode(...args);
 };
 
-export { createStore, createApp, createRouter };
+let store = null;
+let router = null;
+let updateFn = null;
+let vnode = null;
+
+h3.init = ({element, routes, modules, component}) => {
+  if (!(element instanceof Element)) {
+    throw new Error('Invalid element specified.');
+  }
+  // Initialize store
+  store = new Store();
+  (modules || []).forEach((i) => {
+    if (i) i(store);
+  });
+  store.dispatch("$init");
+  // Initialize component
+  vnode = component();
+  updateFn = () => {
+    vnode.update({vnode: component()});
+  }
+  // Initialize router
+  //router = new Router({element, routes})
+  // Render
+  //router.start();
+  store.on('$update', updateFn);
+  element.appendChild(vnode.render());
+}
+
+h3.go = (path, params) => {
+  if (!router) {
+    throw new Error('No application initialized, unable to navigate.');
+  }
+  return router.go(path, params);
+}
+
+h3.route = () => {
+  if (!router) {
+    throw new Error('No application initialized, unable to retrieve current route.');
+  }
+  return router.route;
+}
+
+h3.state = (key) => {
+  if (!store) {
+    throw new Error('No application initialized, unable to retrieve current state.');
+  }
+  return store.get(key);
+}
+
+h3.on = (event, cb) => {
+  if (!store) {
+    throw new Error('No application initialized, unable to listen to events.');
+  }
+  return store.on(event, cb);
+}
+
+h3.dispatch = (event, data) => {
+  if (!store) {
+    throw new Error('No application initialized, unable to dispatch events.');
+  }
+  return store.dispatch(event, data);
+}
+
+h3.update = () => {
+  if (!updateFn) {
+    throw new Error('No application initialized, unable to update.');
+  }
+  updateFn();
+}
+
 export default h3;

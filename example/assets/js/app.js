@@ -1,13 +1,19 @@
-import h3, { createApp } from "./h3.js";
+import h3 from "./h3.js";
 import AddTodoForm from "./components/addTodoForm.js";
 import EmptyTodoError from "./components/emptyTodoError.js";
 import NavigationBar from "./components/navigationBar.js";
 import TodoList from "./components/todoList.js";
-import store from "./store.js";
+import modules from "./modules.js";
+
+let initialized = false;
 
 const app = () => {
-  const { todos, filteredTodos, filter } = store.get();
-  store.dispatch("todos/filter", filter);
+  if (!initialized) {
+    h3.dispatch("todos/load");
+  }
+  initialized = true;
+  const { todos, filteredTodos, filter } = h3.state();
+  h3.dispatch("todos/filter", filter);
   localStorage.setItem("h3_todo_list", JSON.stringify(todos));
   return h3("div#todolist.todo-list-container", [
     h3("h1", "To Do List"),
@@ -19,8 +25,12 @@ const app = () => {
   ]);
 }
 
-store.dispatch("todos/load");
+h3.init({
+  element: document.getElementById('app'),
+  modules,
+  component: app
+  /*routes: {
+    "/": app
+  }*/
+});
 
-const update = createApp('app', app);
-
-store.on('$update', update);

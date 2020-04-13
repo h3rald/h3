@@ -1,10 +1,9 @@
 import h3 from "../h3.js";
 import Todo from "./todo.js";
-import store from "../store.js";
 
 export default function TodoList() {
-  const { page, pagesize } = store.get();
-  const filteredTodos = store.get('filteredTodos');
+  const { page, pagesize } = h3.state();
+  const filteredTodos = h3.state('filteredTodos');
   const start = (page - 1) * pagesize;
   const end = Math.min(start + pagesize, filteredTodos.length);
   return h3(

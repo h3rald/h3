@@ -1,7 +1,5 @@
-import { createStore } from "./h3.js";
-
 const todos = (store) => {
-  store.on("init", () => ({ todos: [], filteredTodos: [], filter: "" }));
+  store.on("$init", () => ({ todos: [], filteredTodos: [], filter: "" }));
   store.on("todos/add", (state, data) => {
     let todos = state.todos;
     todos.unshift({
@@ -33,18 +31,18 @@ const todos = (store) => {
 };
 
 const error = (store) => {
-  store.on("init", () => ({ displayEmptyTodoError: false }));
+  store.on("$init", () => ({ displayEmptyTodoError: false }));
   store.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
   store.on("error/set", (state) => ({ displayEmptyTodoError: true }));
 };
 
 const pages = (store) => {
-  store.on("init", () => ({ pagesize: 10, page: 1 }));
+  store.on("$init", () => ({ pagesize: 10, page: 1 }));
   store.on("pages/set", (state, page) => ({ page }));
 };
 
-const store = createStore([todos, error, pages]);
-
-store.dispatch("init");
-
-export default store;
+export default [
+  todos,
+  error,
+  pages,
+];

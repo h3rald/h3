@@ -1,15 +1,14 @@
 import h3 from "../h3.js";
-import store from "../store.js";
 
 export default function Todo(data) {
   const todoStateClass = data.done ? ".done" : ".todo";
   const toggleTodo = (todo) => {
-    store.dispatch("todos/toggle", data);
-    store.dispatch("$update");
+    h3.dispatch("todos/toggle", data);
+    h3.dispatch("$update");
   };
   const removeTodo = (todo) => {
-    store.dispatch("todos/remove", data);
-    store.dispatch("$update");
+    h3.dispatch("todos/remove", data);
+    h3.dispatch("$update");
   };
   return h3(`div#${data.key}.todo-item`, [
     h3(`div.todo-content${todoStateClass}`, [
