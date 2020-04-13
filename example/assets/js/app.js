@@ -25,7 +25,7 @@ const main = () => {
     updateMainArea();
   });
   return h3("main", [
-    AddTodoForm(),
+    AddTodoForm,
     error,
     mainArea
   ]);

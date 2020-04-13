@@ -56,19 +56,37 @@ const equal = (obj1, obj2) => {
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
+
+  from(data) {
+    this.type = data.type;
+    this.value = data.value;
+    this.element = data.value;
+    this.id = data.id;
+    this.children = data.children;
+    this.attributes = data.attributes;
+    this.classList = data.classList;
+  }
+
   constructor(...args) {
     this.element = null;
     this.attributes = {};
     this.children = [];
     this.classList = [];
-    if (
-      args[0] &&
-      Object.prototype.toString.call(args[0]) === "[object Object]" &&
-      !args[1] &&
-      !args[2]
-    ) {
-      this.type = args[0].type;
-      this.value = args[0].value;
+    if (typeof args[0] !== 'string' && !args[1] && !args[2]) {
+      if (Object.prototype.toString.call(args[0]) === "[object Object]") {
+        if (args[0] instanceof VNode) {
+          this.from(args[0]); 
+          return
+        } else {
+          this.type = args[0].type;
+          this.value = args[0].value;
+          return
+        }
+      } else if (typeof args[0] === "function") {
+        const vnode = args[0]();
+        this.from(vnode);
+        return;
+      }
     } else {
       this.type = "element";
       const elSelector = String(args[0]);
@@ -90,9 +108,15 @@ class VNode {
       this.element = element;
       this.id = id && id.slice(1);
       this.classList = (classes && classes.split(".").slice(1)) || [];
-      this.children = this.children.map((c) =>
-        typeof c === "string" ? new VNode({ type: "text", value: c }) : c
-      );
+      this.children = this.children.map((c) => {
+        if (typeof c === "string") {
+          return new VNode({ type: "text", value: c });
+        } else if (typeof c === "function") {
+          return new VNode(c);
+        } else {
+          return c;
+        }
+      });
     }
   }
 
@@ -394,8 +418,10 @@ class Router {
   }
 
   go(path, params) {
-    let query = Object.keys(params).map(p => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`).join('&');
-    query = query ? `?${query}` : '';
+    let query = Object.keys(params)
+      .map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`)
+      .join("&");
+    query = query ? `?${query}` : "";
     window.location.hash = `#${path}${query}`;
   }
 }
