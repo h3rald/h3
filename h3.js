@@ -292,7 +292,7 @@ class Store {
   }
   dispatch(event, data) {
     if (this.events[event]) {
-      if (event !== "log") this.dispatch("log", { event, data });
+      if (event !== "$log") this.dispatch("$log", { event, data });
       let changes = {};
       let changed;
       this.events[event].forEach((i) => {
@@ -313,16 +313,6 @@ class Store {
     };
   }
 }
-
-const createStore = (modules) => {
-  const store = new Store();
-
-  modules.forEach((i) => {
-    if (i) i(store);
-  });
-
-  return store;
-};
 
 class Route {
   constructor({ path, def, query, parts, fallback }) {
@@ -439,7 +429,6 @@ h3.init = ({element, routes, modules, component}) => {
   //router = new Router({element, routes})
   // Render
   //router.start();
-  store.on('$update', updateFn);
   element.appendChild(vnode.render());
 }
 

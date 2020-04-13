@@ -6,7 +6,7 @@ export default function NavigationBar() {
   const setFilter = () => {
     let f = document.getElementById("filter-text");
     h3.dispatch("todos/filter", f.value);
-    h3.dispatch("$update");
+    h3.update()
     f = document.getElementById("filter-text");
     f.focus();
   };

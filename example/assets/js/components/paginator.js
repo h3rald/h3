@@ -18,14 +18,14 @@ export default function Paginator() {
     const newPage = page - 1;
     h3.dispatch("pages/set", newPage);
     window.location.hash = `/?page=${newPage}`;
-    h3.dispatch("$update");
+    h3.update()
   }
   function setNextPage() {
     const page = h3.state('page');
     const newPage = page + 1;
     h3.dispatch("pages/set", newPage);
     window.location.hash = `/?page=${newPage}`;
-    h3.dispatch("$update");
+    h3.update()
   }
   return h3("div.paginator", [
     h3(
