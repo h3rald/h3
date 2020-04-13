@@ -9,6 +9,6 @@ export default function TodoList() {
   const end = Math.min(start + pagesize, filteredTodos.length);
   return h3(
     "div.todo-list",
-    filteredTodos.slice(start, end).map((t) => Todo(t))
+    filteredTodos.slice(start, end).map(Todo)
   );
 }

@@ -18,6 +18,6 @@ export default function NavigationBar() {
       placeholder: "Type to filter todo items...",
       onkeyup: setFilter,
     }),
-    Paginator(),
+    Paginator,
   ]);
 }
