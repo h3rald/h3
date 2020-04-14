@@ -4,8 +4,8 @@ export default function Paginator() {
   const hash = window.location.hash;
   let { page, pagesize, filteredTodos } = h3.state();
   let total = filteredTodos.length;
-  if (hash.match(/page=(\d+)/)) {
-    page = parseInt(hash.match(/page=(\d+)/)[1]);
+  if (h3.route().params.page) {
+    page = parseInt(h3.route().params.page);
   }
   // Recalculate page in case data is filtered.
   page = Math.min(Math.ceil(filteredTodos.length / pagesize), page) || 1;
@@ -13,25 +13,17 @@ export default function Paginator() {
   const pages = Math.ceil(total / pagesize) || 1;
   const previousClass = page > 1 ? ".link" : ".disabled";
   const nextClass = page < pages ? ".link" : ".disabled";
-  function setPreviousPage() {
-    const page = h3.state('page');
-    const newPage = page - 1;
+  const setPage = (value) => {
+    const page = h3.state("page");
+    const newPage = page + value;
     h3.dispatch("pages/set", newPage);
-    window.location.hash = `/?page=${newPage}`;
-    h3.update()
-  }
-  function setNextPage() {
-    const page = h3.state('page');
-    const newPage = page + 1;
-    h3.dispatch("pages/set", newPage);
-    window.location.hash = `/?page=${newPage}`;
-    h3.update()
+    h3.go("/", { page: newPage });
   }
   return h3("div.paginator", [
     h3(
       `span.previous-page${previousClass}`,
       {
-        onclick: setPreviousPage,
+        onclick: () => setPage(-1),
       },
       ["←"]
     ),
@@ -39,7 +31,7 @@ export default function Paginator() {
     h3(
       `span.next-page${nextClass}`,
       {
-        onclick: setNextPage,
+        onclick: () => setPage(+1),
       },
       ["→"]
     ),
