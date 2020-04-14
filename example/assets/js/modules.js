@@ -30,7 +30,7 @@ const todos = (store) => {
   store.on("todos/add", (state, data) => {
     let todos = state.todos;
     todos.unshift({
-      key: data.key, // Make todos "unique-enough" to ensure they are processed correctly
+      key: data.key,
       text: data.text,
     });
     return { todos };
