@@ -355,6 +355,7 @@ class Router {
     this.redraw = () => {
       const fn = this.routes[this.route.def];
       vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
+      this.store.dispatch('$redraw');
     };
   }
 
