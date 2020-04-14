@@ -6,7 +6,7 @@ export default function NavigationBar() {
   const setFilter = () => {
     let f = document.getElementById("filter-text");
     h3.dispatch("todos/filter", f.value);
-    h3.update()
+    h3.redraw()
     f = document.getElementById("filter-text");
     f.focus();
   };
@@ -16,7 +16,7 @@ export default function NavigationBar() {
       "a.nav-link",
       {
         title: "Settings",
-        onclick: () => h3.go("/settings"),
+        onclick: () => h3.navigateTo("/settings"),
       },
       "⚙"
     ),

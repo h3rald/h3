@@ -1,7 +1,7 @@
 import h3 from "../h3.js";
 
 export default function EmptyTodoError(data, actions) {
-  const emptyTodoErrorClass = h3.state('displayEmptyTodoError') ? "" : ".hidden";
+  const emptyTodoErrorClass = h3.state.displayEmptyTodoError ? "" : ".hidden";
   const clearError = () => {
     h3.dispatch('error/clear');
     h3.dispatch('$update');

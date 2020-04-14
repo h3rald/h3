@@ -10,7 +10,7 @@ export default function () {
     type: "checkbox",
     onclick: toggleLogging,
   };
-  if (h3.state("settings").logging) {
+  if (h3.state.settings.logging) {
     attrs.checked = true;
   }
   return h3("div.settings.container", [
@@ -28,7 +28,7 @@ export default function () {
     h3(
       "a.nav-link",
       {
-        onclick: () => h3.go("/"),
+        onclick: () => h3.navigateTo("/"),
       },
       "← Go Back"
     )

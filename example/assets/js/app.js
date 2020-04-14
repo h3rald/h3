@@ -8,7 +8,7 @@ h3.init({
   modules,
   onInit: () => {
     h3.dispatch("app/load");
-    h3.dispatch("settings/set", h3.state("settings"));
+    h3.dispatch("settings/set", h3.state.settings);
   },
   routes: {
     "/settings": SettingsView,

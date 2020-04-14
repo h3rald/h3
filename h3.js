@@ -154,7 +154,7 @@ class VNode {
   }
 
   // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
-  update(data) {
+  redraw(data) {
     let { node, vnode } = data || {};
     if (!node && this.id) {
       node = document.getElementById(this.id);
@@ -239,7 +239,7 @@ class VNode {
               oldvnode.children[i] = newvnode.children[i];
               node.childNodes[i].nodeValue = newvnode.children[i].value;
             } else {
-              oldvnode.children[i].update({
+              oldvnode.children[i].redraw({
                 node: node.childNodes[i],
                 vnode: newvnode.children[i],
               });
@@ -334,7 +334,7 @@ class Route {
 class Router {
   constructor({ element, routes, store }) {
     this.element = element;
-    this.update = null;
+    this.redraw = null;
     this.store = store;
     if (!this.element) {
       throw new Error(`[Router] No view element specified.`);
@@ -347,11 +347,11 @@ class Router {
     this.routes = routes;
   }
 
-  setUpdate() {
+  setRedraw() {
     let vnode = this.routes[this.route.def]();
-    this.update = () => {
+    this.redraw = () => {
       const fn = this.routes[this.route.def];
-      vnode.update({ node: this.element.childNodes[0], vnode: fn() });
+      vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
     };
   }
 
@@ -399,14 +399,14 @@ class Router {
         this.element.removeChild(this.element.firstChild);
       }
       this.element.appendChild(this.routes[this.route.def]().render());
-      this.setUpdate();
+      this.setRedraw();
       this.store.dispatch("$navigation", this.route);
     };
     processPath();
     window.addEventListener("hashchange", processPath);
   }
 
-  go(path, params) {
+  navigateTo(path, params) {
     let query = Object.keys(params || {})
       .map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`)
       .join("&");
@@ -439,33 +439,37 @@ h3.init = ({ element, routes, modules, onInit }) => {
   router = new Router({ element, routes, store });
   onInit && onInit();
   router.start();
-  router.setUpdate();
+  router.setRedraw();
 };
 
-h3.go = (path, params) => {
+h3.navigateTo = (path, params) => {
   if (!router) {
     throw new Error("No application initialized, unable to navigate.");
   }
-  return router.go(path, params);
+  return router.navigateTo(path, params);
 };
 
-h3.route = () => {
-  if (!router) {
-    throw new Error(
-      "No application initialized, unable to retrieve current route."
-    );
-  }
-  return router.route;
-};
+Object.defineProperty(h3, "route", {
+  get: () => {
+    if (!router) {
+      throw new Error(
+        "No application initialized, unable to retrieve current route."
+      );
+    }
+    return router.route;
+  },
+});
 
-h3.state = (key) => {
-  if (!store) {
-    throw new Error(
-      "No application initialized, unable to retrieve current state."
-    );
-  }
-  return store.get(key);
-};
+Object.defineProperty(h3, "state", {
+  get: () => {
+    if (!store) {
+      throw new Error(
+        "No application initialized, unable to retrieve current state."
+      );
+    }
+    return store.get();
+  },
+});
 
 h3.on = (event, cb) => {
   if (!store) {
@@ -481,11 +485,11 @@ h3.dispatch = (event, data) => {
   return store.dispatch(event, data);
 };
 
-h3.update = () => {
-  if (!router || !router.update) {
+h3.redraw = () => {
+  if (!router || !router.redraw) {
     throw new Error("No application initialized, unable to update.");
   }
-  router.update();
+  router.redraw();
 };
 
 export default h3;

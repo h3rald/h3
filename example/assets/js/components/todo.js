@@ -4,11 +4,11 @@ export default function Todo(data) {
   const todoStateClass = data.done ? ".done" : ".todo";
   const toggleTodo = (todo) => {
     h3.dispatch("todos/toggle", data);
-    h3.update()
+    h3.redraw()
   };
   const removeTodo = (todo) => {
     h3.dispatch("todos/remove", data);
-    h3.update()
+    h3.redraw()
   };
   return h3(`div#${data.key}.todo-item`, [
     h3(`div.todo-content${todoStateClass}`, [

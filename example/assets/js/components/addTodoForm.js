@@ -5,7 +5,7 @@ export default function AddTodoForm() {
     const newTodo = document.getElementById("new-todo");
     if (!newTodo.value) {
       h3.dispatch("error/set");
-      h3.update()
+      h3.redraw()
       document.getElementById("new-todo").focus();
       return;
     }
@@ -15,7 +15,7 @@ export default function AddTodoForm() {
       text: newTodo.value,
     });
     newTodo.value = "";
-    h3.update()
+    h3.redraw()
     document.getElementById("new-todo").focus();
   };
   const addTodoOnEnter = (event) => {
