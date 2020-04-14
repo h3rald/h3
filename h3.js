@@ -290,8 +290,8 @@ class Store {
     this.state = {};
   }
   dispatch(event, data) {
+    if (event !== "$log") this.dispatch("$log", { event, data });
     if (this.events[event]) {
-      if (event !== "$log") this.dispatch("$log", { event, data });
       let changes = {};
       let changed;
       this.events[event].forEach((i) => {
@@ -332,8 +332,10 @@ class Route {
 }
 
 class Router {
-  constructor({ element, routes }) {
+  constructor({ element, routes, store }) {
     this.element = element;
+    this.update = null;
+    this.store = store;
     if (!this.element) {
       throw new Error(`[Router] No view element specified.`);
     }
@@ -343,6 +345,14 @@ class Router {
     const defs = Object.keys(routes);
     this.fallback = defs[defs.length - 1];
     this.routes = routes;
+  }
+
+  setUpdate() {
+    let vnode = this.routes[this.route.def]();
+    this.update = () => {
+      const fn = this.routes[this.route.def];
+      vnode.update({ node: this.element.childNodes[0], vnode: fn() });
+    };
   }
 
   start() {
@@ -389,7 +399,8 @@ class Router {
         this.element.removeChild(this.element.firstChild);
       }
       this.element.appendChild(this.routes[this.route.def]().render());
-      defineUpdateFn(this.element); // TODO Refactor this
+      this.setUpdate();
+      this.store.dispatch("$navigation", this.route);
     };
     processPath();
     window.addEventListener("hashchange", processPath);
@@ -414,16 +425,6 @@ let store = null;
 let router = null;
 let updateFn = null;
 
-// TODO Refactor this
-const defineUpdateFn = (element) => {
-  // Configure update function
-  let vnode = router.routes[router.route.def]();
-  updateFn = () => {
-    const fn = router.routes[router.route.def];
-    vnode.update({ node: element.childNodes[0], vnode: fn() });
-  };
-};
-
 h3.init = ({ element, routes, modules, onInit }) => {
   if (!(element instanceof Element)) {
     throw new Error("Invalid element specified.");
@@ -435,10 +436,10 @@ h3.init = ({ element, routes, modules, onInit }) => {
   });
   store.dispatch("$init");
   // Initialize router
-  router = new Router({ element, routes });
+  router = new Router({ element, routes, store });
   onInit && onInit();
   router.start();
-  defineUpdateFn(); // TODO Refactor this
+  router.setUpdate();
 };
 
 h3.go = (path, params) => {
@@ -481,10 +482,10 @@ h3.dispatch = (event, data) => {
 };
 
 h3.update = () => {
-  if (!updateFn) {
+  if (!router || !router.update) {
     throw new Error("No application initialized, unable to update.");
   }
-  updateFn();
+  router.update();
 };
 
 export default h3;
