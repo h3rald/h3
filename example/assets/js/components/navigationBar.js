@@ -12,6 +12,13 @@ export default function NavigationBar() {
   };
   // Filtering function for todo items
   return h3("div.navigation-bar", [
+    h3(
+      "a.nav-link",
+      {
+        onclick: () => h3.go("/settings"),
+      },
+      "⚙"
+    ),
     h3("input", {
       id: "filter-text",
       placeholder: "Type to filter todo items...",

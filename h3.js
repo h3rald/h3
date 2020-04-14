@@ -349,9 +349,10 @@ class Router {
   }
 
   start() {
-    const processPath = () => {
-      const path = window.location.hash.replace(/\?.+$/, "").slice(1);
-      const rawQuery = window.location.hash.match(/\?(.+)$/);
+    const processPath = (data) => {
+      const hash = (data && data.newURL && data.newURL.match(/(#.+)$/) && data.newURL.match(/(#.+)$/)[1] || window.location.hash);
+      const path = hash.replace(/\?.+$/, "").slice(1);
+      const rawQuery = hash.match(/\?(.+)$/);
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
       const pathParts = path.split("/").slice(1);
       let parts = {};
@@ -373,6 +374,7 @@ class Router {
         if (match) {
           let fallback = false;
           this.route = new Route({ query, path, def, parts, fallback });
+          break;
         }
       }
       if (!this.route) {
@@ -384,14 +386,14 @@ class Router {
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      this.element.appendChild(this.routes[this.route.def].render());
+      this.element.appendChild(this.routes[this.route.def]().render());
     };
     processPath();
     window.addEventListener("hashchange", processPath);
   }
 
   go(path, params) {
-    let query = Object.keys(params)
+    let query = Object.keys(params || {})
       .map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`)
       .join("&");
     query = query ? `?${query}` : "";
@@ -408,9 +410,8 @@ const h3 = (...args) => {
 let store = null;
 let router = null;
 let updateFn = null;
-let vnode = null;
 
-h3.init = ({element, routes, modules, component}) => {
+h3.init = ({element, routes, modules}) => {
   if (!(element instanceof Element)) {
     throw new Error('Invalid element specified.');
   }
@@ -420,16 +421,15 @@ h3.init = ({element, routes, modules, component}) => {
     if (i) i(store);
   });
   store.dispatch("$init");
-  // Initialize component
-  vnode = component();
-  updateFn = () => {
-    vnode.update({vnode: component()});
-  }
   // Initialize router
-  //router = new Router({element, routes})
-  // Render
-  //router.start();
-  element.appendChild(vnode.render());
+  router = new Router({element, routes})
+  router.start();
+  // Configure update function
+  const vnode = router.routes[router.route.def]();
+  updateFn = () => {
+    const fn = router.routes[router.route.def];
+    vnode.update({node: element, vnode: fn()})
+  }
 }
 
 h3.go = (path, params) => {
