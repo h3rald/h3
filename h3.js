@@ -60,7 +60,7 @@ class VNode {
   from(data) {
     this.type = data.type;
     this.value = data.value;
-    this.element = data.value;
+    this.element = data.element;
     this.id = data.id;
     this.children = data.children;
     this.attributes = data.attributes;
@@ -428,7 +428,7 @@ h3.init = ({element, routes, modules}) => {
   const vnode = router.routes[router.route.def]();
   updateFn = () => {
     const fn = router.routes[router.route.def];
-    vnode.update({node: element, vnode: fn()})
+    vnode.update({node: element.childNodes[0], vnode: fn()})
   }
 }
 
