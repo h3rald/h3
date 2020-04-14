@@ -1,5 +1,5 @@
 import h3 from "../h3.js";
-import Todo from "./todo.js";
+import Todo from "./Todo.js";
 
 export default function TodoList() {
   const { page, pagesize } = h3.state();

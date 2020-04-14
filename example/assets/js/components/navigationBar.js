@@ -1,5 +1,5 @@
 import h3 from "../h3.js";
-import Paginator from "./paginator.js";
+import Paginator from "./Paginator.js";
 
 export default function NavigationBar() {
   // Set the todo filter.
@@ -15,6 +15,7 @@ export default function NavigationBar() {
     h3(
       "a.nav-link",
       {
+        title: "Settings",
         onclick: () => h3.go("/settings"),
       },
       "⚙"

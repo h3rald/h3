@@ -56,7 +56,6 @@ const equal = (obj1, obj2) => {
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
-
   from(data) {
     this.type = data.type;
     this.value = data.value;
@@ -72,15 +71,15 @@ class VNode {
     this.attributes = {};
     this.children = [];
     this.classList = [];
-    if (typeof args[0] !== 'string' && !args[1] && !args[2]) {
+    if (typeof args[0] !== "string" && !args[1] && !args[2]) {
       if (Object.prototype.toString.call(args[0]) === "[object Object]") {
         if (args[0] instanceof VNode) {
-          this.from(args[0]); 
-          return
+          this.from(args[0]);
+          return;
         } else {
           this.type = args[0].type;
           this.value = args[0].value;
-          return
+          return;
         }
       } else if (typeof args[0] === "function") {
         const vnode = args[0]();
@@ -333,24 +332,27 @@ class Route {
 }
 
 class Router {
-  constructor({element, routes }) {
+  constructor({ element, routes }) {
     this.element = element;
     if (!this.element) {
-      throw new Error(
-        `[Router] No view element specified.`
-      );
+      throw new Error(`[Router] No view element specified.`);
     }
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
     const defs = Object.keys(routes);
-    this.fallback = defs[defs.length-1];
+    this.fallback = defs[defs.length - 1];
     this.routes = routes;
   }
 
   start() {
     const processPath = (data) => {
-      const hash = (data && data.newURL && data.newURL.match(/(#.+)$/) && data.newURL.match(/(#.+)$/)[1] || window.location.hash);
+      const hash =
+        (data &&
+          data.newURL &&
+          data.newURL.match(/(#.+)$/) &&
+          data.newURL.match(/(#.+)$/)[1]) ||
+        window.location.hash;
       const path = hash.replace(/\?.+$/, "").slice(1);
       const rawQuery = hash.match(/\?(.+)$/);
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
@@ -387,6 +389,7 @@ class Router {
         this.element.removeChild(this.element.firstChild);
       }
       this.element.appendChild(this.routes[this.route.def]().render());
+      defineUpdateFn(this.element); // TODO Refactor this
     };
     processPath();
     window.addEventListener("hashchange", processPath);
@@ -411,9 +414,19 @@ let store = null;
 let router = null;
 let updateFn = null;
 
-h3.init = ({element, routes, modules}) => {
+// TODO Refactor this
+const defineUpdateFn = (element) => {
+  // Configure update function
+  let vnode = router.routes[router.route.def]();
+  updateFn = () => {
+    const fn = router.routes[router.route.def];
+    vnode.update({ node: element.childNodes[0], vnode: fn() });
+  };
+};
+
+h3.init = ({ element, routes, modules, onInit }) => {
   if (!(element instanceof Element)) {
-    throw new Error('Invalid element specified.');
+    throw new Error("Invalid element specified.");
   }
   // Initialize store
   store = new Store();
@@ -422,56 +435,56 @@ h3.init = ({element, routes, modules}) => {
   });
   store.dispatch("$init");
   // Initialize router
-  router = new Router({element, routes})
+  router = new Router({ element, routes });
+  onInit && onInit();
   router.start();
-  // Configure update function
-  const vnode = router.routes[router.route.def]();
-  updateFn = () => {
-    const fn = router.routes[router.route.def];
-    vnode.update({node: element.childNodes[0], vnode: fn()})
-  }
-}
+  defineUpdateFn(); // TODO Refactor this
+};
 
 h3.go = (path, params) => {
   if (!router) {
-    throw new Error('No application initialized, unable to navigate.');
+    throw new Error("No application initialized, unable to navigate.");
   }
   return router.go(path, params);
-}
+};
 
 h3.route = () => {
   if (!router) {
-    throw new Error('No application initialized, unable to retrieve current route.');
+    throw new Error(
+      "No application initialized, unable to retrieve current route."
+    );
   }
   return router.route;
-}
+};
 
 h3.state = (key) => {
   if (!store) {
-    throw new Error('No application initialized, unable to retrieve current state.');
+    throw new Error(
+      "No application initialized, unable to retrieve current state."
+    );
   }
   return store.get(key);
-}
+};
 
 h3.on = (event, cb) => {
   if (!store) {
-    throw new Error('No application initialized, unable to listen to events.');
+    throw new Error("No application initialized, unable to listen to events.");
   }
   return store.on(event, cb);
-}
+};
 
 h3.dispatch = (event, data) => {
   if (!store) {
-    throw new Error('No application initialized, unable to dispatch events.');
+    throw new Error("No application initialized, unable to dispatch events.");
   }
   return store.dispatch(event, data);
-}
+};
 
 h3.update = () => {
   if (!updateFn) {
-    throw new Error('No application initialized, unable to update.');
+    throw new Error("No application initialized, unable to update.");
   }
   updateFn();
-}
+};
 
 export default h3;

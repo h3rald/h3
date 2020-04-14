@@ -1,3 +1,30 @@
+const app = (store) => {
+  store.on("app/load", () => {
+    const storedData = localStorage.getItem("h3_todo_list");
+    const { todos, settings } = storedData ? JSON.parse(storedData) : {todos: [], settings: {}};
+    return { todos, settings };
+  });
+  store.on("app/save", (state, data) => {
+    localStorage.setItem(
+      "h3_todo_list",
+      JSON.stringify({ todos: state.todos, settings: state.settings })
+    );
+  });
+};
+
+const settings = (store) => {
+  let removeSubscription;
+  store.on("$init", () => ({ settings: {} }));
+  store.on("settings/set", (state, data) => {
+    if (data.logging) {
+      removeSubscription = store.on("$log", (state, data) => console.log(data));
+    } else {
+      removeSubscription && removeSubscription();
+    }
+    return { settings: data };
+  });
+};
+
 const todos = (store) => {
   store.on("$init", () => ({ todos: [], filteredTodos: [], filter: "" }));
   store.on("todos/add", (state, data) => {
@@ -6,11 +33,6 @@ const todos = (store) => {
       key: `todo_${Date.now()}__${data.text}`, // Make todos "unique-enough" to ensure they are processed correctly
       text: data.text,
     });
-    return { todos };
-  });
-  store.on("todos/load", () => {
-    const storedTodos = localStorage.getItem("h3_todo_list");
-    const todos = storedTodos ? JSON.parse(storedTodos) : [];
     return { todos };
   });
   store.on("todos/remove", (state, data) => {
@@ -41,8 +63,4 @@ const pages = (store) => {
   store.on("pages/set", (state, page) => ({ page }));
 };
 
-export default [
-  todos,
-  error,
-  pages,
-];
+export default [app, todos, error, pages, settings];

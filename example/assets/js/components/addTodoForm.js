@@ -33,6 +33,7 @@ export default function AddTodoForm() {
     h3(
       "span.submit-todo",
       {
+        title: "Add Todo",
         onclick: addTodo,
       },
       "+"

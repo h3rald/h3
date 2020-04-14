@@ -21,7 +21,7 @@ h1 {
   text-align: center;
 }
 
-.todo-list-container {
+.container {
   padding: 15px;
 }
 
@@ -30,6 +30,7 @@ h1 {
   display: flex;
   justify-content: center;
 }
+
 #new-todo {
   font-size: 2rem;
   height: 3rem;
@@ -37,6 +38,7 @@ h1 {
   display: flex;
   justify-content: space-around;
 }
+
 .submit-todo {
   height: 3rem;
   width: 4rem;
@@ -46,10 +48,27 @@ h1 {
   justify-content: space-around;
   cursor: pointer;
 }
+
+.options {
+  padding: 20px 0;
+}
+
 .navigation-bar {
   display: flex;
   justify-content: center; 
 }
+
+.navigation-bar .nav-link {
+  font-size: 1.5em;
+  display: flex;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
 #filter-text {
   display: flex;
   justify-content: space-around; 
