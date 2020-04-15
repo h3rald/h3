@@ -64,6 +64,7 @@ class VNode {
     this.style = data.style;
     this.data = data.data;
     this.value = data.value;
+    this.eventListeners = data.eventListeners;
     this.children = data.children;
     this.attributes = data.attributes;
     this.classList = data.classList;
@@ -76,6 +77,12 @@ class VNode {
     this.value = attrs.value;
     this.data = attrs.data || {};
     this.attributes = attrs || {};
+    Object.keys(attrs)
+      .filter((a) => a.startsWith("on"))
+      .forEach((key) => {
+        this.eventListeners[key.slice(2)] = attrs[key];
+        delete this.attributes[key];
+      });
     delete this.attributes.value;
     delete this.attributes.key;
     delete this.attributes.id;
@@ -93,6 +100,7 @@ class VNode {
     this.value = null;
     this.children = [];
     this.classList = [];
+    this.eventListeners = {};
     if (typeof args[0] !== "string" && !args[1] && !args[2]) {
       if (Object.prototype.toString.call(args[0]) === "[object Object]") {
         if (args[0] instanceof VNode) {
@@ -155,18 +163,16 @@ class VNode {
       node.id = this.id;
     }
     Object.keys(this.attributes).forEach((attr) => {
-      if (attr.match(/^on/)) {
-        // Event listener
-        const event = attr.match(/^on(.+)$/)[1];
-        node.addEventListener(event, this.attributes[attr]);
-      } else {
-        // Standard attributes (unless falsy)
-        if (this.attributes[attr]) {
-          const a = document.createAttribute(attr);
-          a.value = this.attributes[attr];
-          node.setAttributeNode(a);
-        }
+      // Standard attributes (unless falsy)
+      if (this.attributes[attr]) {
+        const a = document.createAttribute(attr);
+        a.value = this.attributes[attr];
+        node.setAttributeNode(a);
       }
+    });
+    // Event Listeners
+    Object.keys(this.eventListeners).forEach((event) => {
+      node.addEventListener(event, this.eventListeners[event]);
     });
     // Value
     if (this.value) {
@@ -216,10 +222,17 @@ class VNode {
       oldvnode = newvnode;
       return;
     }
+    // ID
+    if (oldvnode.id !== newvnode.id) {
+      node.id = newvnode.id;
+      oldvnode.id = newvnode.id;
+    }
+    // Value
     if (oldvnode.value !== newvnode.value) {
       node.value = newvnode.value;
       oldvnode.value = newvnode.value;
     }
+    // Classes
     if (!equal(oldvnode.classList, newvnode.classList)) {
       oldvnode.classList.forEach((c) => {
         if (!newvnode.classList.includes(c)) {
@@ -233,10 +246,12 @@ class VNode {
       });
       oldvnode.classList = newvnode.classList;
     }
+    // Style
     if (oldvnode.style !== newvnode.style) {
       node.style.cssText = newvnode.style;
       oldvnode.style = newvnode.style;
     }
+    // Data
     if (!equal(oldvnode.data, newvnode.data)) {
       Object.keys(oldvnode.data).forEach((a) => {
         if (!newvnode.data[a]) {
@@ -252,11 +267,15 @@ class VNode {
       });
       oldvnode.data = newvnode.data;
     }
+    // Attributes
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
         if (!newvnode.attributes[a]) {
           node.removeAttribute(a);
-        } else if (newvnode.attributes[a] && newvnode.attributes[a] !== oldvnode.attributes[a]) {
+        } else if (
+          newvnode.attributes[a] &&
+          newvnode.attributes[a] !== oldvnode.attributes[a]
+        ) {
           node.setAttribute(a, newvnode.attributes[a]);
         }
       });
@@ -266,6 +285,25 @@ class VNode {
         }
       });
       oldvnode.attributes = newvnode.attributes;
+    }
+    // Event listeners
+    if (!equal(oldvnode.eventListeners, newvnode.eventListeners)) {
+      Object.keys(oldvnode.eventListeners).forEach((a) => {
+        if (!newvnode.eventListeners[a]) {
+          node.removeEventListener(a, oldvnode.eventListeners[a]);
+        } else if (
+          !equal(newvnode.eventListeners[a] !== oldvnode.eventListeners[a])
+        ) {
+          node.removeEventListener(a, oldvnode.eventListeners[a]);
+          node.addEventListener(a, newvnode.eventListeners[a]);
+        }
+      });
+      Object.keys(newvnode.eventListeners).forEach((a) => {
+        if (!oldvnode.eventListeners[a]) {
+          node.addEventListener(a, newvnode.eventListeners[a]);
+        }
+      });
+      oldvnode.eventListeners = newvnode.eventListeners;
     }
     var newmap = []; // Map positions of newvnode children in relation to oldvnode children
     var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
@@ -413,7 +451,7 @@ class Router {
     this.redraw = () => {
       const fn = this.routes[this.route.def];
       vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
-      this.store.dispatch('$redraw');
+      this.store.dispatch("$redraw");
     };
   }
 
