@@ -160,10 +160,12 @@ class VNode {
       } else if (attr === "value") {
         node.value = this.attributes[attr];
       } else {
-        // Standard attributes
-        const a = document.createAttribute(attr);
-        a.value = this.attributes[attr];
-        node.setAttributeNode(a);
+        // Standard attributes (unless falsy)
+        if (this.attributes[attr]) {
+          const a = document.createAttribute(attr);
+          a.value = this.attributes[attr];
+          node.setAttributeNode(a);
+        }
       }
     });
     // Style
@@ -246,12 +248,12 @@ class VNode {
       Object.keys(oldvnode.attributes).forEach((a) => {
         if (!newvnode.attributes[a]) {
           node.removeAttribute(a);
-        } else if (newvnode.attributes[a] !== oldvnode.attributes[a]) {
+        } else if (newvnode.attributes[a] && newvnode.attributes[a] !== oldvnode.attributes[a]) {
           node.setAttribute(a, newvnode.attributes[a]);
         }
       });
       Object.keys(newvnode.attributes).forEach((a) => {
-        if (!oldvnode.attributes[a]) {
+        if (!oldvnode.attributes[a] && newvnode.attributes[a]) {
           node.setAttribute(a, newvnode.attributes[a]);
         }
       });
