@@ -57,9 +57,8 @@ const equal = (obj1, obj2) => {
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   from(data) {
-    this.type = data.type;
     this.value = data.value;
-    this.element = data.element;
+    this.type = data.type;
     this.id = data.id;
     this.key = data.key;
     this.style = data.style;
@@ -82,7 +81,7 @@ class VNode {
   }
 
   constructor(...args) {
-    this.element = null;
+    this.type = null;
     this.attributes = {};
     this.data = {};
     this.id = null;
@@ -106,7 +105,6 @@ class VNode {
         return;
       }
     } else {
-      this.type = "element";
       const elSelector = String(args[0]);
       if (args[1] && !args[2]) {
         // assuming no attributes
@@ -125,15 +123,15 @@ class VNode {
       if (!elSelector.match(selectorRegex)) {
         throw new Error(`[VNode] Invalid selector: ${elSelector}`);
       }
-      const [, element, id, classes] = elSelector.match(selectorRegex);
-      this.element = element;
+      const [, type, id, classes] = elSelector.match(selectorRegex);
+      this.type = type;
       if (id) {
         this.id = id.slice(1);
       }
       this.classList = (classes && classes.split(".").slice(1)) || [];
       this.children = this.children.map((c) => {
         if (typeof c === "string") {
-          return new VNode({ type: "text", value: c });
+          return new VNode({ type: "#text", value: c });
         } else if (typeof c === "function") {
           return new VNode(c);
         } else {
@@ -145,10 +143,10 @@ class VNode {
 
   // Renders the actual DOM Node corresponding to the current Virtual Node
   render() {
-    if (this.type === "text") {
+    if (this.type === "#text") {
       return document.createTextNode(this.value);
     }
-    const node = document.createElement(this.element);
+    const node = document.createElement(this.type);
     if (this.id) {
       node.id = this.id;
     }
@@ -200,7 +198,7 @@ class VNode {
     const oldvnode = this;
     if (
       oldvnode.constructor !== newvnode.constructor ||
-      oldvnode.element !== newvnode.element
+      oldvnode.type !== newvnode.type
     ) {
       // Different node types, replace the whole node (requires valid parent node)
       node.parentNode.replaceChild(newvnode.render(), node);
@@ -288,7 +286,7 @@ class VNode {
         // Something changed
         for (let i = 0; i < newmap.length; i++) {
           if (newmap[i] === -1) {
-            if (oldvnode.children[i].type === "text") {
+            if (oldvnode.children[i].type === "#text") {
               oldvnode.children[i] = newvnode.children[i];
               node.childNodes[i].nodeValue = newvnode.children[i].value;
             } else {
