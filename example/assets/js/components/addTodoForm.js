@@ -11,7 +11,7 @@ export default function AddTodoForm() {
     }
     h3.dispatch("error/clear");
     h3.dispatch("todos/add", {
-      key: `todo_${Date.now()}__${newTodo.value}`, // Make todos "unique-enough" to ensure they are processed correctly
+      key: `todo_${Date.now()}__${btoa(newTodo.value)}`, 
       text: newTodo.value,
     });
     newTodo.value = "";

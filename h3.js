@@ -121,7 +121,10 @@ class VNode {
         this.setAttributes(args[1]);
         this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
       }
-      const selectorRegex = /^([a-z0-9:_-]+)(#[a-z0-9:_-]+)?(\..+)?$/i;
+      const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
+      if (!elSelector.match(selectorRegex)) {
+        throw new Error(`[VNode] Invalid selector: ${elSelector}`);
+      }
       const [, element, id, classes] = elSelector.match(selectorRegex);
       this.element = element;
       if (id) {
@@ -400,6 +403,7 @@ class Router {
     this.redraw = () => {
       const fn = this.routes[this.route.def];
       vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
+      this.store.dispatch('$redraw');
     };
   }
 
@@ -471,7 +475,6 @@ const h3 = (...args) => {
 
 let store = null;
 let router = null;
-let updateFn = null;
 
 h3.init = ({ element, routes, modules, onInit }) => {
   if (!(element instanceof Element)) {
