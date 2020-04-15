@@ -10,7 +10,7 @@ export default function Todo(data) {
     h3.dispatch("todos/remove", data);
     h3.redraw()
   };
-  return h3(`div#${data.key}.todo-item`, [
+  return h3(`div.todo-item`, {key: data.key}, [
     h3(`div.todo-content${todoStateClass}`, [
       h3("span.todo-text", { onclick: () => toggleTodo(data) }, data.text),
     ]),
