@@ -61,14 +61,33 @@ class VNode {
     this.value = data.value;
     this.element = data.element;
     this.id = data.id;
+    this.key = data.key;
+    this.style = data.style;
+    this.data = data.data;
     this.children = data.children;
     this.attributes = data.attributes;
     this.classList = data.classList;
   }
 
+  setAttributes(attrs) {
+    this.id = attrs.id;
+    this.key = attrs.key;
+    this.style = attrs.style;
+    this.data = attrs.data || {};
+    this.attributes = attrs || {};
+    delete this.attributes.key;
+    delete this.attributes.id;
+    delete this.attributes.data;
+    delete this.attributes.style;
+  }
+
   constructor(...args) {
     this.element = null;
     this.attributes = {};
+    this.data = {};
+    this.id = null;
+    this.key = null;
+    this.style = null;
     this.children = [];
     this.classList = [];
     if (typeof args[0] !== "string" && !args[1] && !args[2]) {
@@ -96,16 +115,18 @@ class VNode {
         } else if (args[1].constructor === Array) {
           this.children = args[1];
         } else {
-          this.attributes = args[1];
+          this.setAttributes(args[1]);
         }
       } else {
-        this.attributes = args[1] || {};
+        this.setAttributes(args[1]);
         this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
       }
       const selectorRegex = /^([a-z0-9:_-]+)(#[a-z0-9:_-]+)?(\..+)?$/i;
       const [, element, id, classes] = elSelector.match(selectorRegex);
       this.element = element;
-      this.id = id && id.slice(1);
+      if (id) {
+        this.id = id.slice(1);
+      }
       this.classList = (classes && classes.split(".").slice(1)) || [];
       this.children = this.children.map((c) => {
         if (typeof c === "string") {
@@ -142,9 +163,17 @@ class VNode {
         node.setAttributeNode(a);
       }
     });
+    // Style
+    if (this.style) {
+      node.style.cssText = this.style;
+    }
     // Classes
     this.classList.forEach((c) => {
       node.classList.add(c);
+    });
+    // Data
+    Object.keys(this.data).forEach((key) => {
+      node.dataset[key] = this.data[key];
     });
     // Children
     this.children.forEach((c) => {
@@ -190,6 +219,25 @@ class VNode {
         }
       });
       oldvnode.classList = newvnode.classList;
+    }
+    if (oldvnode.style !== newvnode.style) {
+      node.style.cssText = newvnode.style;
+      oldvnode.style = newvnode.style;
+    }
+    if (!equal(oldvnode.data, newvnode.data)) {
+      Object.keys(oldvnode.data).forEach((a) => {
+        if (!newvnode.data[a]) {
+          delete node.dataset[a];
+        } else if (newvnode.data[a] !== oldvnode.data[a]) {
+          node.dataset[a] = newvnode.data[a];
+        }
+      });
+      Object.keys(newvnode.data).forEach((a) => {
+        if (!oldvnode.data[a]) {
+          node.dataset[a] = newvnode.data[a];
+        }
+      });
+      oldvnode.data = newvnode.data;
     }
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
