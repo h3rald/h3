@@ -63,6 +63,7 @@ class VNode {
     this.key = data.key;
     this.style = data.style;
     this.data = data.data;
+    this.value = data.value;
     this.children = data.children;
     this.attributes = data.attributes;
     this.classList = data.classList;
@@ -72,8 +73,10 @@ class VNode {
     this.id = attrs.id;
     this.key = attrs.key;
     this.style = attrs.style;
+    this.value = attrs.value;
     this.data = attrs.data || {};
     this.attributes = attrs || {};
+    delete this.attributes.value;
     delete this.attributes.key;
     delete this.attributes.id;
     delete this.attributes.data;
@@ -87,6 +90,7 @@ class VNode {
     this.id = null;
     this.key = null;
     this.style = null;
+    this.value = null;
     this.children = [];
     this.classList = [];
     if (typeof args[0] !== "string" && !args[1] && !args[2]) {
@@ -155,8 +159,6 @@ class VNode {
         // Event listener
         const event = attr.match(/^on(.+)$/)[1];
         node.addEventListener(event, this.attributes[attr]);
-      } else if (attr === "value") {
-        node.value = this.attributes[attr];
       } else {
         // Standard attributes (unless falsy)
         if (this.attributes[attr]) {
@@ -166,6 +168,10 @@ class VNode {
         }
       }
     });
+    // Value
+    if (this.value) {
+      node.value = this.value;
+    }
     // Style
     if (this.style) {
       node.style.cssText = this.style;
@@ -209,6 +215,10 @@ class VNode {
       node.data = newvnode;
       oldvnode = newvnode;
       return;
+    }
+    if (oldvnode.value !== newvnode.value) {
+      node.value = newvnode.value;
+      oldvnode.value = newvnode.value;
     }
     if (!equal(oldvnode.classList, newvnode.classList)) {
       oldvnode.classList.forEach((c) => {
