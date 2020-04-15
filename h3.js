@@ -80,6 +80,11 @@ class VNode {
     Object.keys(attrs)
       .filter((a) => a.startsWith("on"))
       .forEach((key) => {
+        if (typeof attrs[key] !== "function") {
+          throw new Error(
+            `[VNode] Event handler specified for on${key} event is not a function.`
+          );
+        }
         this.eventListeners[key.slice(2)] = attrs[key];
         delete this.attributes[key];
       });
@@ -119,7 +124,7 @@ class VNode {
     } else {
       const elSelector = String(args[0]);
       if (args[1] && !args[2]) {
-        // assuming no attributes
+        // Assuming no attributes
         if (typeof args[1] === "string") {
           this.children = [args[1]];
         } else if (args[1].constructor === Array) {
@@ -516,7 +521,6 @@ class Router {
 }
 
 // High Level API
-
 const h3 = (...args) => {
   return new VNode(...args);
 };
@@ -524,9 +528,9 @@ const h3 = (...args) => {
 let store = null;
 let router = null;
 
-h3.init = ({ element, routes, modules, onInit }) => {
+h3.init = ({ element, routes, modules, preStart, postStart }) => {
   if (!(element instanceof Element)) {
-    throw new Error("Invalid element specified.");
+    throw new Error("[h3.init] Invalid element specified.");
   }
   // Initialize store
   store = new Store();
@@ -536,14 +540,15 @@ h3.init = ({ element, routes, modules, onInit }) => {
   store.dispatch("$init");
   // Initialize router
   router = new Router({ element, routes, store });
-  onInit && onInit();
-  router.start();
-  router.setRedraw();
+  return Promise.resolve(preStart && preStart())
+    .then(() => router.start())
+    .then(() => postStart && postStart())
+    .then(() => router.setRedraw());
 };
 
 h3.navigateTo = (path, params) => {
   if (!router) {
-    throw new Error("No application initialized, unable to navigate.");
+    throw new Error("[h3.navigateTo] No application initialized, unable to navigate.");
   }
   return router.navigateTo(path, params);
 };
@@ -552,7 +557,7 @@ Object.defineProperty(h3, "route", {
   get: () => {
     if (!router) {
       throw new Error(
-        "No application initialized, unable to retrieve current route."
+        "[h3.route] No application initialized, unable to retrieve current route."
       );
     }
     return router.route;
@@ -563,7 +568,7 @@ Object.defineProperty(h3, "state", {
   get: () => {
     if (!store) {
       throw new Error(
-        "No application initialized, unable to retrieve current state."
+        "[h3.state] No application initialized, unable to retrieve current state."
       );
     }
     return store.get();
@@ -572,21 +577,21 @@ Object.defineProperty(h3, "state", {
 
 h3.on = (event, cb) => {
   if (!store) {
-    throw new Error("No application initialized, unable to listen to events.");
+    throw new Error("[h3.on] No application initialized, unable to listen to events.");
   }
   return store.on(event, cb);
 };
 
 h3.dispatch = (event, data) => {
   if (!store) {
-    throw new Error("No application initialized, unable to dispatch events.");
+    throw new Error("[h3.dispatch] No application initialized, unable to dispatch events.");
   }
   return store.dispatch(event, data);
 };
 
 h3.redraw = () => {
   if (!router || !router.redraw) {
-    throw new Error("No application initialized, unable to update.");
+    throw new Error("[h3.redraw] No application initialized, unable to update.");
   }
   router.redraw();
 };
