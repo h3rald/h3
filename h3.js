@@ -70,7 +70,7 @@ class VNode {
     this.classList = data.classList;
   }
 
-  setAttributes(attrs) {
+  setProps(attrs) {
     this.id = attrs.id;
     this.key = attrs.key;
     this.style = attrs.style;
@@ -130,10 +130,10 @@ class VNode {
         } else if (args[1].constructor === Array) {
           this.children = args[1];
         } else {
-          this.setAttributes(args[1]);
+          this.setProps(args[1]);
         }
       } else {
-        this.setAttributes(args[1] || {});
+        this.setProps(args[1] || {});
         this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
       }
       const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;

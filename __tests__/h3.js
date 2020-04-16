@@ -2,17 +2,32 @@
 const h3 = require("../h3.js").default;
 
 describe("h3", () => {
-  it("should expose an equal method to check object/array equality", () => {
+  it("should expose an equal method to check object/array/function equality", () => {
     expect(h3.equal({}, {})).toBeTruthy();
     expect(h3.equal([], [])).toBeTruthy();
+    expect(h3.equal([], [1])).toBeFalsy();
+    expect(h3.equal([2], [1])).toBeFalsy();
     expect(h3.equal([], {})).toBeFalsy();
     expect(h3.equal({ a: 1 }, { a: 1 })).toBeTruthy();
     expect(h3.equal({ a: 1 }, { b: 1 })).toBeFalsy();
+    expect(h3.equal({ a: 1 }, { a: 2 })).toBeFalsy();
     expect(h3.equal({ a: 1 }, { a: 1, b: 2 })).toBeFalsy();
     expect(h3.equal(undefined, undefined)).toBeTruthy();
     expect(h3.equal(undefined, null)).toBeFalsy();
     expect(h3.equal(null, 1)).toBeFalsy();
     expect(h3.equal(null, null)).toBeTruthy();
+    expect(
+      h3.equal(
+        () => 1,
+        () => 1
+      )
+    ).toBeTruthy();
+    expect(
+      h3.equal(
+        () => 1,
+        () => 2
+      )
+    ).toBeFalsy();
     expect(h3.equal([1, 2, 3], [1, 2, 3])).toBeTruthy();
     expect(h3.equal([1, 2, 3], [1, 4, 3])).toBeFalsy();
     expect(h3.equal([1, 2, 3], [1, 3])).toBeFalsy();
@@ -71,6 +86,37 @@ describe("h3", () => {
       style: undefined,
       value: undefined,
     });
+  });
+
+  it("should support the creation of nodes with a single child node", () => {
+    const result = {
+      type: "div",
+      children: [
+        {
+          type: "#text",
+          children: [],
+          attributes: {},
+          classList: [],
+          data: {},
+          eventListeners: {},
+          id: undefined,
+          key: undefined,
+          style: undefined,
+          value: "test",
+        },
+      ],
+      attributes: {},
+      classList: [],
+      data: {},
+      eventListeners: {},
+      id: undefined,
+      key: undefined,
+      style: undefined,
+      value: undefined,
+    };
+    expect(h3("div", "test")).toEqual(result);
+    const failing = () => h3("***");
+    expect(failing).toThrowError(/Invalid selector/);
   });
 
   it("should support the creation of virtual node elements with classes", () => {
@@ -203,7 +249,7 @@ describe("h3", () => {
   });
 
   it("should support the creation of virtual node elements with element children and classes", () => {
-    expect(h3("div.test", ["a", h3("span", ["test1"])])).toEqual({
+    expect(h3("div.test", ["a", h3("span", ["test1"]), () => h3("span", ["test2"])])).toEqual({
       attributes: {},
       type: "div",
       children: [
@@ -244,6 +290,31 @@ describe("h3", () => {
           style: undefined,
           value: undefined,
         },
+        {
+          type: "span",
+          children: [
+            {
+              attributes: {},
+              children: [],
+              classList: [],
+              data: {},
+              eventListeners: {},
+              id: undefined,
+              key: undefined,
+              style: undefined,
+              type: "#text",
+              value: "test2",
+            },
+          ],
+          attributes: {},
+          classList: [],
+          data: {},
+          eventListeners: {},
+          id: undefined,
+          key: undefined,
+          style: undefined,
+          value: undefined,
+        },
       ],
       classList: ["test"],
       data: {},
@@ -253,6 +324,31 @@ describe("h3", () => {
       style: undefined,
       value: undefined,
     });
+  });
+});
+
+describe("VNode", () => {
+  it("should initialize itself based on another node or a function returning a VNode", () => {
+    const a = h3("div#test", ["a", "b"]);
+    const b = h3("span");
+    const c = h3(a);
+    const d = () => h3(a);
+    b.from(a);
+    expect(b).toEqual(a);
+    expect(c).toEqual(a);
+    expect(h3(d)).toEqual(a);
+  });
+
+  it("should provide a method to set properties", () => {
+    const a = h3("div");
+    const failing = () =>
+      a.setProps({ id: "test", key: "aaa", onclick: "test" });
+    expect(failing).toThrowError(/not a function/);
+    const handler = () => "test";
+    a.setProps({ id: "test", key: "aaa", onclick: handler });
+    expect(a.key).toEqual("aaa");
+    expect(a.id).toEqual("test");
+    expect(a.eventListeners.click).toEqual(handler);
   });
 
   it("should provide a render method able to render textual nodes", () => {
