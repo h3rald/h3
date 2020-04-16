@@ -133,7 +133,7 @@ class VNode {
           this.setAttributes(args[1]);
         }
       } else {
-        this.setAttributes(args[1]);
+        this.setAttributes(args[1] || {});
         this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
       }
       const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
@@ -548,7 +548,9 @@ h3.init = ({ element, routes, modules, preStart, postStart }) => {
 
 h3.navigateTo = (path, params) => {
   if (!router) {
-    throw new Error("[h3.navigateTo] No application initialized, unable to navigate.");
+    throw new Error(
+      "[h3.navigateTo] No application initialized, unable to navigate."
+    );
   }
   return router.navigateTo(path, params);
 };
@@ -577,23 +579,33 @@ Object.defineProperty(h3, "state", {
 
 h3.on = (event, cb) => {
   if (!store) {
-    throw new Error("[h3.on] No application initialized, unable to listen to events.");
+    throw new Error(
+      "[h3.on] No application initialized, unable to listen to events."
+    );
   }
   return store.on(event, cb);
 };
 
 h3.dispatch = (event, data) => {
   if (!store) {
-    throw new Error("[h3.dispatch] No application initialized, unable to dispatch events.");
+    throw new Error(
+      "[h3.dispatch] No application initialized, unable to dispatch events."
+    );
   }
   return store.dispatch(event, data);
 };
 
 h3.redraw = () => {
   if (!router || !router.redraw) {
-    throw new Error("[h3.redraw] No application initialized, unable to update.");
+    throw new Error(
+      "[h3.redraw] No application initialized, unable to update."
+    );
   }
   router.redraw();
+};
+
+h3.equal = (...args) => {
+  return equal(...args);
 };
 
 export default h3;

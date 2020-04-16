@@ -1,0 +1,40 @@
+{
+  "name": "h3",
+  "version": "0.1.0",
+  "description": "A tiny, extremely minimalist client side web framework.",
+  "main": "h3.js",
+  "directories": {
+    "example": "example",
+    "site": "site"
+  },
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h3rald/h3.git"
+  },
+  "keywords": [
+    "javascript",
+    "virtual-dom",
+    "router",
+    "storeon",
+    "redux",
+    "spa",
+    "client-side",
+    "framework",
+    "minimalist"
+  ],
+  "author": "Fabio Cevasco",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/h3rald/h3/issues"
+  },
+  "homepage": "https://github.com/h3rald/h3#readme",
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "jest": "^25.3.0"
+  }
+}
