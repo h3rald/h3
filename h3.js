@@ -96,13 +96,13 @@ class VNode {
   }
 
   constructor(...args) {
-    this.type = null;
+    this.type = undefined;
     this.attributes = {};
     this.data = {};
-    this.id = null;
-    this.key = null;
-    this.style = null;
-    this.value = null;
+    this.id = undefined;
+    this.key = undefined;
+    this.style = undefined;
+    this.value = undefined;
     this.children = [];
     this.classList = [];
     this.eventListeners = {};
