@@ -1,0 +1,8 @@
+footer {
+  text-align: center;
+  width: 100%;
+}
+
+main {
+  height: calc(100vh - 120px);
+}

@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "jest",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "minify": "terser h3.js -o h3.min.js --source-map"
   },
   "repository": {
     "type": "git",
