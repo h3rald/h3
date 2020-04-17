@@ -54,13 +54,16 @@ const equal = (obj1, obj2) => {
   return checkProperties(o1, o2) && checkProperties(o2, o1);
 };
 
+const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
+
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   from(data) {
     this.value = data.value;
     this.type = data.type;
     this.id = data.id;
-    this.key = data.key;
+    this.$key = data.$key;
+    this.$html = data.$html;
     this.style = data.style;
     this.data = data.data;
     this.value = data.value;
@@ -70,9 +73,10 @@ class VNode {
     this.classList = data.classList;
   }
 
-  setProps(attrs) {
-    this.id = attrs.id;
-    this.key = attrs.key;
+  processProperties(attrs) {
+    this.id = this.id || attrs.id;
+    this.$key = attrs.$key;
+    this.$html = attrs.$html;
     this.style = attrs.style;
     this.value = attrs.value;
     this.data = attrs.data || {};
@@ -89,72 +93,134 @@ class VNode {
         delete this.attributes[key];
       });
     delete this.attributes.value;
-    delete this.attributes.key;
+    delete this.attributes.$key;
+    delete this.attributes.$html;
     delete this.attributes.id;
     delete this.attributes.data;
     delete this.attributes.style;
   }
+
+  processSelector(selector) {
+    if (!selector.match(selectorRegex)) {
+      throw new Error(`[VNode] Invalid selector: ${selector}`);
+    }
+    const [, type, id, classes] = selector.match(selectorRegex);
+    this.type = type;
+    if (id) {
+      this.id = id.slice(1);
+    }
+    this.classList = (classes && classes.split(".").slice(1)) || [];
+  }
+
+  processVNodeObject(arg) {
+    if (arg instanceof VNode) {
+      return arg;
+    }
+    if (arg instanceof Function) {
+      const vnode = arg();
+      if (typeof vnode !== VNode) {
+        throw new Error("[VNode] Function argument does not return a VNode");
+      }
+      return vnode;
+    }
+    throw new Error(
+      "[VNode] Invalid first argument provided to VNode constructor."
+    );
+  }
+
+  processChildren(arg) {
+    const children = Array.isArray(arg) ? arg : [arg];
+    this.children = children.map((c) => {
+      if (typeof c === "string") {
+        return new VNode({ type: "#text", value: c });
+      }
+      if (typeof c === "object" && c !== null) {
+        return this.processVNodeObject(c);
+      }
+      throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
+    });
+  }
+
 
   constructor(...args) {
     this.type = undefined;
     this.attributes = {};
     this.data = {};
     this.id = undefined;
-    this.key = undefined;
+    this.$key = undefined;
+    this.$html= undefined;
     this.style = undefined;
     this.value = undefined;
     this.children = [];
     this.classList = [];
     this.eventListeners = {};
-    if (typeof args[0] !== "string" && !args[1] && !args[2]) {
-      if (Object.prototype.toString.call(args[0]) === "[object Object]") {
-        if (args[0] instanceof VNode) {
-          this.from(args[0]);
-          return;
+    if (args.length === 0) {
+      throw new Error("[VNode] No arguments passed to VNode constructor.");
+    }
+    if (args.length === 1) {
+      let vnode = args[0];
+      if (typeof vnode === "string") {
+        // Assume empty element
+        this.processSelector(vnode);
+      } else if (typeof vnode === "object" && vnode !== null) {
+        // Text node
+        if (vnode.type === "#text") {
+          this.type = "#text";
+          this.value = vnode.value;
         } else {
-          this.type = args[0].type;
-          this.value = args[0].value;
-          return;
-        }
-      } else if (typeof args[0] === "function") {
-        const vnode = args[0]();
-        this.from(vnode);
-        return;
-      }
-    } else {
-      const elSelector = String(args[0]);
-      if (args[1] && !args[2]) {
-        // Assuming no attributes
-        if (typeof args[1] === "string") {
-          this.children = [args[1]];
-        } else if (args[1].constructor === Array) {
-          this.children = args[1];
-        } else {
-          this.setProps(args[1]);
+          this.from(this.processVNodeObject(vnode));
         }
       } else {
-        this.setProps(args[1] || {});
-        this.children = typeof args[2] === "string" ? [args[2]] : args[2] || [];
+        throw new Error(
+          "[VNode] Invalid first argument provided to VNode constructor."
+        );
       }
-      const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
-      if (!elSelector.match(selectorRegex)) {
-        throw new Error(`[VNode] Invalid selector: ${elSelector}`);
+    } else if (args.length === 2) {
+      let [selector, data] = args;
+      if (typeof selector !== "string") {
+        throw new Error(
+          "[VNode] Invalid first argument provided to VNode constructor."
+        );
       }
-      const [, type, id, classes] = elSelector.match(selectorRegex);
-      this.type = type;
-      if (id) {
-        this.id = id.slice(1);
+      this.processSelector(selector);
+      this.children = [];
+      if (typeof data === "string") {
+        // Assume single child text node
+        this.type = "#text";
+        this.value = data;
+        return
       }
-      this.classList = (classes && classes.split(".").slice(1)) || [];
-      this.children = this.children.map((c) => {
-        if (typeof c === "string") {
-          return new VNode({ type: "#text", value: c });
-        } else if (typeof c === "function") {
-          return new VNode(c);
+      if (typeof data !== "object" || data === null) {
+        throw new Error(
+          "[VNode] The second argument of a VNode constructor must be an object or a string."
+        );
+      }
+      if (Array.isArray(data)) {
+        // Assume 2nd argument as children
+        this.processChildren(data);
+      } else {
+        if (data instanceof Function || data instanceof VNode) {
+          this.processChildren(data);
         } else {
-          return c;
+          // Not a VNode, assume props object
+          this.processProperties(data);
         }
-      });
+      }
+    } else if (args.length === 3) {
+      let [selector, props, children] = args;
+      if (typeof selector !== "string") {
+        throw new Error(
+          "[VNode] Invalid first argument provided to VNode constructor."
+        );
+      }
+      this.processSelector(selector);
+      if (typeof props !== "object" || props === null) {
+        throw new Error(
+          "[VNode] Invalid second argument provided to VNode constructor."
+        );
+      }
+      this.processProperties(props);
+      this.processChildren(children);
     }
   }
 
@@ -199,6 +265,9 @@ class VNode {
     this.children.forEach((c) => {
       node.appendChild(c.render());
     });
+    if (this.$html) {
+      node.innerHTML = this.$html;
+    }
     return node;
   }
 
@@ -310,6 +379,12 @@ class VNode {
       });
       oldvnode.eventListeners = newvnode.eventListeners;
     }
+    // innerHTML
+    if (oldvnode.$html !== newvnode.$html) {
+      node.innerHTML = newvnode.$html;
+      oldvnode.$html = newvnode.$html;
+    }
+    // Children
     var newmap = []; // Map positions of newvnode children in relation to oldvnode children
     var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
     if (newvnode.children) {
@@ -451,8 +526,7 @@ class Router {
     this.routes = routes;
   }
 
-  setRedraw() {
-    let vnode = this.routes[this.route.def]();
+  setRedraw(vnode) {
     this.redraw = () => {
       const fn = this.routes[this.route.def];
       vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
@@ -503,8 +577,9 @@ class Router {
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      this.element.appendChild(this.routes[this.route.def]().render());
-      this.setRedraw();
+      const vnode = this.routes[this.route.def]()
+      this.element.appendChild(vnode.render());
+      this.setRedraw(vnode);
       this.store.dispatch("$navigation", this.route);
     };
     processPath();
@@ -543,7 +618,6 @@ h3.init = ({ element, routes, modules, preStart, postStart }) => {
   return Promise.resolve(preStart && preStart())
     .then(() => router.start())
     .then(() => postStart && postStart())
-    .then(() => router.setRedraw());
 };
 
 h3.navigateTo = (path, params) => {

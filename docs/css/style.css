@@ -6,3 +6,12 @@ footer {
 main {
   height: calc(100vh - 120px);
 }
+
+#navigation {
+  border: none;
+  border-left: 1px solid #ccc;
+}
+
+[type=checkbox].drawer:checked+* {
+  padding-top: 60px;
+}
