@@ -3,10 +3,6 @@ footer {
   width: 100%;
 }
 
-main {
-  height: calc(100vh - 120px);
-}
-
 #navigation {
   border: none;
   border-left: 1px solid #ccc;
