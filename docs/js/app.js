@@ -35,7 +35,9 @@ const Page = () => {
   }
   const menu = ids.map((p) => h3("a", { href: `#/${p}` }, labels[p]));
   const html = h3.state.pages[id];
-  const content = html ? h3("div.content", { $html:  html}) : h3("div.empty", {style: "text-align: center; margin: auto;"}, h3("span.spinner"));
+  const content = html
+    ? h3("div.content", { $html: html })
+    : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
     h3("header.row", [
       h3("a.logo.col-sm", { href: "#/" }, "H3"),
@@ -48,7 +50,7 @@ const Page = () => {
         ...menu,
       ]),
       h3("main.col-sm-12.col-md-9", [
-        h3("div.card.fluid", h3("div.section", content))
+        h3("div.card.fluid", h3("div.section", content)),
       ]),
       h3("footer", h3("div", "© 2020 Fabio Cevasco")),
     ]),
@@ -56,7 +58,7 @@ const Page = () => {
 };
 
 h3.init({
-  element: document.getElementById("app"),
+  element: document.body,
   modules: [pages],
   routes: {
     "/": Page,

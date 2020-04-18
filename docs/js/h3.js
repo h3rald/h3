@@ -458,7 +458,9 @@ class VNode {
     }
     // innerHTML
     if (oldvnode.$html !== newvnode.$html) {
-      node.innerHTML = newvnode.$html;
+      if (newvnode.children.length === 0 && newvnode.$html) {
+        node.innerHTML = newvnode.$html;
+      }
       oldvnode.$html = newvnode.$html;
     }
   }

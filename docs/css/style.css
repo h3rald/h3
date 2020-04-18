@@ -12,6 +12,11 @@ main {
   border-left: 1px solid #ccc;
 }
 
-[type=checkbox].drawer:checked+* {
+[type="checkbox"].drawer:checked + * {
   padding-top: 60px;
+}
+
+.spinner-container {
+  text-align: center;
+  margin: auto;
 }
