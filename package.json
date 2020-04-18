@@ -10,8 +10,8 @@
   "scripts": {
     "test": "jest",
     "coverage": "jest --coverage",
-    "minify": "terser h3.js -o h3.min.js --source-map",
-    "copy": "cp h3.js docs/js/h3.js && cp h3.js example/assets/js/h3.js"
+    "copy": "cp h3.js docs/js/h3.js && cp h3.js example/assets/js/h3.js",
+    "guide": "hastyscribe docs/H3_DeveloperGuide.md"
   },
   "repository": {
     "type": "git",

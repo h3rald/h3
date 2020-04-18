@@ -58,88 +58,6 @@ const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
-  from(data) {
-    this.value = data.value;
-    this.type = data.type;
-    this.id = data.id;
-    this.$key = data.$key;
-    this.$html = data.$html;
-    this.style = data.style;
-    this.data = data.data;
-    this.value = data.value;
-    this.eventListeners = data.eventListeners;
-    this.children = data.children;
-    this.attributes = data.attributes;
-    this.classList = data.classList;
-  }
-
-  processProperties(attrs) {
-    this.id = this.id || attrs.id;
-    this.$key = attrs.$key;
-    this.$html = attrs.$html;
-    this.style = attrs.style;
-    this.value = attrs.value;
-    this.data = attrs.data || {};
-    this.attributes = attrs || {};
-    Object.keys(attrs)
-      .filter((a) => a.startsWith("on"))
-      .forEach((key) => {
-        if (typeof attrs[key] !== "function") {
-          throw new Error(
-            `[VNode] Event handler specified for on${key} event is not a function.`
-          );
-        }
-        this.eventListeners[key.slice(2)] = attrs[key];
-        delete this.attributes[key];
-      });
-    delete this.attributes.value;
-    delete this.attributes.$key;
-    delete this.attributes.$html;
-    delete this.attributes.id;
-    delete this.attributes.data;
-    delete this.attributes.style;
-  }
-
-  processSelector(selector) {
-    if (!selector.match(selectorRegex)) {
-      throw new Error(`[VNode] Invalid selector: ${selector}`);
-    }
-    const [, type, id, classes] = selector.match(selectorRegex);
-    this.type = type;
-    if (id) {
-      this.id = id.slice(1);
-    }
-    this.classList = (classes && classes.split(".").slice(1)) || [];
-  }
-
-  processVNodeObject(arg) {
-    if (arg instanceof VNode) {
-      return arg;
-    }
-    if (arg instanceof Function) {
-      const vnode = arg();
-      if (typeof vnode !== VNode) {
-        throw new Error("[VNode] Function argument does not return a VNode");
-      }
-      return vnode;
-    }
-    throw new Error(
-      "[VNode] Invalid first argument provided to VNode constructor."
-    );
-  }
-
-  processChildren(arg) {
-    const children = Array.isArray(arg) ? arg : [arg];
-    this.children = children.map((c) => {
-      if (typeof c === "string") {
-        return new VNode({ type: "#text", value: c });
-      }
-      if (typeof c === "object" && c !== null) {
-        return this.processVNodeObject(c);
-      }
-      throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
-    });
-  }
 
   constructor(...args) {
     this.type = undefined;
@@ -221,6 +139,89 @@ class VNode {
       this.processProperties(props);
       this.processChildren(children);
     }
+  }
+
+  from(data) {
+    this.value = data.value;
+    this.type = data.type;
+    this.id = data.id;
+    this.$key = data.$key;
+    this.$html = data.$html;
+    this.style = data.style;
+    this.data = data.data;
+    this.value = data.value;
+    this.eventListeners = data.eventListeners;
+    this.children = data.children;
+    this.attributes = data.attributes;
+    this.classList = data.classList;
+  }
+
+  processProperties(attrs) {
+    this.id = this.id || attrs.id;
+    this.$key = attrs.$key;
+    this.$html = attrs.$html;
+    this.style = attrs.style;
+    this.value = attrs.value;
+    this.data = attrs.data || {};
+    this.attributes = attrs || {};
+    Object.keys(attrs)
+      .filter((a) => a.startsWith("on"))
+      .forEach((key) => {
+        if (typeof attrs[key] !== "function") {
+          throw new Error(
+            `[VNode] Event handler specified for on${key} event is not a function.`
+          );
+        }
+        this.eventListeners[key.slice(2)] = attrs[key];
+        delete this.attributes[key];
+      });
+    delete this.attributes.value;
+    delete this.attributes.$key;
+    delete this.attributes.$html;
+    delete this.attributes.id;
+    delete this.attributes.data;
+    delete this.attributes.style;
+  }
+
+  processSelector(selector) {
+    if (!selector.match(selectorRegex)) {
+      throw new Error(`[VNode] Invalid selector: ${selector}`);
+    }
+    const [, type, id, classes] = selector.match(selectorRegex);
+    this.type = type;
+    if (id) {
+      this.id = id.slice(1);
+    }
+    this.classList = (classes && classes.split(".").slice(1)) || [];
+  }
+
+  processVNodeObject(arg) {
+    if (arg instanceof VNode) {
+      return arg;
+    }
+    if (arg instanceof Function) {
+      const vnode = arg();
+      if (typeof vnode !== VNode) {
+        throw new Error("[VNode] Function argument does not return a VNode");
+      }
+      return vnode;
+    }
+    throw new Error(
+      "[VNode] Invalid first argument provided to VNode constructor."
+    );
+  }
+
+  processChildren(arg) {
+    const children = Array.isArray(arg) ? arg : [arg];
+    this.children = children.map((c) => {
+      if (typeof c === "string") {
+        return new VNode({ type: "#text", value: c });
+      }
+      if (typeof c === "object" && c !== null) {
+        return this.processVNodeObject(c);
+      }
+      throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
+    });
   }
 
   // Renders the actual DOM Node corresponding to the current Virtual Node
