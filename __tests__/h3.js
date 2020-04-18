@@ -2,6 +2,7 @@
 const h3 = require("../h3.js").default;
 
 describe("h3", () => {
+
   it("should expose an equal method to check object/array/function equality", () => {
     expect(h3.equal({}, {})).toBeTruthy();
     expect(h3.equal([], [])).toBeTruthy();
@@ -88,6 +89,30 @@ describe("h3", () => {
     });
   });
 
+  it("should throw an error when invalid arguments are supplied", () => {
+    const empty = () => h3();
+    const invalid1st = () => h3(1);
+    const invalid1st2 = () => h3(1, {});
+    const invalid1st3 = () => h3(1, {}, []);
+    const invalid2nd = () => h3("div", 1);
+    const invalid2nd2 = () => h3("div", true, []);
+    const invalid2nd3 = () => h3("div", null, []);
+    expect(empty).toThrowError(/No arguments passed/);
+    expect(invalid1st).toThrowError(/Invalid first argument/);
+    expect(invalid1st2).toThrowError(/Invalid first argument/);
+    expect(invalid1st3).toThrowError(/Invalid first argument/);
+    expect(invalid2nd).toThrowError(/second argument of a VNode constructor/);
+    expect(invalid2nd2).toThrowError(/Invalid second argument/);
+    expect(invalid2nd3).toThrowError(/Invalid second argument/);
+  });
+
+  it("should support the creation of elements with a single, non-array child", () => {
+    const vnode1 = h3("div", () => "test");
+    const vnode2 = h3("div", () => h3("span"));
+    expect(vnode1.children[0].value).toEqual("test");
+    expect(vnode2.children[0].type).toEqual("span");
+  });
+
   it("should support the creation of nodes with a single child node", () => {
     const result = {
       type: "div",
@@ -100,7 +125,8 @@ describe("h3", () => {
           data: {},
           eventListeners: {},
           id: undefined,
-          key: undefined,
+          $key: undefined,
+          $html: undefined,
           style: undefined,
           value: "test",
         },
@@ -110,7 +136,8 @@ describe("h3", () => {
       data: {},
       eventListeners: {},
       id: undefined,
-      key: undefined,
+      $key: undefined,
+      $html: undefined,
       style: undefined,
       value: undefined,
     };
@@ -249,7 +276,9 @@ describe("h3", () => {
   });
 
   it("should support the creation of virtual node elements with element children and classes", () => {
-    expect(h3("div.test", ["a", h3("span", ["test1"]), () => h3("span", ["test2"])])).toEqual({
+    expect(
+      h3("div.test", ["a", h3("span", ["test1"]), () => h3("span", ["test2"])])
+    ).toEqual({
       attributes: {},
       type: "div",
       children: [

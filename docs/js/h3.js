@@ -1,4 +1,3 @@
-// Basic object equality
 const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
@@ -58,7 +57,6 @@ const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
-
   constructor(...args) {
     this.type = undefined;
     this.attributes = {};
@@ -79,7 +77,10 @@ class VNode {
       if (typeof vnode === "string") {
         // Assume empty element
         this.processSelector(vnode);
-      } else if (typeof vnode === "object" && vnode !== null) {
+      } else if (
+        typeof vnode === "function" ||
+        (typeof vnode === "object" && vnode !== null)
+      ) {
         // Text node
         if (vnode.type === "#text") {
           this.type = "#text";
@@ -100,16 +101,15 @@ class VNode {
         );
       }
       this.processSelector(selector);
-      this.children = [];
       if (typeof data === "string") {
         // Assume single child text node
-        this.type = "#text";
-        this.value = data;
+        this.children = [new VNode({ type: "#text", value: data })];
         return;
       }
-      if (typeof data !== "object" || data === null) {
+      if (typeof data !== "function" && (typeof data !== "object" || data === null)) {
+        console.log(data);
         throw new Error(
-          "[VNode] The second argument of a VNode constructor must be an object or a string."
+          "[VNode] The second argument of a VNode constructor must be an object, an array or a string."
         );
       }
       if (Array.isArray(data)) {
@@ -200,8 +200,11 @@ class VNode {
       return arg;
     }
     if (arg instanceof Function) {
-      const vnode = arg();
-      if (typeof vnode !== VNode) {
+      let vnode = arg();
+      if (typeof vnode === "string") {
+        vnode = new VNode({ type: "#text", value: vnode });
+      }
+      if (!(vnode instanceof VNode)) {
         throw new Error("[VNode] Function argument does not return a VNode");
       }
       return vnode;
@@ -217,7 +220,7 @@ class VNode {
       if (typeof c === "string") {
         return new VNode({ type: "#text", value: c });
       }
-      if (typeof c === "object" && c !== null) {
+      if (typeof c === "function" || (typeof c === "object" && c !== null)) {
         return this.processVNodeObject(c);
       }
       throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
