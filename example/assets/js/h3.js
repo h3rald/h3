@@ -141,14 +141,13 @@ class VNode {
     });
   }
 
-
   constructor(...args) {
     this.type = undefined;
     this.attributes = {};
     this.data = {};
     this.id = undefined;
     this.$key = undefined;
-    this.$html= undefined;
+    this.$html = undefined;
     this.style = undefined;
     this.value = undefined;
     this.children = [];
@@ -188,7 +187,7 @@ class VNode {
         // Assume single child text node
         this.type = "#text";
         this.value = data;
-        return
+        return;
       }
       if (typeof data !== "object" || data === null) {
         throw new Error(
@@ -379,11 +378,6 @@ class VNode {
       });
       oldvnode.eventListeners = newvnode.eventListeners;
     }
-    // innerHTML
-    if (oldvnode.$html !== newvnode.$html) {
-      node.innerHTML = newvnode.$html;
-      oldvnode.$html = newvnode.$html;
-    }
     // Children
     var newmap = []; // Map positions of newvnode children in relation to oldvnode children
     var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
@@ -457,6 +451,11 @@ class VNode {
           }
         }
       }
+    }
+    // innerHTML
+    if (oldvnode.$html !== newvnode.$html) {
+      node.innerHTML = newvnode.$html;
+      oldvnode.$html = newvnode.$html;
     }
   }
 }
@@ -577,7 +576,7 @@ class Router {
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      const vnode = this.routes[this.route.def]()
+      const vnode = this.routes[this.route.def]();
       this.element.appendChild(vnode.render());
       this.setRedraw(vnode);
       this.store.dispatch("$navigation", this.route);
@@ -617,7 +616,7 @@ h3.init = ({ element, routes, modules, preStart, postStart }) => {
   router = new Router({ element, routes, store });
   return Promise.resolve(preStart && preStart())
     .then(() => router.start())
-    .then(() => postStart && postStart())
+    .then(() => postStart && postStart());
 };
 
 h3.navigateTo = (path, params) => {
