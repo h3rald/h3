@@ -16,3 +16,19 @@ footer {
   text-align: center;
   margin: auto;
 }
+
+ul, ol {
+  padding-left: 1.5em;
+}
+
+pre[class*="language-"] {
+  padding: 0.5em;
+  line-height: 1em;
+  border: 1px solid #dedede;
+}
+
+pre code[class*="language-"], 
+pre code[class*="language-"] span.token  {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+}

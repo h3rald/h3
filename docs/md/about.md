@@ -6,7 +6,7 @@ A while ago, I was interviewing with several companies trying to find a new job 
 
 I spent some time thinking about it, started cobbling together a few lines of code doing the usual DOM manipulation stuff (how hard can it be, right? It's a Todo List!) and then stopped. 
 
-_F\*\*\* this!_ &mdash; I thought.
+_No way!_ &mdash; I thought.
 
 There has to be a better way. If only I could use something small like [Mithril](https://mithril.js.org), it would take me no time! But sadly I couldn't. Unless...
 
@@ -21,5 +21,5 @@ A few months after that interview, I decided to take a look at that code, tidy i
 This site is built with H3 itself, in under [70 lines](https://github.com/h3rald/h3/blob/master/docs/js/app.js) of code, plus the following third-party libraries:
 
 * [marked.js](https://marked.js.org/#/README.md#README.md)
-* [DOMPurify](https://github.com/cure53/DOMPurify)
+* [Prism.js](https://prismjs.com/)
 * [mini.css](https://minicss.org/)

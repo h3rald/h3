@@ -38,5 +38,8 @@
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "jest": "^25.3.0"
+  },
+  "dependencies": {
+    "prismjs": "^1.20.0"
   }
 }

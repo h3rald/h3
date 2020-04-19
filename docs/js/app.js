@@ -1,6 +1,6 @@
 import h3 from "./h3.js";
 import marked from "./vendor/marked.js";
-import DOMPurify from "./vendor/purify.js";
+import Prism from "./vendor/prism.js";
 
 const labels = {
   overview: "Overview",
@@ -21,12 +21,12 @@ const Page = () => {
     (async () => {
       const response = await fetch(md);
       const text = await response.text();
-      pages[id] = marked(DOMPurify.sanitize(text));
+      pages[id] = marked(text);
       h3.redraw();
     })();
   }
   const menu = ids.map((p) => h3("a", { href: `#/${p}` }, labels[p]));
-  const content = pages[id]
+  let content = pages[id]
     ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
@@ -49,3 +49,4 @@ const Page = () => {
 };
 
 h3.init(Page);
+h3.on('$redraw', () => Prism.highlightAll());
