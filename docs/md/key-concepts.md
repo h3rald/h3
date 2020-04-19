@@ -1,6 +1,6 @@
 ## Key Concepts
 
-There are essentially four things you need to know about if you want to use H3. 
+There are just a few things you should know about if you want to use H3. 
 
 Oh... and a solid understanding of HTML and JavaScript wouldn't hurt either ;)
 
@@ -53,7 +53,7 @@ const CounterButton = () => {
 
 ### Store
 
-H3 essentially uses something very, *very* similar to [StoreOn](https://github.com/storeon/storeon) for state maagemennt *and* also as a very simple client-side message dispatcher/subscriber. Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to actions (messages).
+H3 essentially uses something very, *very* similar to [StoreOn](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side message dispatcher/subscriber (seriously, it is virtually the same code as StoreOn). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to actions (messages).
 
 The current application state is accessible via the `h3.state` property.
 

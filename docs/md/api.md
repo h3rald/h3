@@ -88,7 +88,7 @@ h3.navigateTo("/posts/", {orderBy: 'date', direction: 'desc'});
 
 ### h3.on(message: string, handler: function)
 
-Subscribes to the specified messages and executes the specified handler function whenever the message is dispatches. Returns a function that can be used to delete the subscription.
+Subscribes to the specified message and executes the specified handler function whenever the message is dispatches. Returns a function that can be used to delete the subscription.
 
 Subscriptions should be typically managed in modules rather than in components: a component gets rendered several times and subscriptions *must* be properly cleaned up to avoid memory leaks.
 
