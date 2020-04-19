@@ -1,6 +1,6 @@
 ## API
 
-The core of the H3 API is comprised of the following six methods and two properties (plus a bunch of system messages).
+The core of the H3 API is comprised of the following six methods and two properties.
 
 ### h3.equal(a: any, b: any)
 
@@ -62,7 +62,7 @@ The initialization method of every H3 application. You _must_ call this method o
     <td data-label="Description">An optional function to be executed after the application is first rendered.</td>
   </tr>
   </tbody>
-</table>                            |
+</table>
 
 Routing paths can contain named parts like `:name` or `:id` which will populate the `parts` property of the current route.
 
@@ -90,7 +90,7 @@ h3.navigateTo("/posts/", {orderBy: 'date', direction: 'desc'});
 
 Subscribes to the specified messages and executes the specified handler function whenever the message is dispatches. Returns a function that can be used to delete the subscription.
 
-Subscriptions should be typically managed in modules rather than in componnents: a component gets rendered several times and subscriptions *must* be properly cleaned up to avoid memory leaks.
+Subscriptions should be typically managed in modules rather than in components: a component gets rendered several times and subscriptions *must* be properly cleaned up to avoid memory leaks.
 
 Example:
 
