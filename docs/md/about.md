@@ -19,6 +19,7 @@ A few months after that interview, I decided to take a look at that code, tidy i
 ### Credits
 
 This site is built with H3 itself, in under [70 lines](https://github.com/h3rald/h3/blob/master/docs/js/app.js) of code, plus the following third-party libraries:
+
 * [marked.js](https://marked.js.org/#/README.md#README.md)
 * [DOMPurify](https://github.com/cure53/DOMPurify)
 * [mini.css](https://minicss.org/)
