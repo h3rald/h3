@@ -106,7 +106,10 @@ class VNode {
         this.children = [new VNode({ type: "#text", value: data })];
         return;
       }
-      if (typeof data !== "function" && (typeof data !== "object" || data === null)) {
+      if (
+        typeof data !== "function" &&
+        (typeof data !== "object" || data === null)
+      ) {
         console.log(data);
         throw new Error(
           "[VNode] The second argument of a VNode constructor must be an object, an array or a string."
@@ -608,8 +611,14 @@ const h3 = (...args) => {
 let store = null;
 let router = null;
 
-h3.init = ({ element, routes, modules, preStart, postStart }) => {
-  if (!(element instanceof Element)) {
+h3.init = (config) => {
+  let { element, routes, modules, preStart, postStart } = config;
+  if (!routes) {
+    // Assume config is a component object, define default route
+    routes = { "/": config };
+  }
+  element = element || document.body;
+  if (!(element && element instanceof Element)) {
     throw new Error("[h3.init] Invalid element specified.");
   }
   // Initialize store

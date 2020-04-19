@@ -11,32 +11,23 @@ const labels = {
   about: "About",
 };
 
-const pages = (store) => {
-  store.on("$init", () => ({ pages: {} }));
-  store.on("pages/set", (state, data) => ({
-    pages: { [data.id]: data.content, ...state.pages },
-  }));
-};
+const pages = {};
 
 const Page = () => {
   const id = h3.route.path.slice(1);
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
-  if (!h3.state.pages[id]) {
+  if (!pages[id]) {
     (async () => {
       const response = await fetch(md);
       const text = await response.text();
-      h3.dispatch("pages/set", {
-        id,
-        content: marked(DOMPurify.sanitize(text)),
-      });
+      pages[id] = marked(DOMPurify.sanitize(text));
       h3.redraw();
     })();
   }
   const menu = ids.map((p) => h3("a", { href: `#/${p}` }, labels[p]));
-  const html = h3.state.pages[id];
-  const content = html
-    ? h3("div.content", { $html: html })
+  const content = pages[id]
+    ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
     h3("header.row", [
@@ -57,10 +48,4 @@ const Page = () => {
   ]);
 };
 
-h3.init({
-  element: document.body,
-  modules: [pages],
-  routes: {
-    "/": Page,
-  },
-});
+h3.init(Page);
