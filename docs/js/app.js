@@ -30,7 +30,7 @@ const Page = () => {
     ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
-    h3("header.row", [
+    h3("header.row.sticky", [
       h3("a.logo.col-sm", { href: "#/" }, "H3"),
       h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
     ]),
@@ -49,4 +49,4 @@ const Page = () => {
 };
 
 h3.init(Page);
-h3.on('$redraw', () => Prism.highlightAll());
+h3.on("$redraw", () => Prism.highlightAll());

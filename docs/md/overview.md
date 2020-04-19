@@ -9,6 +9,9 @@ H3 is also:
 * **modern**, it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
 * **easy** to learn, its API is comprised of only 6 methods and 2 properties.
 
+### I'm sold, where can I get it?
+
+Get it from [here](https://raw.githubusercontent.com/h3rald/h3/master/h3.js) and include it in your application.
 
 ### Hello, World!
 

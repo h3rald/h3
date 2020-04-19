@@ -501,12 +501,11 @@ class Store {
 }
 
 class Route {
-  constructor({ path, def, query, parts, fallback }) {
+  constructor({ path, def, query, parts}) {
     this.path = path;
     this.def = def;
     this.query = query;
     this.parts = parts;
-    this.fallback = fallback;
     this.params = {};
     if (this.query) {
       const rawParams = this.query.split("&");
@@ -530,7 +529,6 @@ class Router {
       throw new Error("[Router] No routes defined.");
     }
     const defs = Object.keys(routes);
-    this.fallback = defs[defs.length - 1];
     this.routes = routes;
   }
 
@@ -571,15 +569,12 @@ class Router {
           index++;
         }
         if (match) {
-          let fallback = false;
-          this.route = new Route({ query, path, def, parts, fallback });
+          this.route = new Route({ query, path, def, parts });
           break;
         }
       }
       if (!this.route) {
-        let def = this.fallback;
-        let fallback = true;
-        this.route = new Route({ query, path, def, parts, fallback });
+        this.route = new Route({ query, path, def, parts });
       }
       // Display View
       while (this.element.firstChild) {

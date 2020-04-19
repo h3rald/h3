@@ -17,7 +17,8 @@ footer {
   margin: auto;
 }
 
-ul, ol {
+ul,
+ol {
   padding-left: 1.5em;
 }
 
@@ -27,8 +28,23 @@ pre[class*="language-"] {
   border: 1px solid #dedede;
 }
 
-pre code[class*="language-"], 
-pre code[class*="language-"] span.token  {
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+pre code[class*="language-"],
+pre code[class*="language-"] span.token {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
   font-size: 0.8rem;
+}
+
+@media screen and (min-width: 768px) {
+  #navigation {
+    position: sticky;
+    top: 60px;
+  }
+}
+
+.content {
+  margin-left: 40px;
+}
+
+h2, h3, h4, h5, h6 {
+  margin-left: -35px;
 }
