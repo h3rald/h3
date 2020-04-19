@@ -7223,7 +7223,12 @@ div .terminal {
 }
 </style>
   
-  
+  <style>
+.js::before {
+  content: none;
+}
+</style>
+
   
 </head>
 <body class="headings">
@@ -7233,13 +7238,25 @@ div .terminal {
     <div id="toc"><ul>
  <li>
  <ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Quick-Start">Quick Start</a></li>
+  <li><a href="#Overview">Overview</a>
+  <ul>
+   <li><a href="#I'm-sold,-where-can-I-get-it?">I'm sold, where can I get it?</a></li>
+   <li><a href="#Hello,-World!">Hello, World!</a></li>
+  </ul>
+  </li>
+  <li><a href="#Quick-Start">Quick Start</a>
+  <ul>
+   <li><a href="#Create-a-basic-HTML-file">Create a basic HTML file</a></li>
+   <li><a href="#Import-h3.js">Import h3.js</a></li>
+   <li><a href="#Create-your-SPA">Create your SPA</a></li>
+  </ul>
+  </li>
   <li><a href="#Key-Concepts">Key Concepts</a>
   <ul>
    <li><a href="#HyperScript">HyperScript</a></li>
-   <li><a href="#Functional-Components">Functional Components</a></li>
+   <li><a href="#Components">Components</a></li>
    <li><a href="#Store">Store</a></li>
+   <li><a href="#Modules">Modules</a></li>
    <li><a href="#Router">Router</a></li>
   </ul>
   </li>
@@ -7247,10 +7264,10 @@ div .terminal {
   <li><a href="#API">API</a>
   <ul>
    <li><a href="#h3.equal(a:-any,-b:-any)">h3.equal(a: any, b: any)</a></li>
-   <li><a href="#h3.dispatch(event:-string,-data:-any)">h3.dispatch(event: string, data: any)</a></li>
+   <li><a href="#h3.dispatch(message:-string,-data:-any)">h3.dispatch(message: string, data: any)</a></li>
    <li><a href="#h3.init(config:-object))">h3.init(config: object))</a></li>
    <li><a href="#h3.navigateTo(path:-string,-params:-object)">h3.navigateTo(path: string, params: object)</a></li>
-   <li><a href="#h3.on(event:-string,-cb:-function)">h3.on(event: string, cb: function)</a></li>
+   <li><a href="#h3.on(message:-string,-handler:-function)">h3.on(message: string, handler: function)</a></li>
    <li><a href="#h3.redraw()">h3.redraw()</a></li>
    <li><a href="#h3.route">h3.route</a></li>
    <li><a href="#h3.state">h3.state</a></li>
@@ -7261,30 +7278,179 @@ div .terminal {
 </ul>
 </div>
     <div id="main">
+
+
+
+
 <a name="Overview"></a>
 <h2>Overview<a href="#document-top" title="Go to top"></a></h2>
 
 <p><strong>H3</strong> is a microframework to build client-side web applications in modern JavaScript.</p>
 
-<p>This site is under construction, but you can already peek at the <a href="https://github.com/h3rald/h3/blob/master/h3.js">source code</a>.</p>
+<p>H3 is also:</p>
+
+<ul>
+<li><strong>tiny</strong>, under <a href="https://github.com/h3rald/h3/blob/master/h3.js">700 sloc</a>.</li>
+<li><strong>bare-bones</strong>, it contains just the bare minimum to create a fully-functional single-page application.</li>
+<li><strong>modern</strong>, it runs only in modern browsers (latest versions of Chrome, Firefox, Edge &amp; similar).</li>
+<li><strong>easy</strong> to learn, its API is comprised of only 6 methods and 2 properties.</li>
+</ul>
+
+
+<a name="I'm-sold,-where-can-I-get-it?"></a>
+<h3>I&rsquo;m sold, where can I get it?<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Get it from <a href="https://raw.githubusercontent.com/h3rald/h3/master/h3.js">here</a> and copy it into your application folder.</p>
+
+<a name="Hello,-World!"></a>
+<h3>Hello, World!<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Here&rsquo;s an example of an extremely minimal SPA created with H3:</p>
+
+<pre><code class="js">import h3 from "./h3.js";
+h3.init(() =&gt; h3("h1", "Hello, World!"));
+</code></pre>
+
+<p>This will render a <code>h1</code> tag within the document body, containing the text <code>"Hello, World!"</code>.</p>
 
 <a name="Quick-Start"></a>
 <h2>Quick Start<a href="#document-top" title="Go to top"></a></h2>
 
+<p>Getting up and running with H3 is simple enough, and you don&rsquo;t even need any special tool to build or transpile your application (unless you really, <em>really</em> require IE11 support).</p>
+
+<a name="Create-a-basic-HTML-file"></a>
+<h3>Create a basic HTML file<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Start with a minimal HTML file like this one, and include an <code>app.js</code> script. That will be the entry point of your application:</p>
+
+<pre><code class="html">&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;title&gt;H3&lt;/title&gt;
+    &lt;meta name="description" content="My little H3-powered app" /&gt;
+    &lt;meta name="author" content="Fabio Cevasco" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script src="js/app.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<a name="Import-h3.js"></a>
+<h3>Import h3.js<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Then, inside your <code>app.js</code> file, import <code>h3.js</code>, which should be accessible somewhere in your app:</p>
+
+<pre><code class="js">import h3 from "./h3.js";
+</code></pre>
+
+<p>This will work in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules">every modern browser except Internet Explorer</a>. You don&rsquo;t need a transpiler, you don&rsquo;t need something to convert your beautiful ES6 code back to cluncky ES5.</p>
+
+<p>Unless your company tells you to, do yourself a favor and don&rsquo;t support IE. It&rsquo;s 2020, even <a href="https://www.theverge.com/2020/1/15/21066767/microsoft-edge-chromium-new-browser-windows-mac-download-os">Microsoft moved on</a>, and now ES6 modules work in all major browsers.</p>
+
+<a name="Create-your-SPA"></a>
+<h3>Create your SPA<a href="#document-top" title="Go to top"></a></h3>
+
+<p>After importing the <code>h3</code> object, you can start developing your SPA. A bare minimum SPA is comprised by a single component passed to the <code>h3.init()</code> method:</p>
+
+<pre><code class="js">// A simple component printing the current date and time
+// Pressig the Refresh button causes the applicationn to redraw
+// And updates the displayed date/dime.
+const Page = () =&gt; {
+  return h3("main", [
+    h3("h1", "Welcome!"),
+    h3("p", `The current date and time is ${new Date()}`),
+    h3("button", {
+      onclick: () =&gt; h3.redraw()
+    }, "Refresh")
+  ]);
+}
+// Initialize your SPA
+h3.init(Page);
+</code></pre>
+
 <a name="Key-Concepts"></a>
 <h2>Key Concepts<a href="#document-top" title="Go to top"></a></h2>
+
+<p>There are essentially four things you need to know about if you want to use H3.</p>
+
+<p>Oh&hellip; and a solid understanding of HTML and JavaScript wouldn&rsquo;t hurt either ;)</p>
 
 <a name="HyperScript"></a>
 <h3>HyperScript<a href="#document-top" title="Go to top"></a></h3>
 
-<a name="Functional-Components"></a>
-<h3>Functional Components<a href="#document-top" title="Go to top"></a></h3>
+<p>H3 uses a <a href="https://openbase.io/js/hyperscript">HyperScript</a>-like syntax to create HTML elements in pure JavaScript. No, you are actually creating Virtual DOM nodes with it but it can be easier to think about them as HTML elements, or better, something that <em>eventually</em> will be rendered as an HTML element.</p>
+
+<p>The main difference between H3&rsquo;s HyperScript implementation and others is that it uses <strong>h3</strong> as the main constructor to create nodes. HyperScript uses <strong>h</strong>, Mithril uses <strong>m</strong>, &hellip;kind of an obvious choice if you ask me. If you don&rsquo;t like it, you can rename it to <em>piripicchio</em> if you want, and it will <em>still</em> be used in the same way.</p>
+
+<p>How, you ask? Like this:</p>
+
+<pre><code class="js">h3("div.test", [
+  h3("ul", [
+    h3("li", "This is..."),
+    h3("li", "...a simple..."),
+    h3("li", "unordered list.")
+  ])
+]);
+</code></pre>
+
+<p>&hellip;which will output:</p>
+
+<pre><code class="html">&lt;div class="test"&gt;
+  &lt;ul&gt;
+    &lt;li&gt;This is...&lt;/li&gt;
+    &lt;li&gt;...a simple...&lt;/li&gt;
+    &lt;li&gt;...unordered list.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>Simple enough. Yes there are some quirks to it, but check the API or Usage docs for those.</p>
+
+<a name="Components"></a>
+<h3>Components<a href="#document-top" title="Go to top"></a></h3>
+
+<p>In H3, a component is a function that returns a Virtual Node or a string (that will be treated as a textual DOM node).</p>
+
+<p>Yes that&rsquo;s it. An example? here:</p>
+
+<pre><code class="js">let count = 0;
+const CounterButton = () =&gt; {
+  return h3("button", {
+    onclick: () =&gt; count +=1 &amp;&amp; h3.redraw()
+  }, `You clicked me ${count} times.`);
+}
+</code></pre>
 
 <a name="Store"></a>
 <h3>Store<a href="#document-top" title="Go to top"></a></h3>
 
+<p>H3 essentially uses something very, <em>very</em> similar to <a href="https://github.com/storeon/storeon">StoreOn</a> for state maagemennt <em>and</em> also as a very simple client-side message dispatcher/subscriber. Typically you&rsquo;ll only use the default store created by H3 upon initialization, and you&rsquo;ll use the <code>h3.dispatch()</code> and <code>h3.on()</code> methods to dispatch and subscribe to actions (messages).</p>
+
+<p>The current application state is accessible via the <code>h3.state</code> property.</p>
+
+<a name="Modules"></a>
+<h3>Modules<a href="#document-top" title="Go to top"></a></h3>
+
+<p>The <code>h3.init()</code> method takes an array of <em>modules</em> that can be used to manipulate the application state when specific messages are received. A simple module looks like this:</p>
+
+<pre><code class="js">const error = (store) =&gt; {
+  store.on("$init", () =&gt; ({ displayEmptyTodoError: false }));
+  store.on("error/clear", (state) =&gt; ({ displayEmptyTodoError: false }));
+  store.on("error/set", (state) =&gt; ({ displayEmptyTodoError: true }));
+};
+</code></pre>
+
+<p>Essentially a module is a function that receives a reference to the H3 store as a parameter. Modules are the place where you should handle state changes in your application.</p>
+
 <a name="Router"></a>
 <h3>Router<a href="#document-top" title="Go to top"></a></h3>
+
+<p>H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary HREF links or the <code>h3.navigateTo</code> method.</p>
+
+<p>The current route is accessible via the <code>h3.route</code> property.</p>
 
 <a name="Usage"></a>
 <h2>Usage<a href="#document-top" title="Go to top"></a></h2>
@@ -7292,34 +7458,140 @@ div .terminal {
 <a name="API"></a>
 <h2>API<a href="#document-top" title="Go to top"></a></h2>
 
+<p>The core of the H3 API is comprised of the following six methods and two properties.</p>
+
 <a name="h3.equal(a:-any,-b:-any)"></a>
 <h3>h3.equal(a: any, b: any)<a href="#document-top" title="Go to top"></a></h3>
 
-<a name="h3.dispatch(event:-string,-data:-any)"></a>
-<h3>h3.dispatch(event: string, data: any)<a href="#document-top" title="Go to top"></a></h3>
+<p>A way to determine if two object or literals are equal. This method is mainly used internally by the Virtual DOM diffing algorithm.</p>
+
+<p>Note that two functions are considered <em>equal</em> if their source code is exactly the same. This may not be ideal in certain situations, but when it comes to diffing two nodes that may be generated dynamically through iteration it generally makes sense to behave in this way.</p>
+
+<a name="h3.dispatch(message:-string,-data:-any)"></a>
+<h3>h3.dispatch(message: string, data: any)<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Dispatches a message and optionally some data. Messages are typically handled centrally by modules.</p>
+
+<pre><code class="js">h3.dispatch("settings/set", { logging: true });
+</code></pre>
+
+<p>A message name can be anything, but keep in mind that the following names (and typically any name starting with <code>$</code>) are reserved for framework use:</p>
+
+<ul>
+<li><code>$init</code> &mdash; Dispatched when the application is initialized. Useful to initialize application state.</li>
+<li><code>$redraw</code> &mdash; Dispatched after an application redraw is triggered.</li>
+<li><code>$navigation</code> &mdash; Dispatched after a navigation occurs.</li>
+<li><code>$log</code> &mdash; Dispatched after <em>any</em> message (except <code>$log</code> iself) is dispatched. Very useful for debugging.</li>
+</ul>
+
 
 <a name="h3.init(config:-object))"></a>
 <h3>h3.init(config: object))<a href="#document-top" title="Go to top"></a></h3>
 
+<p>The initialization method of every H3 application. You <em>must</em> call this method once to initialize your application by providing a component to render or configuration object with the following properties:</p>
+
+<table>
+<thead>
+  <tr>
+    <th>Property</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td data-label="Property">element</td>
+    <td data-label="Type">Element</td>
+    <td data-label="Description">The DOM Element to which the Application will be attached (default: document.body).</td>
+  </tr>
+  <tr>
+    <td data-label="Property">routes</td>
+    <td data-label="Type">Object</td>
+    <td data-label="Description">An object containing paths as key and components as values, corresponding to the routes of the application.</td>
+  </tr>
+  <tr>
+    <td data-label="Property">modules</td>
+    <td data-label="Type">Array</td>
+    <td data-label="Description">An array of functions used to handle the application state.</td>
+  </tr>
+  <tr>
+    <td data-label="Property">preStart</td>
+    <td data-label="Type">Function</td>
+    <td data-label="Description">An optional function to be executed before the application is first rendered.</td>
+  </tr>
+  <tr>
+    <td data-label="Property">postStart</td>
+    <td data-label="Type">Function</td>
+    <td data-label="Description">An optional function to be executed after the application is first rendered.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<p>Routing paths can contain named parts like <code>:name</code> or <code>:id</code> which will populate the <code>parts</code> property of the current route.</p>
+
+<p>This is an example of a possible routing configuration:</p>
+
+<pre><code class="js">const routes = {
+  "/posts/:id": Post,
+  "/pages/:id": Page,
+  "/": HomePage,
+};
+</code></pre>
+
 <a name="h3.navigateTo(path:-string,-params:-object)"></a>
 <h3>h3.navigateTo(path: string, params: object)<a href="#document-top" title="Go to top"></a></h3>
 
-<a name="h3.on(event:-string,-cb:-function)"></a>
-<h3>h3.on(event: string, cb: function)<a href="#document-top" title="Go to top"></a></h3>
+<p>Navigates to the specified path. Optionally, it is possibile to specify query string parameters as an object.</p>
+
+<p>The following call causes the application to switch to the following URL: <code>#/posts/?orderBy=date&amp;direction=desc</code>.</p>
+
+<pre><code class="js">h3.navigateTo("/posts/", {orderBy: 'date', direction: 'desc'});
+</code></pre>
+
+<a name="h3.on(message:-string,-handler:-function)"></a>
+<h3>h3.on(message: string, handler: function)<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Subscribes to the specified messages and executes the specified handler function whenever the message is dispatches. Returns a function that can be used to delete the subscription.</p>
+
+<p>Subscriptions should be typically managed in modules rather than in components: a component gets rendered several times and subscriptions <em>must</em> be properly cleaned up to avoid memory leaks.</p>
+
+<p>Example:</p>
+
+<pre><code class="js">const pages = (store) =&gt; {
+  store.on("$init", () =&gt; ({ pagesize: 10, page: 1 }));
+  store.on("pages/set", (state, page) =&gt; ({ page }));
+};
+</code></pre>
 
 <a name="h3.redraw()"></a>
 <h3>h3.redraw()<a href="#document-top" title="Go to top"></a></h3>
 
+<p>Triggers an application redraw. Unlike most frameworks, in H3 redraws <em>must</em> be triggered explicitly. Just call this method whenever you want something to change and components to re-render.</p>
+
 <a name="h3.route"></a>
 <h3>h3.route<a href="#document-top" title="Go to top"></a></h3>
+
+<p>An object containing the current route. A Route object has the following properties:</p>
+
+<ul>
+<li><code>path</code> &mdash; The current path (fragment without #) without query string parameters, e.g. <code>/posts/134</code></li>
+<li><code>def</code> &mdash; The matching route definition, e.g. <code>/posts/:id</code></li>
+<li><code>query</code> &mdash; The query string, if present, e.g. <code>?comments=yes</code></li>
+<li><code>parts</code> &mdash; An object containing the values of the parts defined in the route, e.g. <code>{id: "134"}</code></li>
+<li><code>params</code> &mdash; An object containing the query string parameters, e.g. <code>{comments: "yet"}</code></li>
+</ul>
+
 
 <a name="h3.state"></a>
 <h3>h3.state<a href="#document-top" title="Go to top"></a></h3>
 
+<p>An object containing the current application state. Do not modify this directly, use subscriptions in modules to modify it.</p>
+
 <p>&hellip;</p>
     </div>
     <div id="footer">
-      <p><span class="copy"></span> Fabio Cevasco &ndash; April 18, 2020</p>
+      <p><span class="copy"></span> Fabio Cevasco &ndash; April 19, 2020</p>
       <p><span>Powered by</span> <a href="https://h3rald.com/hastyscribe"><span class="hastyscribe"></span></a></p>
     </div>
   </div>

@@ -46,10 +46,7 @@ Yes that's it. An example? here:
 let count = 0;
 const CounterButton = () => {
   return h3("button", {
-    onclick: () => {
-      count +=1;
-      h3.redraw();
-    }
+    onclick: () => count +=1 && h3.redraw()
   }, `You clicked me ${count} times.`);
 }
 ```

@@ -2,6 +2,12 @@
 % Fabio Cevasco
 % -
 
+<style>
+.js::before {
+  content: none;
+}
+</style>
+
 {@ md/overview.md || 0 @}
 
 {@ md/quick-start.md || 0 @}

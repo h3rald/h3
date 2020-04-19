@@ -42,9 +42,9 @@ pre code[class*="language-"] span.token {
 }
 
 .content {
-  margin-left: 40px;
+  margin-left: 30px;
 }
 
 h2, h3, h4, h5, h6 {
-  margin-left: -35px;
+  margin-left: -30px;
 }
