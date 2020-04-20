@@ -13,19 +13,21 @@ const labels = {
 
 const pages = {};
 
+const fetchPage = async (pages, id, md) => {
+  if (!pages[id]) {
+    const response = await fetch(md);
+    const text = await response.text();
+    pages[id] = marked(text);
+    h3.redraw();
+  }
+};
+
 const Page = () => {
   const id = h3.route.path.slice(1);
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
-  if (!pages[id]) {
-    (async () => {
-      const response = await fetch(md);
-      const text = await response.text();
-      pages[id] = marked(text);
-      h3.redraw();
-    })();
-  }
-  const menu = ids.map((p) => h3("a", { href: `#/${p}` }, labels[p]));
+  fetchPage(pages, id, md);
+  const menu = ids.map((p) => h3(`a${p === id ? '.active' : ''}`, { href: `#/${p}` }, labels[p]));
   let content = pages[id]
     ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
@@ -43,7 +45,20 @@ const Page = () => {
       h3("main.col-sm-12.col-md-9", [
         h3("div.card.fluid", h3("div.section", content)),
       ]),
-      h3("footer", h3("div", "© 2020 Fabio Cevasco")),
+      h3(
+        "footer",
+        h3("div", [
+          "© 2020 Fabio Cevasco · ",
+          h3(
+            "a",
+            {
+              href: "https://h3.js.org/H3_DeveloperGuide.htm",
+              target: "_blank",
+            },
+            "Download the Guide"
+          ),
+        ])
+      ),
     ]),
   ]);
 };

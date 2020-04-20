@@ -17,10 +17,12 @@ Start with a minimal HTML file like this one, and include an `app.js` script. Th
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
 ```
+
+Note that the script must be marked as an ES6 module (`type=module`), otherwise your imports won't work.
 
 ### Import h3.js
 

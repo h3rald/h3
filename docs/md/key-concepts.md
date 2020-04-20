@@ -62,14 +62,14 @@ The current application state is accessible via the `h3.state` property.
 The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific messages are received. A simple module looks like this:
 
 ```js
-const error = (store) => {
-  store.on("$init", () => ({ displayEmptyTodoError: false }));
-  store.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
-  store.on("error/set", (state) => ({ displayEmptyTodoError: true }));
+const error = () => {
+  h3.on("$init", () => ({ displayEmptyTodoError: false }));
+  h3.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
+  h3.on("error/set", (state) => ({ displayEmptyTodoError: true }));
 };
 ```
 
-Essentially a module is a function that receives a reference to the H3 store as a parameter. Modules are the place where you should handle state changes in your application.
+Essentially a module is just a function that typically is meant to run only once to define one or more message subscriptions. Modules are the place where you should handle state changes in your application.
 
 ### Router
 

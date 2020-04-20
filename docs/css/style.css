@@ -12,6 +12,10 @@ footer {
   padding-top: 60px;
 }
 
+#navigation a.active {
+  background: #dedede;
+}
+
 .spinner-container {
   text-align: center;
   margin: auto;
@@ -32,6 +36,10 @@ pre code[class*="language-"],
 pre code[class*="language-"] span.token {
   font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
   font-size: 0.8rem;
+}
+
+pre code {
+  padding: 0;
 }
 
 @media screen and (min-width: 768px) {

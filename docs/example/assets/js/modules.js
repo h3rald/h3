@@ -1,10 +1,12 @@
-const app = (store) => {
-  store.on("app/load", () => {
+import h3 from "./h3.js";
+
+const app = () => {
+  h3.on("app/load", () => {
     const storedData = localStorage.getItem("h3_todo_list");
     const { todos, settings } = storedData ? JSON.parse(storedData) : {todos: [], settings: {}};
     return { todos, settings };
   });
-  store.on("app/save", (state, data) => {
+  h3.on("app/save", (state, data) => {
     localStorage.setItem(
       "h3_todo_list",
       JSON.stringify({ todos: state.todos, settings: state.settings })
@@ -12,12 +14,12 @@ const app = (store) => {
   });
 };
 
-const settings = (store) => {
+const settings = () => {
   let removeSubscription;
-  store.on("$init", () => ({ settings: {} }));
-  store.on("settings/set", (state, data) => {
+  h3.on("$init", () => ({ settings: {} }));
+  h3.on("settings/set", (state, data) => {
     if (data.logging) {
-      removeSubscription = store.on("$log", (state, data) => console.log(data));
+      removeSubscription = h3.on("$log", (state, data) => console.log(data));
     } else {
       removeSubscription && removeSubscription();
     }
@@ -25,9 +27,9 @@ const settings = (store) => {
   });
 };
 
-const todos = (store) => {
-  store.on("$init", () => ({ todos: [], filteredTodos: [], filter: "" }));
-  store.on("todos/add", (state, data) => {
+const todos = () => {
+  h3.on("$init", () => ({ todos: [], filteredTodos: [], filter: "" }));
+  h3.on("todos/add", (state, data) => {
     let todos = state.todos;
     todos.unshift({
       key: data.key,
@@ -35,32 +37,32 @@ const todos = (store) => {
     });
     return { todos };
   });
-  store.on("todos/remove", (state, data) => {
+  h3.on("todos/remove", (state, data) => {
     const todos = state.todos.filter(({ key }) => key !== data.key);
     return { todos };
   });
-  store.on("todos/toggle", (state, data) => {
+  h3.on("todos/toggle", (state, data) => {
     const todos = state.todos;
     const todo = state.todos.find((t) => t.key === data.key);
     todo.done = !todo.done;
     return { todos };
   });
-  store.on("todos/filter", (state, filter) => {
+  h3.on("todos/filter", (state, filter) => {
     const todos = state.todos;
     const filteredTodos = todos.filter(({ text }) => text.match(filter));
     return { filteredTodos, filter };
   });
 };
 
-const error = (store) => {
-  store.on("$init", () => ({ displayEmptyTodoError: false }));
-  store.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
-  store.on("error/set", (state) => ({ displayEmptyTodoError: true }));
+const error = () => {
+  h3.on("$init", () => ({ displayEmptyTodoError: false }));
+  h3.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
+  h3.on("error/set", (state) => ({ displayEmptyTodoError: true }));
 };
 
-const pages = (store) => {
-  store.on("$init", () => ({ pagesize: 10, page: 1 }));
-  store.on("pages/set", (state, page) => ({ page }));
+const pages = () => {
+  h3.on("$init", () => ({ pagesize: 10, page: 1 }));
+  h3.on("pages/set", (state, page) => ({ page }));
 };
 
 export default [app, todos, error, pages, settings];

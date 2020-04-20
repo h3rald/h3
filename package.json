@@ -11,7 +11,7 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "copy": "cp h3.js docs/js/h3.js && cp h3.js docs/example/assets/js/h3.js",
-    "guide": "hastyscribe docs/H3_DeveloperGuide.md"
+    "guide": "hastyscribe H3_DeveloperGuide.md --output-file=docs/H3_DeveloperGuide.htm"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,117 @@
 ## API
 
-The core of the H3 API is comprised of the following six methods and two properties.
+The core of the H3 API is comprised of the following seven methods and two properties.
+
+
+### h3(selector: string, attributes: object, children: array)
+
+The `h3` object is also used as a constructor for Virtual DOM Nodes (VNodes). It can actually take from one to three arguments used to configure the resulting node.
+
+The best way to understand how it works is by providing a few different examples. Please note that in each example the corresponding *HTML* markup is provided, although such markup will actually be generated when the Virtual Node is rendered/redrawn.
+
+#### Create an element, with an ID, classes, attributes and children
+
+This is a complete example showing how to create a link with an `href` attribute, an ID, two classes, and three child nodes.
+
+```js
+h3("a#test-link.btn.primary", {
+  href: "#/test"
+}, ["This is a ", h3("em", "test"), "link."]);
+```
+
+🡇
+
+```html
+<a id="test-link" class="primary" href="#/test">
+  This is a <em>test</em> link.
+</a>
+```
+
+#### Create an empty element
+
+```js
+h3("div");
+```
+
+🡇
+
+```html
+<div></div>
+```
+
+#### Create an element with a textual child node
+
+```js
+h3("span", "This is a test");
+```
+
+🡇
+
+```html
+<span>This is a test</span>
+```
+
+#### Create an element with child nodes
+
+```js
+h3("ol", [
+  h3("li", "Do this first."),
+  h3("li", "Then this."),
+  h3("li", "And finally this.")
+]);
+```
+
+🡇
+
+```html
+<ol>
+  <li>Do this first.</li>
+  <li>Then this.</li>
+  <li>And finally this.</li>
+</ol>
+```
+
+#### Render a component
+
+```js
+const TestComponent = () => {
+  return h3("button.test", {
+      onclick: () => alert("Hello!")
+    }, "Show Alert");
+};
+h3(TestComponent);
+```
+
+🡇
+
+```html
+<button class="test">Show Alert</button>
+```
+
+Note: The event listener will not be added to the markup.
+
+#### Render child components
+
+```js
+const TestLi = (text) => h3("li.test", text);
+h3("ul", ["A", "B", "C"].map(TestLi));
+```
+
+🡇
+
+```html
+<ul>
+  <li class="test">A</li>
+  <li class="test">B</li>
+  <li class="test">C</li>
+</ul>
+```
+
+#### Special attributes
+
+* Any attribute starting with *on* (e.g. onclick, onkeydown, etc.) will be treated as an event listener.
+* The special `$key` attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.
+* The special `$html` attribute can be used to set the `innerHTML` property of the resulting HTML element. Use only if you know what you are doing!
 
 ### h3.equal(a: any, b: any)
 
