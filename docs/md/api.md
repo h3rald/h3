@@ -19,7 +19,7 @@ h3("a#test-link.btn.primary", {
 }, ["This is a ", h3("em", "test"), "link."]);
 ```
 
-🡇
+↓
 
 ```html
 <a id="test-link" class="btn primary" href="#/test">
@@ -33,7 +33,7 @@ h3("a#test-link.btn.primary", {
 h3("div");
 ```
 
-🡇
+↓
 
 ```html
 <div></div>
@@ -45,7 +45,7 @@ h3("div");
 h3("span", "This is a test");
 ```
 
-🡇
+↓
 
 ```html
 <span>This is a test</span>
@@ -61,7 +61,7 @@ h3("ol", [
 ]);
 ```
 
-🡇
+↓
 
 ```html
 <ol>
@@ -82,7 +82,7 @@ const TestComponent = () => {
 h3(TestComponent);
 ```
 
-🡇
+↓
 
 ```html
 <button class="test">Show Alert</button>
@@ -97,7 +97,7 @@ const TestLi = (text) => h3("li.test", text);
 h3("ul", ["A", "B", "C"].map(TestLi));
 ```
 
-🡇
+↓
 
 ```html
 <ul>
