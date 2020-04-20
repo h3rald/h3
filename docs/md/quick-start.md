@@ -10,10 +10,8 @@ Start with a minimal HTML file like this one, and include an `app.js` script. Th
 <!doctype html>
 <html lang="en">
   <head>
+    <title>My H3-powered App</title>
     <meta charset="utf-8" />
-    <title>H3</title>
-    <meta name="description" content="My little H3-powered app" />
-    <meta name="author" content="Fabio Cevasco" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
@@ -22,7 +20,7 @@ Start with a minimal HTML file like this one, and include an `app.js` script. Th
 </html>
 ```
 
-Note that the script must be marked as an ES6 module (`type=module`), otherwise your imports won't work.
+Note that the script must be marked as an ES6 module (`type="module"`), otherwise your imports won't work.
 
 ### Import h3.js
 

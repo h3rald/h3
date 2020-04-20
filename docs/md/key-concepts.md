@@ -73,6 +73,6 @@ Essentially a module is just a function that typically is meant to run only once
 
 ### Router
 
-H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary HREF links or the `h3.navigateTo` method.
+H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary `href` links or programmatically using the `h3.navigateTo` method.
 
-The current route is accessible via the `h3.route` property.
+The current route is always accessible via the `h3.route` property.

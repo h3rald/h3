@@ -22,7 +22,7 @@ h3("a#test-link.btn.primary", {
 🡇
 
 ```html
-<a id="test-link" class="primary" href="#/test">
+<a id="test-link" class="btn primary" href="#/test">
   This is a <em>test</em> link.
 </a>
 ```
@@ -138,46 +138,13 @@ A message name can be anything, but keep in mind that the following names (and t
 
 The initialization method of every H3 application. You _must_ call this method once to initialize your application by providing a component to render or configuration object with the following properties:
 
-<table>
-<thead>
-  <tr>
-    <th>Property</th>
-    <th>Type</th>
-    <th>Description</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td data-label="Property">element</td>
-    <td data-label="Type">Element</td>
-    <td data-label="Description">The DOM Element to which the Application will be attached (default: document.body).</td>
-  </tr>
-  <tr>
-    <td data-label="Property">routes</td>
-    <td data-label="Type">Object</td>
-    <td data-label="Description">An object containing paths as key and components as values, corresponding to the routes of the application.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">modules</td>
-    <td data-label="Type">Array</td>
-    <td data-label="Description">An array of functions used to handle the application state.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">preStart</td>
-    <td data-label="Type">Function</td>
-    <td data-label="Description">An optional function to be executed before the application is first rendered.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">postStart</td>
-    <td data-label="Type">Function</td>
-    <td data-label="Description">An optional function to be executed after the application is first rendered.</td>
-  </tr>
-  </tbody>
-</table>
+* **element** (Element) &mdash; The DOM Element to which the Application will be attached (default: `document.body`). 
+* **modules** (Array) &mdash; An array of functions used to handle the application state that will be executed once before starting the application.
+* **routes** (Object) &mdash; An object containing routing definitions, using paths as keys and components as values. Routing paths can contain named parts like `:name` or `:id` which will populate the `parts` property of the current route (`h3.route`).
+* **preStart** (Function) &mdash; An optional function to be executed before the application is first rendered.
+* **postStart** (Function) &mdash; An optional function to be executed after the application is first rendered.
 
-Routing paths can contain named parts like `:name` or `:id` which will populate the `parts` property of the current route.
-
-This is an example of a possible routing configuration:
+This is an example of a simple routing configuration:
 
 ```js
 const routes = {
@@ -186,6 +153,8 @@ const routes = {
   "/": HomePage,
 };
 ```
+
+For more a complete example of initialization, see [this](https://h3.js.org/example/assets/js/app.js).
 
 ### h3.navigateTo(path: string, params: object)
 
@@ -220,11 +189,11 @@ Triggers an application redraw. Unlike most frameworks, in H3 redraws *must* be 
 
 An object containing the current route. A Route object has the following properties:
 
-* `path` &mdash; The current path (fragment without #) without query string parameters, e.g. `/posts/134`
-* `def` &mdash; The matching route definition, e.g. `/posts/:id`
-* `query` &mdash; The query string, if present, e.g. `?comments=yes`
-* `parts` &mdash; An object containing the values of the parts defined in the route, e.g. `{id: "134"}`
-* `params` &mdash; An object containing the query string parameters, e.g. `{comments: "yet"}`
+* **path** &mdash; The current path (fragment without #) without query string parameters, e.g. `/posts/134`
+* **def** &mdash; The matching route definition, e.g. `/posts/:id`
+* **query** &mdash; The query string, if present, e.g. `?comments=yes`
+* **part**` &mdash; An object containing the values of the parts defined in the route, e.g. `{id: "134"}`
+* **params** &mdash; An object containing the query string parameters, e.g. `{comments: "yet"}`
 
 ### h3.state
 

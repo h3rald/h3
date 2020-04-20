@@ -7358,10 +7358,8 @@ h3.init(() =&gt; h3("h1", "Hello, World!"));
 <pre><code class="html">&lt;!doctype html&gt;
 &lt;html lang="en"&gt;
   &lt;head&gt;
+    &lt;title&gt;My H3-powered App&lt;/title&gt;
     &lt;meta charset="utf-8" /&gt;
-    &lt;title&gt;H3&lt;/title&gt;
-    &lt;meta name="description" content="My little H3-powered app" /&gt;
-    &lt;meta name="author" content="Fabio Cevasco" /&gt;
     &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
   &lt;/head&gt;
   &lt;body&gt;
@@ -7370,7 +7368,7 @@ h3.init(() =&gt; h3("h1", "Hello, World!"));
 &lt;/html&gt;
 </code></pre>
 
-<p>Note that the script must be marked as an ES6 module (<code>type=module</code>), otherwise your imports won&rsquo;t work.</p>
+<p>Note that the script must be marked as an ES6 module (<code>type="module"</code>), otherwise your imports won&rsquo;t work.</p>
 
 <a name="Import-h3.js"></a>
 <h3>Import h3.js<a href="#document-top" title="Go to top"></a></h3>
@@ -7482,9 +7480,9 @@ const CounterButton = () =&gt; {
 <a name="Router"></a>
 <h3>Router<a href="#document-top" title="Go to top"></a></h3>
 
-<p>H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary HREF links or the <code>h3.navigateTo</code> method.</p>
+<p>H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary <code>href</code> links or programmatically using the <code>h3.navigateTo</code> method.</p>
 
-<p>The current route is accessible via the <code>h3.route</code> property.</p>
+<p>The current route is always accessible via the <code>h3.route</code> property.</p>
 
 <a name="Usage"></a>
 <h2>Usage<a href="#document-top" title="Go to top"></a></h2>
@@ -7697,7 +7695,7 @@ const fetchPage = async (pages, id, md) =&gt; {
 
 <p>🡇</p>
 
-<pre><code class="html">&lt;a id="test-link" class="primary" href="#/test"&gt;
+<pre><code class="html">&lt;a id="test-link" class="btn primary" href="#/test"&gt;
   This is a &lt;em&gt;test&lt;/em&gt; link.
 &lt;/a&gt;
 </code></pre>
@@ -7817,47 +7815,16 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
 <p>The initialization method of every H3 application. You <em>must</em> call this method once to initialize your application by providing a component to render or configuration object with the following properties:</p>
 
-<table>
-<thead>
-  <tr>
-    <th>Property</th>
-    <th>Type</th>
-    <th>Description</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td data-label="Property">element</td>
-    <td data-label="Type">Element</td>
-    <td data-label="Description">The DOM Element to which the Application will be attached (default: document.body).</td>
-  </tr>
-  <tr>
-    <td data-label="Property">routes</td>
-    <td data-label="Type">Object</td>
-    <td data-label="Description">An object containing paths as key and components as values, corresponding to the routes of the application.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">modules</td>
-    <td data-label="Type">Array</td>
-    <td data-label="Description">An array of functions used to handle the application state.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">preStart</td>
-    <td data-label="Type">Function</td>
-    <td data-label="Description">An optional function to be executed before the application is first rendered.</td>
-  </tr>
-  <tr>
-    <td data-label="Property">postStart</td>
-    <td data-label="Type">Function</td>
-    <td data-label="Description">An optional function to be executed after the application is first rendered.</td>
-  </tr>
-  </tbody>
-</table>
+<ul>
+<li><strong>element</strong> (Element) &mdash; The DOM Element to which the Application will be attached (default: <code>document.body</code>).</li>
+<li><strong>modules</strong> (Array) &mdash; An array of functions used to handle the application state that will be executed once before starting the application.</li>
+<li><strong>routes</strong> (Object) &mdash; An object containing routing definitions, using paths as keys and components as values. Routing paths can contain named parts like <code>:name</code> or <code>:id</code> which will populate the <code>parts</code> property of the current route (<code>h3.route</code>).</li>
+<li><strong>preStart</strong> (Function) &mdash; An optional function to be executed before the application is first rendered.</li>
+<li><strong>postStart</strong> (Function) &mdash; An optional function to be executed after the application is first rendered.</li>
+</ul>
 
 
-<p>Routing paths can contain named parts like <code>:name</code> or <code>:id</code> which will populate the <code>parts</code> property of the current route.</p>
-
-<p>This is an example of a possible routing configuration:</p>
+<p>This is an example of a simple routing configuration:</p>
 
 <pre><code class="js">const routes = {
   "/posts/:id": Post,
@@ -7865,6 +7832,8 @@ h3("ul", ["A", "B", "C"].map(TestLi));
   "/": HomePage,
 };
 </code></pre>
+
+<p>For more a complete example of initialization, see <a href="https://h3.js.org/example/assets/js/app.js">this</a>.</p>
 
 <a name="h3.navigateTo(path:-string,-params:-object)"></a>
 <h3>h3.navigateTo(path: string, params: object)<a href="#document-top" title="Go to top"></a></h3>
@@ -7902,11 +7871,11 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 <p>An object containing the current route. A Route object has the following properties:</p>
 
 <ul>
-<li><code>path</code> &mdash; The current path (fragment without #) without query string parameters, e.g. <code>/posts/134</code></li>
-<li><code>def</code> &mdash; The matching route definition, e.g. <code>/posts/:id</code></li>
-<li><code>query</code> &mdash; The query string, if present, e.g. <code>?comments=yes</code></li>
-<li><code>parts</code> &mdash; An object containing the values of the parts defined in the route, e.g. <code>{id: "134"}</code></li>
-<li><code>params</code> &mdash; An object containing the query string parameters, e.g. <code>{comments: "yet"}</code></li>
+<li><strong>path</strong> &mdash; The current path (fragment without #) without query string parameters, e.g. <code>/posts/134</code></li>
+<li><strong>def</strong> &mdash; The matching route definition, e.g. <code>/posts/:id</code></li>
+<li><strong>query</strong> &mdash; The query string, if present, e.g. <code>?comments=yes</code></li>
+<li><strong>part</strong><code>&amp;mdash; An object containing the values of the parts defined in the route, e.g.</code>{id: &ldquo;134&rdquo;}`</li>
+<li><strong>params</strong> &mdash; An object containing the query string parameters, e.g. <code>{comments: "yet"}</code></li>
 </ul>
 
 
