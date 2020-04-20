@@ -166,6 +166,7 @@ class VNode {
     this.style = attrs.style;
     this.value = attrs.value;
     this.data = attrs.data || {};
+    this.classList = this.classList || attrs.classList || [];
     this.attributes = attrs || {};
     Object.keys(attrs)
       .filter((a) => a.startsWith("on"))
@@ -184,6 +185,7 @@ class VNode {
     delete this.attributes.id;
     delete this.attributes.data;
     delete this.attributes.style;
+    delete this.attributes.classList;
   }
 
   processSelector(selector) {
@@ -501,7 +503,7 @@ class Store {
 }
 
 class Route {
-  constructor({ path, def, query, parts}) {
+  constructor({ path, def, query, parts }) {
     this.path = path;
     this.def = def;
     this.query = query;

@@ -110,6 +110,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 #### Special attributes
 
 * Any attribute starting with *on* (e.g. onclick, onkeydown, etc.) will be treated as an event listener.
+* The `classList` attribute can be set to a list of classes to apply to the element (as an alternative to using the element selector shorthand).
 * The special `$key` attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.
 * The special `$html` attribute can be used to set the `innerHTML` property of the resulting HTML element. Use only if you know what you are doing!
 
