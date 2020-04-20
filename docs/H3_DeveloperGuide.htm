@@ -7296,6 +7296,7 @@ div .terminal {
   <li><a href="#About">About</a>
   <ul>
    <li><a href="#Why-the-name?">Why the name?</a></li>
+   <li><a href="#Why-the-weird-release-labels?">Why the weird release labels?</a></li>
    <li><a href="#A-brief-history-of-H3">A brief history of H3</a></li>
    <li><a href="#Credits">Credits</a></li>
   </ul>
@@ -7599,10 +7600,14 @@ const fetchPage = async (pages, id, md) =&gt; {
   return h3("div.page", [
     h3("header.row.sticky", [
       h3(
-        "a.logo.col-sm",
+        "a.logo.col-sm-1",
         { href: "#/" },
-        h3("img", { alt: "H3", src: "images/h3.svg" })
+        [h3("img", { alt: "H3", src: "images/h3.svg" })]
       ),
+      h3("div.version.col-sm.col-md", [
+        h3("div.version-number", "v0.1.0"),
+        h3("div.version-label", "“Audacious Andorian“"),
+      ]),
       h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
     ]),
     h3("div.row", [
@@ -7787,6 +7792,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 <ul>
 <li>Any attribute starting with <em>on</em> (e.g. onclick, onkeydown, etc.) will be treated as an event listener.</li>
 <li>The <code>classList</code> attribute can be set to a list of classes to apply to the element (as an alternative to using the element selector shorthand).</li>
+<li>The <code>data</code> attribute can be set to a simple object containing <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes">data attributes</a>.</li>
 <li>The special <code>$key</code> attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.</li>
 <li>The special <code>$html</code> attribute can be used to set the <code>innerHTML</code> property of the resulting HTML element. Use only if you know what you are doing!</li>
 </ul>
@@ -7901,6 +7907,11 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
 <p>Well, because I typically use <a href="https://h3rald.com">H3RALD</a> as my handle online&hellip; <strong>h</strong> was already used by <a href="https://github.com/hyperhype/hyperscript">HyperScript</a> so&hellip; <strong>h3</strong> was the next best thing to use as a constructor for Virtual DOM Nodes.</p>
 
+<a name="Why-the-weird-release-labels?"></a>
+<h3>Why the weird release labels?<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Ubuntu started <a href="https://wiki.ubuntu.com/DevelopmentCodeNames">naming their releases after animals</a> in alphabetical order&hellip; In a similar way, H3 releases are named after <a href="https://en.wikipedia.org/wiki/List_of_Star_Trek_races">Star Trek races</a>.</p>
+
 <a name="A-brief-history-of-H3"></a>
 <h3>A brief history of H3<a href="#document-top" title="Go to top"></a></h3>
 
@@ -7921,7 +7932,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 <a name="Credits"></a>
 <h3>Credits<a href="#document-top" title="Go to top"></a></h3>
 
-<p>This site is <a href="https://github.com/h3rald/h3/blob/master/docs/js/app.js">built with H3 itself</a>, plus the following third-party libraries:</p>
+<p>The H3 web site is <a href="https://github.com/h3rald/h3/blob/master/docs/js/app.js">built with H3 itself</a>, plus the following third-party libraries:</p>
 
 <ul>
 <li><a href="https://marked.js.org/#/README.md#README.md">marked.js</a></li>

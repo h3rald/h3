@@ -36,10 +36,14 @@ const Page = () => {
   return h3("div.page", [
     h3("header.row.sticky", [
       h3(
-        "a.logo.col-sm",
+        "a.logo.col-sm-1",
         { href: "#/" },
-        h3("img", { alt: "H3", src: "images/h3.svg" })
+        [h3("img", { alt: "H3", src: "images/h3.svg" })]
       ),
+      h3("div.version.col-sm.col-md", [
+        h3("div.version-number", "v0.1.0"),
+        h3("div.version-label", "“Audacious Andorian“"),
+      ]),
       h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
     ]),
     h3("div.row", [

@@ -5,7 +5,6 @@ footer {
 
 #navigation {
   border: none;
-  border-left: 1px solid #ccc;
 }
 
 [type="checkbox"].drawer:checked + * {
@@ -48,12 +47,21 @@ pre code {
     top: 60px;
   }
 }
+@media screen and (max-width: 767px) {
+  #navigation {
+    border-left: 1px solid #ccc;
+  }
+}
 
 .content {
   margin-left: 30px;
 }
 
-h2, h3, h4, h5, h6 {
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-left: -30px;
 }
 
@@ -61,4 +69,21 @@ h2, h3, h4, h5, h6 {
   width: 3em;
   height: 3em;
   margin-top: -5px;
+}
+
+.drawer-toggle:before {
+  font-size: 2.5em;
+}
+
+.version {
+  padding: 6px;
+}
+
+.version-number {
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.version-label {
+  font-size: 0.8em;
+  font-style: italic;
 }

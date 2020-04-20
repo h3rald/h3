@@ -6,6 +6,10 @@ Or: _everything you wanted to know about H3, but you were afraid to ask_.
 
 Well, because I typically use [H3RALD](https://h3rald.com) as my handle online... **h** was already used by [HyperScript](https://github.com/hyperhype/hyperscript) so... **h3** was the next best thing to use as a constructor for Virtual DOM Nodes.
 
+### Why the weird release labels?
+
+Ubuntu started [naming their releases after animals](https://wiki.ubuntu.com/DevelopmentCodeNames) in alphabetical order... In a similar way, H3 releases are named after [Star Trek races](https://en.wikipedia.org/wiki/List_of_Star_Trek_races).
+
 ### A brief history of H3
 
 A while ago, I was interviewing with several companies trying to find a new job in the JavaScript ecosystem. One of these companies asked me, as a part of their interview process, to create a simple Todo List app in JavaScript *without using any libraries*.
@@ -24,7 +28,7 @@ A few months after that interview, I decided to take a look at that code, tidy i
 
 ### Credits
 
-This site is [built with H3 itself](https://github.com/h3rald/h3/blob/master/docs/js/app.js), plus the following third-party libraries:
+The H3 web site is [built with H3 itself](https://github.com/h3rald/h3/blob/master/docs/js/app.js), plus the following third-party libraries:
 
 * [marked.js](https://marked.js.org/#/README.md#README.md)
 * [Prism.js](https://prismjs.com/)
