@@ -1,17 +1,13 @@
 {
-  "name": "h3",
+  "name": "h3js",
   "version": "0.1.0",
-  "description": "A tiny, extremely minimalist client side web framework.",
+  "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
-  "directories": {
-    "example": "example",
-    "site": "site"
-  },
   "scripts": {
     "test": "jest",
     "coverage": "jest --coverage",
     "copy": "cp h3.js docs/js/h3.js && cp h3.js docs/example/assets/js/h3.js",
-    "guide": "hastyscribe H3_DeveloperGuide.md --output-file=docs/H3_DeveloperGuide.htm"
+    "guide": "hastyscribe docs/H3_DeveloperGuide.md"
   },
   "repository": {
     "type": "git",
@@ -33,13 +29,10 @@
   "bugs": {
     "url": "https://github.com/h3rald/h3/issues"
   },
-  "homepage": "https://github.com/h3rald/h3#readme",
+  "homepage": "https://h3.js.org",
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "jest": "^25.3.0"
-  },
-  "dependencies": {
-    "prismjs": "^1.20.0"
   }
 }

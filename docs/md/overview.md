@@ -28,3 +28,7 @@ This will render a `h1` tag within the document body, containing the text `"Hell
 ### Something more complex?
 
 Have a look at the code of a [simple todo list](https://github.com/h3rald/h3/tree/master/docs/example) ([demo](https://h3.js.org/example/index.html)) with several components, a store and some routing.
+
+### Can I use it then, no strings attached?
+
+Yes. It's [MIT-licensed](https://github.com/h3rald/h3/blob/master/LICENSE).
