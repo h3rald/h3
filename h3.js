@@ -110,7 +110,6 @@ class VNode {
         typeof data !== "function" &&
         (typeof data !== "object" || data === null)
       ) {
-        console.log(data);
         throw new Error(
           "[VNode] The second argument of a VNode constructor must be an object, an array or a string."
         );
@@ -166,14 +165,17 @@ class VNode {
     this.style = attrs.style;
     this.value = attrs.value;
     this.data = attrs.data || {};
-    this.classList = this.classList || attrs.classList || [];
+    this.classList =
+      attrs.classList && attrs.classList.length > 0
+        ? attrs.classList
+        : this.classList;
     this.attributes = attrs || {};
     Object.keys(attrs)
       .filter((a) => a.startsWith("on"))
       .forEach((key) => {
         if (typeof attrs[key] !== "function") {
           throw new Error(
-            `[VNode] Event handler specified for on${key} event is not a function.`
+            `[VNode] Event handler specified for ${key} event is not a function.`
           );
         }
         this.eventListeners[key.slice(2)] = attrs[key];
@@ -282,26 +284,17 @@ class VNode {
   // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
   redraw(data) {
     let { node, vnode } = data || {};
-    if (!node && this.id) {
-      node = document.getElementById(this.id);
-    }
-    if (!vnode) {
-      vnode = this.render();
-    }
     const newvnode = vnode;
     const oldvnode = this;
     if (
       oldvnode.constructor !== newvnode.constructor ||
-      oldvnode.type !== newvnode.type
+      oldvnode.type !== newvnode.type ||
+      (oldvnode.type === newvnode.type &&
+        oldvnode.type === "#text" &&
+        oldvnode !== newvnode)
     ) {
-      // Different node types, replace the whole node (requires valid parent node)
       node.parentNode.replaceChild(newvnode.render(), node);
-      oldvnode = newvnode;
-      return;
-    } else if (oldvnode.constructor === String && oldvnode !== newvnode) {
-      // String nodes, update value
-      node.data = newvnode;
-      oldvnode = newvnode;
+      oldvnode.from(newvnode);
       return;
     }
     // ID
