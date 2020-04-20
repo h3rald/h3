@@ -95,13 +95,19 @@ const Page = () => {
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
   fetchPage(pages, id, md);
-  const menu = ids.map((p) => h3("a", { href: `#/${p}` }, labels[p]));
+  const menu = ids.map((p) =>
+    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
+  );
   let content = pages[id]
     ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
     h3("header.row.sticky", [
-      h3("a.logo.col-sm", { href: "#/" }, "H3"),
+      h3(
+        "a.logo.col-sm",
+        { href: "#/" },
+        h3("img", { alt: "H3", src: "images/h3.svg" })
+      ),
       h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
     ]),
     h3("div.row", [

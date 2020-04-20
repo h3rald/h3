@@ -7311,13 +7311,12 @@ div .terminal {
 <a name="Overview"></a>
 <h2>Overview<a href="#document-top" title="Go to top"></a></h2>
 
-<p><strong>H3</strong> is a microframework to build client-side web applications in modern JavaScript.</p>
+<p><strong>H3</strong> is a microframework to build client-side single-page applications (SPAs) in modern JavaScript.</p>
 
 <p>H3 is also:</p>
 
 <ul>
 <li><strong>tiny</strong>, under <a href="https://github.com/h3rald/h3/blob/master/h3.js">700 sloc</a>.</li>
-<li><strong>bare-bones</strong>, it contains just the bare minimum to create a fully-functional single-page application.</li>
 <li><strong>modern</strong>, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge &amp; similar).</li>
 <li><strong>easy</strong> to learn, its API is comprised of only seven methods and two properties.</li>
 </ul>
@@ -7587,13 +7586,19 @@ const fetchPage = async (pages, id, md) =&gt; {
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
   fetchPage(pages, id, md);
-  const menu = ids.map((p) =&gt; h3("a", { href: `#/${p}` }, labels[p]));
+  const menu = ids.map((p) =&gt;
+    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
+  );
   let content = pages[id]
     ? h3("div.content", { $html: pages[id] })
     : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
     h3("header.row.sticky", [
-      h3("a.logo.col-sm", { href: "#/" }, "H3"),
+      h3(
+        "a.logo.col-sm",
+        { href: "#/" },
+        h3("img", { alt: "H3", src: "images/h3.svg" })
+      ),
       h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
     ]),
     h3("div.row", [
@@ -7940,7 +7945,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 <a name="Credits"></a>
 <h3>Credits<a href="#document-top" title="Go to top"></a></h3>
 
-<p>This site is built with H3 itself, in under <a href="https://github.com/h3rald/h3/blob/master/docs/js/app.js">70 lines</a> of code, plus the following third-party libraries:</p>
+<p>This site is <a href="https://github.com/h3rald/h3/blob/master/docs/js/app.js">built with H3 itself</a>, plus the following third-party libraries:</p>
 
 <ul>
 <li><a href="https://marked.js.org/#/README.md#README.md">marked.js</a></li>
