@@ -76,3 +76,33 @@ Essentially a module is just a function that typically is meant to run only once
 H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary `href` links or programmatically using the `h3.navigateTo` method.
 
 The current route is always accessible via the `h3.route` property.
+
+### Sequence Diagram
+
+The following sequence diagram summarizes how H3 works, from its initialization to the redraw and navigation phases.
+
+![Sequence Diagram](images/h3.sequence.svg)
+
+When the `h3.init()` method is called at application level, the following operations are performed in sequence:
+
+1. The *Store* is created and initialized.
+2. Any *Module* specified when calling `h3.init()` is executed.
+3. The **$init** message is dispatched.
+4. The *preStart* function (if specified when calling `h3.init()`) is executed.
+5. The *Router* is initialized and started.
+6. All *Components* matching the current route are rendered for the first time.
+7. The **$redraw** and **$navigation** messages are dispatched.
+
+Then, whenever the `h3.redraw()` method is called (typically within a component):
+
+1. The whole application is redrawn, i.e. every *Component* currently rendered on the page is redrawn.
+2. The **$redraw** message is dispatched.
+
+Similarly, whenever the `h3.navigateTo()` method is called (typically within a component), or the URL fragment changes:
+
+1. The *Router* processes the new path and determine which component to render based on the routing configuration.
+2. All DOM nodes within the scope of the routing are removed, all components are removed.
+3. The *Component* matching the new route is rendered.
+4. The **$redraw** and **$navigation** messages are dispatched.
+
+And that's it. The whole idea is to make the system extremely *simple* and *predictable* &mdash; which means everything should be very easy to debug, too.

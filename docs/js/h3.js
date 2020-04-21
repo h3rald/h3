@@ -1,3 +1,11 @@
+  
+/**
+ * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
 const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
@@ -464,8 +472,12 @@ class VNode {
   }
 }
 
-// Simple store based on Storeon
-// https://github.com/storeon/storeon/blob/master/index.js
+/**
+ * The code of the following class is heavily based on Storeon
+ * Modified according to the terms of the MIT License
+ * <https://github.com/storeon/storeon/blob/master/LICENSE>
+ * Copyright 2019 Andrey Sitnik <andrey@sitnik.ru>
+ */
 class Store {
   constructor() {
     this.events = {};

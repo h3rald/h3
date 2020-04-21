@@ -14,7 +14,7 @@
 
 {@ md/key-concepts.md || 0 @}
 
-{@ md/usage.md || 0 @}
+{@ md/tutorial.md || 0 @}
 
 {@ md/api.md || 0 @}
 

@@ -6,7 +6,7 @@ const labels = {
   overview: "Overview",
   "quick-start": "Quick Start",
   "key-concepts": "Key Concepts",
-  usage: "Usage",
+  tutorial: "Tutorial",
   api: "API",
   about: "About",
 };
@@ -27,49 +27,63 @@ const Page = () => {
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
   fetchPage(pages, id, md);
+  return h3("div.page", [
+    Header,
+    h3("div.row", [
+      h3("input#drawer-control.drawer", { type: "checkbox" }),
+      Navigation(id, ids),
+      Content(pages[id]),
+      Footer,
+    ]),
+  ]);
+};
+
+const Header = () => {
+  return h3("header.row.sticky", [
+    h3("a.logo.col-sm-1", { href: "#/" }, [
+      h3("img", { alt: "H3", src: "images/h3.svg" }),
+    ]),
+    h3("div.version.col-sm.col-md", [
+      h3("div.version-number", "v0.1.0"),
+      h3("div.version-label", "“Audacious Andorian“"),
+    ]),
+    h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
+  ]);
+};
+
+const Footer = () => {
+  return h3(
+    "footer",
+    h3("div", [
+      "© 2020 Fabio Cevasco · ",
+      h3(
+        "a",
+        {
+          href: "H3_DeveloperGuide.htm",
+          target: "_blank",
+        },
+        "Download the Guide"
+      ),
+    ])
+  );
+};
+
+const Navigation = (id, ids) => {
   const menu = ids.map((p) =>
     h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
   );
-  let content = pages[id]
-    ? h3("div.content", { $html: pages[id] })
+  return h3("nav#navigation.col-md-3", [
+    h3("label.drawer-close", { for: "drawer-control" }),
+    ...menu,
+  ]);
+};
+
+const Content = (html) => {
+  const content = html
+    ? h3("div.content", { $html: html })
     : h3("div.spinner-container", h3("span.spinner"));
-  return h3("div.page", [
-    h3("header.row.sticky", [
-      h3(
-        "a.logo.col-sm-1",
-        { href: "#/" },
-        [h3("img", { alt: "H3", src: "images/h3.svg" })]
-      ),
-      h3("div.version.col-sm.col-md", [
-        h3("div.version-number", "v0.1.0"),
-        h3("div.version-label", "“Audacious Andorian“"),
-      ]),
-      h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
-    ]),
-    h3("div.row", [
-      h3("input#drawer-control.drawer", { type: "checkbox" }),
-      h3("nav#navigation.col-md-3", [
-        h3("label.drawer-close", { for: "drawer-control" }),
-        ...menu,
-      ]),
-      h3("main.col-sm-12.col-md-9", [
-        h3("div.card.fluid", h3("div.section", content)),
-      ]),
-      h3(
-        "footer",
-        h3("div", [
-          "© 2020 Fabio Cevasco · ",
-          h3(
-            "a",
-            {
-              href: "https://h3.js.org/H3_DeveloperGuide.htm",
-              target: "_blank",
-            },
-            "Download the Guide"
-          ),
-        ])
-      ),
-    ]),
+  return h3("main.col-sm-12.col-md-9", [
+    h3("div.card.fluid", h3("div.section", content)),
   ]);
 };
 

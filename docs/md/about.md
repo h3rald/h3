@@ -33,3 +33,10 @@ The H3 web site is [built with H3 itself](https://github.com/h3rald/h3/blob/mast
 * [marked.js](https://marked.js.org/#/README.md#README.md)
 * [Prism.js](https://prismjs.com/)
 * [mini.css](https://minicss.org/)
+
+### Special Thanks
+
+Special thanks to the following individuals, that made H3 possible:
+
+* **Leo Horie**, author of the awesome [Mithril](https://mithril.js.org/) framework that inspired me to write the H3 microframework in a moment of need.
+* **Andrey Sitnik**, author of the beatiful [Storeon](https://evilmartians.com/chronicles/storeon-redux-in-173-bytes) state management library, that is used (with minor modification) as the H3 store.

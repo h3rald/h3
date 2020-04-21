@@ -1,4 +1,4 @@
-## Usage
+## Tutorial 
 
 As a (meta) explanation of how to use H3, let's have a look at how the [H3 web site](https://h3.js.org) itself was created.
 
@@ -59,7 +59,7 @@ const labels = {
   overview: "Overview",
   "quick-start": "Quick Start",
   "key-concepts": "Key Concepts",
-  usage: "Usage",
+  tutorial: "Tutorial",
   api: "API",
   about: "About",
 };
@@ -87,7 +87,7 @@ Basically this function is going to be called when you navigate to each page, an
 2. renders the Markdown code into HTML using marked, and stores it in the `pages` object
 3. Triggers a redraw of the application
 
-Then it's time to create a simple `Page` component that actually renders the markup of the page:
+We are gonna use our `fetchPage` function inside the main component of our app, `Page`:
 
 ```js
 const Page = () => {
@@ -95,78 +95,93 @@ const Page = () => {
   const ids = Object.keys(labels);
   const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
   fetchPage(pages, id, md);
-  const menu = ids.map((p) =>
-    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
-  );
-  let content = pages[id]
-    ? h3("div.content", { $html: pages[id] })
-    : h3("div.spinner-container", h3("span.spinner"));
   return h3("div.page", [
-    h3("header.row.sticky", [
-      h3(
-        "a.logo.col-sm-1",
-        { href: "#/" },
-        [h3("img", { alt: "H3", src: "images/h3.svg" })]
-      ),
-      h3("div.version.col-sm.col-md", [
-        h3("div.version-number", "v0.1.0"),
-        h3("div.version-label", "“Audacious Andorian“"),
-      ]),
-      h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
-    ]),
+    Header,
     h3("div.row", [
       h3("input#drawer-control.drawer", { type: "checkbox" }),
-      h3("nav#navigation.col-md-3", [
-        h3("label.drawer-close", { for: "drawer-control" }),
-        ...menu,
-      ]),
-      h3("main.col-sm-12.col-md-9", [
-        h3("div.card.fluid", h3("div.section", content)),
-      ]),
-      h3(
-        "footer",
-        h3("div", [
-          "© 2020 Fabio Cevasco · ",
-          h3(
-            "a",
-            {
-              href: "https://h3.js.org/H3_DeveloperGuide.htm",
-              target: "_blank",
-            },
-            "Download the Guide"
-          ),
-        ])
-      ),
+      Navigation(id, ids),
+      Content(pages[id]),
+      Footer,
     ]),
   ]);
 };
 ```
 
-This component is essentially able to render any Markdown page based on the current route (URL fragment). 
+The main responsibility of this component is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: `Header`, `Navigation`, `Content`, and `Footer`.
+
+The `Header` and `Footer` component are very simple, as their only job is to render static content. Both component simply return a tree of VNodes:
+
+```js
+const Header = () => {
+  return h3("header.row.sticky", [
+    h3("a.logo.col-sm-1", { href: "#/" }, [
+      h3("img", { alt: "H3", src: "images/h3.svg" }),
+    ]),
+    h3("div.version.col-sm.col-md", [
+      h3("div.version-number", "v0.1.0"),
+      h3("div.version-label", "“Audacious Andorian“"),
+    ]),
+    h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
+  ]);
+};
+
+const Footer = () => {
+  return h3(
+    "footer",
+    h3("div", [
+      "© 2020 Fabio Cevasco · ",
+      h3(
+        "a",
+        {
+          href: "H3_DeveloperGuide.htm",
+          target: "_blank",
+        },
+        "Download the Guide"
+      ),
+    ])
+  );
+};
+```
+
+The `Navigation` component is more interesting, as it takes two parameters:
+
+* The ID of the current page
+* The list of page IDs
+
+...and it uses this information to create the site navigation menu dynamically:
+
+```js
+const Navigation = (id, ids) => {
+  const menu = ids.map((p) =>
+    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
+  );
+  return h3("nav#navigation.col-md-3", [
+    h3("label.drawer-close", { for: "drawer-control" }),
+    ...menu,
+  ]);
+};
+```
+
+Finally, the `Content` component optionally takes a string containing the HTML of the page content to render. If no content is provided, it will display a loading spinner, otherwise it will render the content by using the special `$html` attribute that can be used to essentially set the `innerHTML` of an element:
+
+```js
+const Content = (html) => {
+  const content = html
+    ? h3("div.content", { $html: html })
+    : h3("div.spinner-container", h3("span.spinner"));
+  return h3("main.col-sm-12.col-md-9", [
+    h3("div.card.fluid", h3("div.section", content)),
+  ]);
+};
+```
+
+Now, the key here is that we are only ever going to render "known" pages that are listed in the `labels` object.
 
 Suppose for example that the `#/overview` page is loaded. The `h3.route.path` in this case is going to be set to `/overview`, which in turns corresponds to an ID of a well-known page (`overview`).
 
 In a similar way, other well-known pages can easily be mapped to IDs, but it is also important to handle _unknown_ pages (technically I could even pass an URL to a different site containing a malicious markdown page and have it rendered!), and if a page passed in the URL fragment is not present in the `labels` Object, the Overview page will be rendered instead.
 
 This feature is also handy to automatically load the Overview when no fragment is specified.
-
-Note then how the web site menu is created based on the `labels` object:
-
-```js
-const menu = ids.map((p) => h3(`a${p === id ? '.active' : ''}`, { href: `#/${p}` }, labels[p]));
-```
-
-Also, the `active` class will be applied for the currently-active link.
-
-Finally, the last noteworthy thing of this code is how the HTML code of each page is rendered:
-
-```js
-let content = pages[id]
-    ? h3("div.content", { $html: pages[id] })
-    : h3("div.spinner-container", h3("span.spinner"));
-```
-
-If the content has been loaded, the page content will be added as raw HTML to the `div.content` element (no sanitization needed as we are only going to ever render well-known Markdown files), otherwise a spinner will be displayed (until the application is re-rendered anyway).
 
 ### Initialization and post-redraw operations
 
