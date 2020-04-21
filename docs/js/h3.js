@@ -525,13 +525,11 @@ class Route {
 }
 
 class Router {
-  constructor({ element, routes, store }) {
+  constructor({ element, routes, store, location }) {
     this.element = element;
     this.redraw = null;
     this.store = store;
-    if (!this.element) {
-      throw new Error(`[Router] No view element specified.`);
-    }
+    this.location = location || window.location; 
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
@@ -549,14 +547,14 @@ class Router {
 
   start() {
     const processPath = (data) => {
-      const hash =
+      const fragment =
         (data &&
           data.newURL &&
           data.newURL.match(/(#.+)$/) &&
           data.newURL.match(/(#.+)$/)[1]) ||
-        window.location.hash;
-      const path = hash.replace(/\?.+$/, "").slice(1);
-      const rawQuery = hash.match(/\?(.+)$/);
+        this.location.hash;
+      const path = fragment.replace(/\?.+$/, "").slice(1);
+      const rawQuery = fragment.match(/\?(.+)$/);
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
       const pathParts = path.split("/").slice(1);
       let parts = {};
@@ -581,7 +579,7 @@ class Router {
         }
       }
       if (!this.route) {
-        this.route = new Route({ query, path, def, parts });
+        throw new Error(`[Router] No route matches '${fragment}'`);
       }
       // Display View
       while (this.element.firstChild) {
@@ -602,7 +600,7 @@ class Router {
       .map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`)
       .join("&");
     query = query ? `?${query}` : "";
-    window.location.hash = `#${path}${query}`;
+    this.location.hash = `#${path}${query}`;
   }
 }
 
@@ -615,9 +613,12 @@ let store = null;
 let router = null;
 
 h3.init = (config) => {
-  let { element, routes, modules, preStart, postStart } = config;
+  let { element, routes, modules, preStart, postStart, location } = config;
   if (!routes) {
     // Assume config is a component object, define default route
+    if (typeof config !== "function") {
+      throw new Error("[h3.init] The specified argument is not a valid configuration object or component function");
+    }
     routes = { "/": config };
   }
   element = element || document.body;
@@ -631,7 +632,7 @@ h3.init = (config) => {
   });
   store.dispatch("$init");
   // Initialize router
-  router = new Router({ element, routes, store });
+  router = new Router({ element, routes, store, location });
   return Promise.resolve(preStart && preStart())
     .then(() => router.start())
     .then(() => postStart && postStart());
