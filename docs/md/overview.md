@@ -10,9 +10,11 @@ H3 is also:
 
 ### I'm sold! Where can I get it?
 
-It ain't formally released yet, sorry! But, if you are brave enough, you can...
+Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/master/h3.js" target="_blank" class="button primary">Download the Development Version</a>
+<a href="hhttps://raw.githubusercontent.com/h3rald/h3/v0.1.0/h3.js" target="_blank" class="button primary">Download v0.1.0</a>
+
+Yes there is also a [NPM package](https://www.npmjs.com/package/h3js) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
 ### Hello, World?
 
