@@ -11,16 +11,6 @@ const labels = {
   about: "About",
 };
 
-const badges = {
-  "https://img.shields.io/npm/v/@h3rald/h3": "https://www.npmjs.com/package/@h3rald/h3",
-  "https://img.shields.io/github/license/h3rald/h3":
-    "https://github.com/h3rald/h3/blob/master/LICENSE",
-  "https://img.shields.io/travis/h3rald/h3":
-    "https://travis-ci.org/github/h3rald/h3",
-  "https://img.shields.io/coveralls/github/h3rald/h3":
-    "https://coveralls.io/github/h3rald/h3?branch=master",
-};
-
 const pages = {};
 
 const fetchPage = async (pages, id, md) => {
@@ -62,9 +52,6 @@ const Header = () => {
 };
 
 const Footer = () => {
-  const images = Object.keys(badges).map((img) =>
-    h3("a.badge", { href: badges[img], target: "_blank" }, h3("img", { src: img }))
-  );
   return h3("footer", [
     h3("div", [
       "© 2020 Fabio Cevasco · ",
@@ -77,7 +64,6 @@ const Footer = () => {
         "Download the Guide"
       ),
     ]),
-    h3("div", images),
   ]);
 };
 
