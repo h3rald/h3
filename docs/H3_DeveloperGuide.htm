@@ -7312,11 +7312,6 @@ div .terminal {
 
 
 
-<p><a href="https://www.npmjs.com/package/h3js"><img src="https://img.shields.io/npm/v/h3js" alt="NPM" /></a>
-<a href="https://github.com/h3rald/h3/blob/master/LICENSE"><img src="https://img.shields.io/github/license/h3rald/h3" alt="License" /></a>
-<a href="https://travis-ci.org/github/h3rald/h3"><img src="https://img.shields.io/travis/h3rald/h3" alt="Build" /></a>
-<a href="https://coveralls.io/github/h3rald/h3?branch=master"><img src="https://img.shields.io/coveralls/github/h3rald/h3" alt="Coverage" /></a></p>
-
 <a name="Overview"></a>
 <h2>Overview<a href="#document-top" title="Go to top"></a></h2>
 
@@ -7596,7 +7591,7 @@ import marked from "./vendor/marked.js";
 import Prism from "./vendor/prism.js";
 </code></pre>
 
-<p>Easy enough. Then we want to store the mapping between the different page fragments and their titles:</p>
+<p>Easy enough. Then we want to store the mapping between the different page fragments and their titles, as well as some cool project badges:</p>
 
 <pre><code class="js">const labels = {
   overview: "Overview",
@@ -7605,6 +7600,16 @@ import Prism from "./vendor/prism.js";
   tutorial: "Tutorial",
   api: "API",
   about: "About",
+};
+
+const badges = {
+  "https://img.shields.io/npm/v/h3js": "https://www.npmjs.com/package/h3js",
+  "https://img.shields.io/github/license/h3rald/h3":
+    "https://github.com/h3rald/h3/blob/master/LICENSE",
+  "https://img.shields.io/travis/h3rald/h3":
+    "https://travis-ci.org/github/h3rald/h3",
+  "https://img.shields.io/coveralls/github/h3rald/h3":
+    "https://coveralls.io/github/h3rald/h3?branch=master",
 };
 </code></pre>
 
@@ -7652,7 +7657,7 @@ const fetchPage = async (pages, id, md) =&gt; {
 
 <p>The main responsibility of this component is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: <code>Header</code>, <code>Navigation</code>, <code>Content</code>, and <code>Footer</code>.</p>
 
-<p>The <code>Header</code> and <code>Footer</code> component are very simple, as their only job is to render static content. Both component simply return a tree of VNodes:</p>
+<p>The <code>Header</code> component is very simple: its only job is to render static content:</p>
 
 <pre><code class="js">const Header = () =&gt; {
   return h3("header.row.sticky", [
@@ -7666,10 +7671,15 @@ const fetchPage = async (pages, id, md) =&gt; {
     h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
 };
+</code></pre>
 
-const Footer = () =&gt; {
-  return h3(
-    "footer",
+<p>The <code>Footer</code> component is slightly more complex, as it also renders the project badges via a <code>map</code> function:</p>
+
+<pre><code class="js">const Footer = () =&gt; {
+  const images = Object.keys(badges).map((img) =&gt;
+    h3("a.badge", { href: badges[img], target: "_blank" }, h3("img", { src: img }))
+  );
+  return h3("footer", [
     h3("div", [
       "© 2020 Fabio Cevasco · ",
       h3(
@@ -7680,8 +7690,9 @@ const Footer = () =&gt; {
         },
         "Download the Guide"
       ),
-    ])
-  );
+    ]),
+    h3("div", images),
+  ]);
 };
 </code></pre>
 

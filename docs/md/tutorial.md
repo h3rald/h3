@@ -52,7 +52,7 @@ import marked from "./vendor/marked.js";
 import Prism from "./vendor/prism.js";
 ```
 
-Easy enough. Then we want to store the mapping between the different page fragments and their titles:
+Easy enough. Then we want to store the mapping between the different page fragments and their titles, as well as some cool project badges:
 
 ```js
 const labels = {
@@ -62,6 +62,16 @@ const labels = {
   tutorial: "Tutorial",
   api: "API",
   about: "About",
+};
+
+const badges = {
+  "https://img.shields.io/npm/v/h3js": "https://www.npmjs.com/package/h3js",
+  "https://img.shields.io/github/license/h3rald/h3":
+    "https://github.com/h3rald/h3/blob/master/LICENSE",
+  "https://img.shields.io/travis/h3rald/h3":
+    "https://travis-ci.org/github/h3rald/h3",
+  "https://img.shields.io/coveralls/github/h3rald/h3":
+    "https://coveralls.io/github/h3rald/h3?branch=master",
 };
 ```
 
@@ -109,7 +119,7 @@ const Page = () => {
 
 The main responsibility of this component is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: `Header`, `Navigation`, `Content`, and `Footer`.
 
-The `Header` and `Footer` component are very simple, as their only job is to render static content. Both component simply return a tree of VNodes:
+The `Header` component is very simple: its only job is to render static content:
 
 ```js
 const Header = () => {
@@ -124,10 +134,16 @@ const Header = () => {
     h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
 };
+```
 
+The `Footer` component is slightly more complex, as it also renders the project badges via a `map` function:
+
+```js
 const Footer = () => {
-  return h3(
-    "footer",
+  const images = Object.keys(badges).map((img) =>
+    h3("a.badge", { href: badges[img], target: "_blank" }, h3("img", { src: img }))
+  );
+  return h3("footer", [
     h3("div", [
       "© 2020 Fabio Cevasco · ",
       h3(
@@ -138,8 +154,9 @@ const Footer = () => {
         },
         "Download the Guide"
       ),
-    ])
-  );
+    ]),
+    h3("div", images),
+  ]);
 };
 ```
 
