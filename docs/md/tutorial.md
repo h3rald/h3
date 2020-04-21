@@ -65,7 +65,7 @@ const labels = {
 };
 
 const badges = {
-  "https://img.shields.io/npm/v/h3js": "https://www.npmjs.com/package/h3js",
+  "https://img.shields.io/npm/v/@h3rald/h3": "https://www.npmjs.com/package/@h3rald/h3",
   "https://img.shields.io/github/license/h3rald/h3":
     "https://github.com/h3rald/h3/blob/master/LICENSE",
   "https://img.shields.io/travis/h3rald/h3":

@@ -14,7 +14,7 @@ Here, look, it's just one file:
 
 <a href="hhttps://raw.githubusercontent.com/h3rald/h3/v0.1.0/h3.js" target="_blank" class="button primary">Download v0.1.0</a>
 
-Yes there is also a [NPM package](https://www.npmjs.com/package/h3js) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
+Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
 ### Hello, World?
 

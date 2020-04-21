@@ -1,5 +1,5 @@
 {
-  "name": "h3js",
+  "name": "@h3rald/h3",
   "version": "0.0.0",
   "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
