@@ -423,4 +423,30 @@ describe("h3", () => {
     expect(appendChild).toHaveBeenCalled();
     expect(body.childNodes[0].childNodes[0].data).toEqual("Hello, World!");
   });
+
+  it("should provide some validation at initialization time", async () => {
+    try {
+      await h3.init({ element: "INVALID", routes: {} });
+    } catch (e) {
+      expect(e.message).toMatch(/Invalid element/);
+    }
+    try {
+      await h3.init({ element: document.body });
+    } catch (e) {
+      expect(e.message).toMatch(/not a valid configuration object/);
+    }
+    try {
+      await h3.init({ element: document.body, routes: {} });
+    } catch (e) {
+      expect(e.message).toMatch(/No routes/);
+    }
+  });
+
+  it("should expose a redraw method", async () => {
+    const vnode = h3("div");
+    await h3.init(() => vnode);
+    jest.spyOn(vnode, "redraw");
+    h3.redraw();
+    expect(vnode.redraw).toHaveBeenCalled();
+  });
 });

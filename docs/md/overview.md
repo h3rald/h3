@@ -1,3 +1,9 @@
+[![NPM](https://img.shields.io/npm/v/h3js)](https://www.npmjs.com/package/h3js)
+[![License](https://img.shields.io/github/license/h3rald/h3)](https://github.com/h3rald/h3/blob/master/LICENSE)
+[![Build](https://img.shields.io/travis/h3rald/h3)](https://travis-ci.org/github/h3rald/h3)
+[![Coverage](https://img.shields.io/coveralls/github/h3rald/h3)](https://coveralls.io/github/h3rald/h3?branch=master)
+
+
 ## Overview
 
 **H3** is a microframework to build client-side single-page applications (SPAs) in modern JavaScript.
