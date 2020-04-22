@@ -52,19 +52,7 @@ const Header = () => {
 };
 
 const Footer = () => {
-  return h3("footer", [
-    h3("div", [
-      "© 2020 Fabio Cevasco · ",
-      h3(
-        "a",
-        {
-          href: "H3_DeveloperGuide.htm",
-          target: "_blank",
-        },
-        "Download the Guide"
-      ),
-    ]),
-  ]);
+  return h3("footer", [h3("div", "© 2020 Fabio Cevasco")]);
 };
 
 const Navigation = (id, ids) => {

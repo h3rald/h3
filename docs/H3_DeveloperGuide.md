@@ -1,4 +1,4 @@
-% H3 Microframework User Guide
+% H3 Microframework Developer Guide
 % Fabio Cevasco
 % -
 

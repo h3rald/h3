@@ -189,14 +189,14 @@ Triggers an application redraw. Unlike most frameworks, in H3 redraws *must* be 
 
 ### h3.route
 
-An object containing the current route. A Route object has the following properties:
+An read-only property containing current route (Route object). A Route object has the following properties:
 
 * **path** &mdash; The current path (fragment without #) without query string parameters, e.g. `/posts/134`
 * **def** &mdash; The matching route definition, e.g. `/posts/:id`
 * **query** &mdash; The query string, if present, e.g. `?comments=yes`
-* **part**` &mdash; An object containing the values of the parts defined in the route, e.g. `{id: "134"}`
+* **part** &mdash; An object containing the values of the parts defined in the route, e.g. `{id: "134"}`
 * **params** &mdash; An object containing the query string parameters, e.g. `{comments: "yet"}`
 
 ### h3.state
 
-An object containing the current application state. Do not modify this directly, use subscriptions in modules to modify it.
+A read-only property containing the current application state. The state is a plain object, but its properties should only be modified using message subscription handlers. 

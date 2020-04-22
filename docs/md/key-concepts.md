@@ -53,7 +53,7 @@ const CounterButton = () => {
 
 ### Store
 
-H3 essentially uses something very, *very* similar to [StoreOn](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side message dispatcher/subscriber (seriously, it is virtually the same code as StoreOn). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to actions (messages).
+H3 essentially uses something very, *very* similar to [Storeon](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side message dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to actions (messages).
 
 The current application state is accessible via the `h3.state` property.
 
