@@ -41,4 +41,4 @@ Go fix it! Or at least open an issue on the [Github repo](https://github.com/h3r
 
 ### Can I download a single, printable HTML file containing all the contents of this site?
 
-What a weird thing to ask... [Sure you can](3_DeveloperGuide.htm)!
+What a weird thing to ask... [Sure you can](H3_DeveloperGuide.htm)!
