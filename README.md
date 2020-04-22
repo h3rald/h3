@@ -41,3 +41,11 @@ Have a look at the code of a [simple todo list](https://github.com/h3rald/h3/tre
 ### Can I use it then, no strings attached?
 
 Yes. It's [MIT-licensed](https://github.com/h3rald/h3/blob/master/LICENSE).
+
+### What if something is broken?
+
+Go fix it! Or at least open an issue on the [Github repo](https://github.com/h3rald/h3), pleasy.
+
+### Can I download a single, printable HTML file containing all the contents of this site?
+
+What a weird thing to ask... [Sure you can](3_DeveloperGuide.htm)!
