@@ -312,7 +312,7 @@ class VNode {
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
-      node.value = newvnode.value;
+      node.value = newvnode.value || "";
       oldvnode.value = newvnode.value;
     }
     // Classes

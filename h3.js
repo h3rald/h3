@@ -307,12 +307,12 @@ class VNode {
     }
     // ID
     if (oldvnode.id !== newvnode.id) {
-      node.id = newvnode.id;
+      node.id = newvnode.id || "";
       oldvnode.id = newvnode.id;
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
-      node.value = newvnode.value;
+      node.value = newvnode.value || "";
       oldvnode.value = newvnode.value;
     }
     // Classes
@@ -331,7 +331,7 @@ class VNode {
     }
     // Style
     if (oldvnode.style !== newvnode.style) {
-      node.style.cssText = newvnode.style;
+      node.style.cssText = newvnode.style || "";
       oldvnode.style = newvnode.style;
     }
     // Data

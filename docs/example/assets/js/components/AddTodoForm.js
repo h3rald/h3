@@ -1,35 +1,37 @@
 import h3 from "../h3.js";
 
 export default function AddTodoForm() {
+  const focus = () => document.getElementById("new-todo").focus();  
   const addTodo = () => {
-    const newTodo = document.getElementById("new-todo");
     if (!newTodo.value) {
       h3.dispatch("error/set");
       h3.redraw()
-      document.getElementById("new-todo").focus();
+      focus();
       return;
     }
     h3.dispatch("error/clear");
     h3.dispatch("todos/add", {
       key: `todo_${Date.now()}__${btoa(newTodo.value)}`, 
-      text: newTodo.value,
+      text: newTodo.value
     });
     newTodo.value = "";
     h3.redraw()
-    document.getElementById("new-todo").focus();
+    focus();
   };
-  const addTodoOnEnter = (event) => {
-    if (event.keyCode == 13) {
+  const addTodoOnEnter = (e) => {
+    if (e.keyCode == 13) {
       addTodo();
-      event.preventDefault();
+      e.preventDefault();
     }
   };
+  const newTodo = h3("input", {
+    id: "new-todo",
+    placeholder: "What do you want to do?",
+    oninput: (e) => newTodo.value = e.target.value,
+    onkeydown: addTodoOnEnter,
+  });
   return h3("form.add-todo-form", [
-    h3("input", {
-      id: "new-todo",
-      placeholder: "What do you want to do?",
-      onkeydown: addTodoOnEnter,
-    }),
+    newTodo,
     h3(
       "span.submit-todo",
       {
