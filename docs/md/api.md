@@ -1,6 +1,6 @@
 ## API
 
-The core of the H3 API is comprised of the following seven methods and two properties.
+The core of the H3 API is comprised of the following six methods and two properties.
 
 
 ### h3(selector: string, attributes: object, children: array)
@@ -114,12 +114,6 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 * The `data` attribute can be set to a simple object containing [data attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes).
 * The special `$key` attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.
 * The special `$html` attribute can be used to set the `innerHTML` property of the resulting HTML element. Use only if you know what you are doing!
-
-### h3.equal(a: any, b: any)
-
-A way to determine if two object or literals are equal. This method is mainly used internally by the Virtual DOM diffing algorithm.
-
-Note that two functions are considered _equal_ if their source code is exactly the same. This may not be ideal in certain situations, but when it comes to diffing two nodes that may be generated dynamically through iteration it generally makes sense to behave in this way.
 
 ### h3.dispatch(message: string, data: any)
 

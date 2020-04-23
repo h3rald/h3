@@ -166,6 +166,10 @@ class VNode {
     this.classList = data.classList;
   }
 
+  equalTo(obj) {
+    return equal(this, obj);
+  }
+
   processProperties(attrs) {
     this.id = this.id || attrs.id;
     this.$key = attrs.$key;
@@ -695,10 +699,6 @@ h3.redraw = () => {
     );
   }
   router.redraw();
-};
-
-h3.equal = (...args) => {
-  return equal(...args);
 };
 
 export default h3;

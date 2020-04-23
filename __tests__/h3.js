@@ -1,75 +1,14 @@
 const h3 = require("../h3.js").default;
 
 describe("h3", () => {
-  it("should expose an equal method to check object/array/function equality", () => {
-    expect(h3.equal({}, {})).toBeTruthy();
-    expect(h3.equal([], [])).toBeTruthy();
-    expect(h3.equal([], [1])).toBeFalsy();
-    expect(h3.equal([2], [1])).toBeFalsy();
-    expect(h3.equal([], {})).toBeFalsy();
-    expect(h3.equal({ a: 1 }, { a: 1 })).toBeTruthy();
-    expect(h3.equal({ a: 1 }, { b: 1 })).toBeFalsy();
-    expect(h3.equal({ a: 1 }, { a: 2 })).toBeFalsy();
-    expect(h3.equal({ a: 1 }, { a: 1, b: 2 })).toBeFalsy();
-    expect(h3.equal(undefined, undefined)).toBeTruthy();
-    expect(h3.equal(undefined, null)).toBeFalsy();
-    expect(h3.equal(null, 1)).toBeFalsy();
-    expect(h3.equal(null, null)).toBeTruthy();
-    expect(
-      h3.equal(
-        () => 1,
-        () => 1
-      )
-    ).toBeTruthy();
-    expect(
-      h3.equal(
-        () => 1,
-        () => 2
-      )
-    ).toBeFalsy();
-    expect(h3.equal([1, 2, 3], [1, 2, 3])).toBeTruthy();
-    expect(h3.equal([1, 2, 3], [1, 4, 3])).toBeFalsy();
-    expect(h3.equal([1, 2, 3], [1, 3])).toBeFalsy();
-  });
-
-  it("should expose an equal method to check nested object/array equality, including standard types and functions", () => {
-    const obj1 = {
-      a: 1,
-      b: 2,
-      c: {
-        a: [1, 2, 3, { b: true, d: false }],
-        d: {
-          q: null,
-          v: undefined,
-          a: [
-            {
-              onclick: function () {
-                console.log("test");
-              },
-            },
-          ],
-        },
-      },
-    };
-    const obj2 = {
-      a: 1,
-      b: 2,
-      c: {
-        a: [1, 2, 3, { b: true, d: false }],
-        d: {
-          q: null,
-          v: undefined,
-          a: [
-            {
-              onclick: function () {
-                console.log("test");
-              },
-            },
-          ],
-        },
-      },
-    };
-    expect(h3.equal(obj1, obj2)).toBe(true);
+  it("should support a way to discriminate functions and objects", () => {
+    const v1 = h3("div", {onclick: () => true});
+    const v2 = h3("div", {onclick: () => true});
+    const v3 = h3("div", {onclick: () => false});
+    const v4 = h3("div");
+    expect(v1.equalTo(v2)).toEqual(true);
+    expect(v1.equalTo(v3)).toEqual(false);
+    expect(v4.equalTo({ type: "div" })).toEqual(false);
   });
 
   it("should support the creation of empty virtual node elements", () => {
