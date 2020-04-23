@@ -6,9 +6,11 @@ describe("h3", () => {
     const v2 = h3("div", {onclick: () => true});
     const v3 = h3("div", {onclick: () => false});
     const v4 = h3("div");
-    expect(v1.equalTo(v2)).toEqual(true);
-    expect(v1.equalTo(v3)).toEqual(false);
-    expect(v4.equalTo({ type: "div" })).toEqual(false);
+    expect(v1.equal(v2)).toEqual(true);
+    expect(v1.equal(v3)).toEqual(false);
+    expect(v4.equal({ type: "div" })).toEqual(false);
+    expect(v1.equal(null, null)).toEqual(true);
+    expect(v1.equal(null, undefined)).toEqual(false);
   });
 
   it("should support the creation of empty virtual node elements", () => {
@@ -38,6 +40,7 @@ describe("h3", () => {
     const invalid2nd2 = () => h3("div", true, []);
     const invalid2nd3 = () => h3("div", null, []);
     const invalidChildren = () => h3("div", ["test", 1, 2]);
+    const tooManyArgs = () => h3("div", {id: "test"}, "test", "aaa");
     expect(empty).toThrowError(/No arguments passed/);
     expect(invalid1st).toThrowError(/Invalid first argument/);
     expect(invalid1st2).toThrowError(/Invalid first argument/);
@@ -48,6 +51,7 @@ describe("h3", () => {
     expect(invalid2nd2).toThrowError(/Invalid second argument/);
     expect(invalid2nd3).toThrowError(/Invalid second argument/);
     expect(invalidChildren).toThrowError(/not a VNode: 1/);
+    expect(tooManyArgs).toThrowError(/Too many arguments/);
   });
 
   it("should support the creation of elements with a single, non-array child", () => {

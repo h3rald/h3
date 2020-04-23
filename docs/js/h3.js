@@ -1,4 +1,3 @@
-  
 /**
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
@@ -45,8 +44,6 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  const o1 = obj1 || {};
-  const o2 = obj2 || {};
   function checkProperties(obj1, obj2) {
     for (const key in obj1) {
       if (!(key in obj2)) {
@@ -58,7 +55,7 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  return checkProperties(o1, o2) && checkProperties(o2, o1);
+  return checkProperties(obj1, obj2) && checkProperties(obj2, obj1);
 };
 
 const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
@@ -98,14 +95,14 @@ class VNode {
         }
       } else {
         throw new Error(
-          "[VNode] Invalid first argument provided to VNode constructor."
+          "[VNode] Invalid first argument passed to VNode constructor."
         );
       }
     } else if (args.length === 2) {
       let [selector, data] = args;
       if (typeof selector !== "string") {
         throw new Error(
-          "[VNode] Invalid first argument provided to VNode constructor."
+          "[VNode] Invalid first argument passed to VNode constructor."
         );
       }
       this.processSelector(selector);
@@ -137,17 +134,21 @@ class VNode {
       let [selector, props, children] = args;
       if (typeof selector !== "string") {
         throw new Error(
-          "[VNode] Invalid first argument provided to VNode constructor."
+          "[VNode] Invalid first argument passed to VNode constructor."
         );
       }
       this.processSelector(selector);
       if (typeof props !== "object" || props === null) {
         throw new Error(
-          "[VNode] Invalid second argument provided to VNode constructor."
+          "[VNode] Invalid second argument passed to VNode constructor."
         );
       }
       this.processProperties(props);
       this.processChildren(children);
+    } else {
+      throw new Error(
+        "[VNode] Too many arguments passed to VNode constructor."
+      );
     }
   }
 
@@ -166,8 +167,8 @@ class VNode {
     this.classList = data.classList;
   }
 
-  equalTo(obj) {
-    return equal(this, obj);
+  equal(a, b) {
+    return equal(a, b === undefined ? this : b);
   }
 
   processProperties(attrs) {
@@ -181,7 +182,7 @@ class VNode {
       attrs.classList && attrs.classList.length > 0
         ? attrs.classList
         : this.classList;
-    this.attributes = attrs || {};
+    this.attributes = attrs;
     Object.keys(attrs)
       .filter((a) => a.startsWith("on"))
       .forEach((key) => {
@@ -295,7 +296,7 @@ class VNode {
 
   // Updates the current Virtual Node with a new Virtual Node (and syncs the existing DOM Node)
   redraw(data) {
-    let { node, vnode } = data || {};
+    let { node, vnode } = data;
     const newvnode = vnode;
     const oldvnode = this;
     if (
@@ -379,7 +380,7 @@ class VNode {
         if (!newvnode.eventListeners[a]) {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
         } else if (
-          !equal(newvnode.eventListeners[a] !== oldvnode.eventListeners[a])
+          !equal(newvnode.eventListeners[a], oldvnode.eventListeners[a])
         ) {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
           node.addEventListener(a, newvnode.eventListeners[a]);
@@ -395,82 +396,78 @@ class VNode {
     // Children
     var newmap = []; // Map positions of newvnode children in relation to oldvnode children
     var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
-    if (newvnode.children) {
-      function mapChildren(parent1, parent2) {
-        const map = [];
-        for (let j = 0; j < parent1.children.length; j++) {
-          let found = false;
-          for (let k = 0; k < parent2.children.length; k++) {
-            if (equal(parent1.children[j], parent2.children[k])) {
-              map.push(k);
-              found = true;
-              break;
-            }
-          }
-          // node not in oldvnode
-          if (!found) {
-            map.push(-1);
+    function mapChildren(parent1, parent2) {
+      const map = [];
+      for (let j = 0; j < parent1.children.length; j++) {
+        let found = false;
+        for (let k = 0; k < parent2.children.length; k++) {
+          if (equal(parent1.children[j], parent2.children[k])) {
+            map.push(k);
+            found = true;
+            break;
           }
         }
-        return map;
+        // node not in oldvnode
+        if (!found) {
+          map.push(-1);
+        }
       }
-      var newmap = mapChildren(newvnode, oldvnode);
-      var oldmap = mapChildren(oldvnode, newvnode);
+      return map;
+    }
+    var newmap = mapChildren(newvnode, oldvnode);
+    var oldmap = mapChildren(oldvnode, newvnode);
+    var notFoundInOld = newmap.indexOf(-1);
+    var notFoundInNew = oldmap.indexOf(-1);
+    if (equal(newmap, oldmap) && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
+      // Something changed
+      for (let i = 0; i < newmap.length; i++) {
+        if (newmap[i] === -1) {
+          if (oldvnode.children[i].type === "#text") {
+            oldvnode.children[i] = newvnode.children[i];
+            node.childNodes[i].nodeValue = newvnode.children[i].value;
+          } else {
+            oldvnode.children[i].redraw({
+              node: node.childNodes[i],
+              vnode: newvnode.children[i],
+            });
+          }
+        }
+      }
+    } else {
       var notFoundInOld = newmap.indexOf(-1);
       var notFoundInNew = oldmap.indexOf(-1);
-      if (equal(newmap, oldmap) && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
-        // Something changed
-        for (let i = 0; i < newmap.length; i++) {
-          if (newmap[i] === -1) {
-            if (oldvnode.children[i].type === "#text") {
-              oldvnode.children[i] = newvnode.children[i];
-              node.childNodes[i].nodeValue = newvnode.children[i].value;
-            } else {
-              oldvnode.children[i].redraw({
-                node: node.childNodes[i],
-                vnode: newvnode.children[i],
-              });
-            }
-          }
+      while (notFoundInOld >= 0 || notFoundInNew >= 0) {
+        // First remove children not found in new map, then add the missing ones.
+        if (notFoundInNew >= 0) {
+          // while there are children not found in newvnode, remove them and re-check
+          node.removeChild(node.childNodes[notFoundInNew]);
+          oldvnode.children.splice(notFoundInNew, 1);
+          newmap = mapChildren(newvnode, oldvnode);
+          oldmap = mapChildren(oldvnode, newvnode);
+          notFoundInNew = oldmap.indexOf(-1);
+          notFoundInOld = newmap.indexOf(-1);
         }
-      } else {
-        var notFoundInOld = newmap.indexOf(-1);
-        var notFoundInNew = oldmap.indexOf(-1);
-        while (notFoundInOld >= 0 || notFoundInNew >= 0) {
-          // First remove children not found in new map, then add the missing ones.
-          if (notFoundInNew >= 0) {
-            // while there are children not found in newvnode, remove them and re-check
-            node.removeChild(node.childNodes[notFoundInNew]);
-            oldvnode.children.splice(notFoundInNew, 1);
-            newmap = mapChildren(newvnode, oldvnode);
-            oldmap = mapChildren(oldvnode, newvnode);
-            notFoundInNew = oldmap.indexOf(-1);
-            notFoundInOld = newmap.indexOf(-1);
-          }
-          if (notFoundInOld >= 0) {
-            // while there are children not found in oldvnode, add them and re-check
-            node.insertBefore(
-              newvnode.children[notFoundInOld].render(),
-              node.childNodes[notFoundInOld]
-            );
-            oldvnode.children.splice(
-              notFoundInOld,
-              0,
-              newvnode.children[notFoundInOld]
-            );
-            newmap = mapChildren(newvnode, oldvnode);
-            oldmap = mapChildren(oldvnode, newvnode);
-            notFoundInNew = oldmap.indexOf(-1);
-            notFoundInOld = newmap.indexOf(-1);
-          }
+        if (notFoundInOld >= 0) {
+          // while there are children not found in oldvnode, add them and re-check
+          node.insertBefore(
+            newvnode.children[notFoundInOld].render(),
+            node.childNodes[notFoundInOld]
+          );
+          oldvnode.children.splice(
+            notFoundInOld,
+            0,
+            newvnode.children[notFoundInOld]
+          );
+          newmap = mapChildren(newvnode, oldvnode);
+          oldmap = mapChildren(oldvnode, newvnode);
+          notFoundInNew = oldmap.indexOf(-1);
+          notFoundInOld = newmap.indexOf(-1);
         }
       }
     }
     // innerHTML
-    if (oldvnode.$html !== newvnode.$html) {
-      if (newvnode.children.length === 0 && newvnode.$html) {
-        node.innerHTML = newvnode.$html;
-      }
+    if (newvnode.$html) {
+      node.innerHTML = newvnode.$html;
       oldvnode.$html = newvnode.$html;
     }
   }
@@ -496,10 +493,6 @@ class Store {
         this.state = { ...this.state, ...i(this.state, data) };
       });
     }
-  }
-
-  get(arg) {
-    return arg ? this.state[arg] : this.state;
   }
 
   on(event, cb) {
@@ -533,7 +526,7 @@ class Router {
     this.element = element;
     this.redraw = null;
     this.store = store;
-    this.location = location || window.location; 
+    this.location = location || window.location;
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
@@ -622,7 +615,9 @@ h3.init = (config) => {
   if (!routes) {
     // Assume config is a component object, define default route
     if (typeof config !== "function") {
-      throw new Error("[h3.init] The specified argument is not a valid configuration object or component function");
+      throw new Error(
+        "[h3.init] The specified argument is not a valid configuration object or component function"
+      );
     }
     routes = { "/": config };
   }
@@ -633,7 +628,7 @@ h3.init = (config) => {
   // Initialize store
   store = new Store();
   (modules || []).forEach((i) => {
-    if (i) i(store);
+    i(store);
   });
   store.dispatch("$init");
   // Initialize router
@@ -670,7 +665,7 @@ Object.defineProperty(h3, "state", {
         "[h3.state] No application initialized, unable to retrieve current state."
       );
     }
-    return store.get();
+    return store.state;
   },
 });
 

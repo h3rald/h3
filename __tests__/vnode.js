@@ -48,7 +48,7 @@ describe("VNode", () => {
 
   it("should provide a render method able to render element nodes with attributes and classes", () => {
     const createElement = jest.spyOn(document, "createElement");
-    const vnode = h3("span.test1.test2", { title: "test" });
+    const vnode = h3("span.test1.test2", { title: "test", falsy: false });
     const node = vnode.render();
     expect(createElement).toHaveBeenCalledWith("span");
     expect(node.constructor).toEqual(HTMLSpanElement);
@@ -113,10 +113,13 @@ describe("VNode", () => {
   });
 
   it("should provide a redraw method that is able to add new DOM nodes", () => {
-    const oldvnode = h3("div", h3("span"));
+    const oldvnode = h3("div#test", h3("span"));
+    const newvnodeNoChildren = h3("div");
     const newvnode = h3("div", [h3("span#a"), h3("span")]);
     const node = oldvnode.render();
     const span = node.childNodes[0];
+    oldvnode.redraw({ node: node, vnode: newvnodeNoChildren });
+    expect(oldvnode.children.length).toEqual(0);
     oldvnode.redraw({ node: node, vnode: newvnode });
     expect(oldvnode).toEqual(newvnode);
     expect(oldvnode.children.length).toEqual(2);
@@ -137,6 +140,18 @@ describe("VNode", () => {
     expect(span).toEqual(node.childNodes[0]);
   });
 
+  it("should provide a redraw method that is able to figure out differences in children", () => {
+    const oldvnode = h3("div", [h3("span", "a"), h3("span"), h3("span", "b")]);
+    const newvnode = h3("div", [
+      h3("span", "a"),
+      h3("span", "c"),
+      h3("span", "b"),
+    ]);
+    const node = oldvnode.render();
+    oldvnode.redraw({ node: node, vnode: newvnode });
+    expect(node.childNodes[1].textContent).toEqual("c");
+  });
+
   it("should provide a redraw method that is able to update different attributes", () => {
     const oldvnode = h3("span", { title: "a", something: "b" });
     const newvnode = h3("span", { title: "b", id: "bbb" });
@@ -150,11 +165,11 @@ describe("VNode", () => {
 
   it("should provide a redraw method that is able to update different classes", () => {
     const oldvnode = h3("span.a.b", { title: "b" });
-    const newvnode = h3("span.c", { title: "b" });
+    const newvnode = h3("span.a.c", { title: "b" });
     const node = oldvnode.render();
     oldvnode.redraw({ node: node, vnode: newvnode });
     expect(oldvnode).toEqual(newvnode);
-    expect(node.classList.value).toEqual("c");
+    expect(node.classList.value).toEqual("a c");
   });
 
   it("should provide redraw method to detect changed nodes if they have different elements", () => {
@@ -211,18 +226,21 @@ describe("VNode", () => {
     const fn = () => false;
     const oldvnode = h3("input", {
       style: "margin: auto;",
-      data: { a: 111, b: 222 },
+      data: { a: 111, b: 222, d: 444 },
       value: "Test...",
       title: "test",
+      label: "test",
+      onkeydown: () => true,
       onclick: () => true,
       onkeypress: () => true,
     });
     const newvnode = h3("input", {
-      style: "margin: 5px;",
-      data: { a: 112, c: 333 },
-      value: "Test!",
+      style: false,
+      data: { a: 111, b: 223, c: 333 },
       title: "test #2",
+      label: "test",
       placeholder: "test",
+      onkeydown: () => true,
       onkeypress: () => false,
       onhover: () => true,
     });
@@ -231,13 +249,14 @@ describe("VNode", () => {
     container.appendChild(node);
     oldvnode.redraw({ node: node, vnode: newvnode });
     expect(oldvnode).toEqual(newvnode);
-    expect(node.style.cssText).toEqual("margin: 5px;");
-    expect(node.dataset["a"]).toEqual("112");
+    expect(node.style.cssText).toEqual("");
+    expect(node.dataset["a"]).toEqual("111");
     expect(node.dataset["c"]).toEqual("333");
-    expect(node.dataset["b"]).toEqual(undefined);
+    expect(node.dataset["b"]).toEqual("223");
+    expect(node.dataset["d"]).toEqual(undefined);
     expect(node.getAttribute("title")).toEqual("test #2");
     expect(node.getAttribute("placeholder")).toEqual("test");
-    expect(node.value).toEqual("Test!");
+    expect(node.value).toEqual("");
   });
 
   it("should provide a redraw method able to detect changes in child content", () => {

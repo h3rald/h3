@@ -9,8 +9,11 @@ const mockLocation = {
     return hash;
   },
   set hash(value) {
+    const event = new CustomEvent("hashchange");
+    event.oldURL = hash;
+    event.newURL = value;
     hash = value;
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    window.dispatchEvent(event);
   },
 };
 
@@ -60,16 +63,22 @@ describe("h3 (Router)", () => {
   });
 
   it("should expose a navigateTo method to navigate to another path", () => {
-    h3.navigateTo("/c2", {test1: 1, test2: 2});
+    h3.navigateTo("/c2", { test1: 1, test2: 2 });
     expect(document.body.childNodes[0].childNodes[1].textContent).toEqual(
       "test2: 2"
     );
+    h3.navigateTo("/c2");
+    expect(document.body.childNodes[0].innerHTML).toEqual("");
   });
 
   it("should fail if no route matches at startup", async () => {
+    mockLocation.hash = "#/test";
     try {
-      await h3.init({element: document.body, routes: {"/gasdgasdg": () => false}});
-    } catch(e) {
+      await h3.init({
+        element: document.body,
+        routes: { "/aaa": () => false },
+      });
+    } catch (e) {
       expect(e.message).toMatch(/No route matches/);
     }
   });
