@@ -3,12 +3,9 @@ import Paginator from "./Paginator.js";
 
 export default function NavigationBar() {
   // Set the todo filter.
-  const setFilter = () => {
-    let f = document.getElementById("filter-text");
-    h3.dispatch("todos/filter", f.value);
-    h3.redraw()
-    f = document.getElementById("filter-text");
-    f.focus();
+  const setFilter = (e) => {
+    h3.dispatch("todos/filter", e.target.value);
+    h3.redraw();
   };
   // Filtering function for todo items
   return h3("div.navigation-bar", [
@@ -23,7 +20,7 @@ export default function NavigationBar() {
     h3("input", {
       id: "filter-text",
       placeholder: "Type to filter todo items...",
-      onkeyup: setFilter,
+      oninput: setFilter,
     }),
     Paginator,
   ]);

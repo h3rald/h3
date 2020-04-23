@@ -4,7 +4,6 @@ import SettingsView from "./components/SettingsView.js";
 import MainView from "./components/MainView.js";
 
 h3.init({
-  element: document.getElementById("app"),
   modules,
   preStart: () => {
     h3.dispatch("app/load");

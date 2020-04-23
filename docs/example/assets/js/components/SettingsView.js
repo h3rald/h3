@@ -1,15 +1,15 @@
 import h3 from "../h3.js";
 
 export default function () {
-  const toggleLogging = () => {
-    const value = document.getElementById("options-logging").checked;
+  const toggleLogging = (e) => {
+    const value = e.target.checked;
     h3.dispatch("settings/set", { logging: value });
     h3.dispatch("app/save");
   };
   return h3("div.settings.container", [
     h3("h1", "Settings"),
     h3("div.options", [
-      h3("input#options-logging", {
+      h3("input", {
         type: "checkbox",
         onclick: toggleLogging,
         checked: h3.state.settings.logging,

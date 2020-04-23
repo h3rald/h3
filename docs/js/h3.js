@@ -307,7 +307,7 @@ class VNode {
     }
     // ID
     if (oldvnode.id !== newvnode.id) {
-      node.id = newvnode.id;
+      node.id = newvnode.id || "";
       oldvnode.id = newvnode.id;
     }
     // Value
@@ -331,7 +331,7 @@ class VNode {
     }
     // Style
     if (oldvnode.style !== newvnode.style) {
-      node.style.cssText = newvnode.style;
+      node.style.cssText = newvnode.style || "";
       oldvnode.style = newvnode.style;
     }
     // Data
@@ -588,6 +588,7 @@ class Router {
       const vnode = this.routes[this.route.def]();
       this.element.appendChild(vnode.render());
       this.setRedraw(vnode);
+      window.scrollTo(0, 0);
       this.store.dispatch("$redraw", this.route);
       this.store.dispatch("$navigation", this.route);
     };

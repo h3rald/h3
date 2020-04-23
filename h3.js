@@ -588,6 +588,7 @@ class Router {
       const vnode = this.routes[this.route.def]();
       this.element.appendChild(vnode.render());
       this.setRedraw(vnode);
+      window.scrollTo(0, 0);
       this.store.dispatch("$redraw", this.route);
       this.store.dispatch("$navigation", this.route);
     };
