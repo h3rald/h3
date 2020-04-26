@@ -12,7 +12,7 @@ H3 is also:
 
 Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/v0.2.0/h3.js" target="_blank" class="button primary">Download v0.2.0 (Brave Bajoran)</a>
+<a href="https://raw.githubusercontent.com/h3rald/h3/v0.3.0/h3.js" target="_blank" class="button primary">Download v0.3.0 (Cunning Cardassian)</a>
 
 Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
@@ -39,6 +39,3 @@ Yes. It's [MIT-licensed](https://github.com/h3rald/h3/blob/master/LICENSE).
 
 Go fix it! Or at least open an issue on the [Github repo](https://github.com/h3rald/h3), pleasy.
 
-### Can I download a single, printable HTML file containing all the contents of this site?
-
-What a weird thing to ask... [Sure you can](H3_DeveloperGuide.htm)!
