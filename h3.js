@@ -236,15 +236,19 @@ class VNode {
 
   processChildren(arg) {
     const children = Array.isArray(arg) ? arg : [arg];
-    this.children = children.map((c) => {
-      if (typeof c === "string") {
-        return new VNode({ type: "#text", value: c });
-      }
-      if (typeof c === "function" || (typeof c === "object" && c !== null)) {
-        return this.processVNodeObject(c);
-      }
-      throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
-    });
+    this.children = children
+      .map((c) => {
+        if (typeof c === "string") {
+          return new VNode({ type: "#text", value: c });
+        }
+        if (typeof c === "function" || (typeof c === "object" && c !== null)) {
+          return this.processVNodeObject(c);
+        }
+        if (c) {
+          throw new Error(`[VNode] Specified child is not a VNode: ${c}`);
+        }
+      })
+      .filter((c) => c);
   }
 
   // Renders the actual DOM Node corresponding to the current Virtual Node

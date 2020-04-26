@@ -2,9 +2,9 @@ const h3 = require("../h3.js").default;
 
 describe("h3", () => {
   it("should support a way to discriminate functions and objects", () => {
-    const v1 = h3("div", {onclick: () => true});
-    const v2 = h3("div", {onclick: () => true});
-    const v3 = h3("div", {onclick: () => false});
+    const v1 = h3("div", { onclick: () => true });
+    const v2 = h3("div", { onclick: () => true });
+    const v3 = h3("div", { onclick: () => false });
     const v4 = h3("div");
     expect(v1.equal(v2)).toEqual(true);
     expect(v1.equal(v3)).toEqual(false);
@@ -40,7 +40,7 @@ describe("h3", () => {
     const invalid2nd2 = () => h3("div", true, []);
     const invalid2nd3 = () => h3("div", null, []);
     const invalidChildren = () => h3("div", ["test", 1, 2]);
-    const tooManyArgs = () => h3("div", {id: "test"}, "test", "aaa");
+    const tooManyArgs = () => h3("div", { id: "test" }, "test", "aaa");
     expect(empty).toThrowError(/No arguments passed/);
     expect(invalid1st).toThrowError(/Invalid first argument/);
     expect(invalid1st2).toThrowError(/Invalid first argument/);
@@ -59,6 +59,11 @@ describe("h3", () => {
     const vnode2 = h3("div", () => h3("span"));
     expect(vnode1.children[0].value).toEqual("test");
     expect(vnode2.children[0].type).toEqual("span");
+  });
+
+  it("should remove null/false/undefined children", () => {
+    const v1 = h3("div", [false, "test", undefined, null, ""]);
+    expect(v1.children).toEqual([h3({ type: "#text", value: "test" }), h3({ type: "#text", value: "" })]);
   });
 
   it("should support the creation of nodes with a single child node", () => {
