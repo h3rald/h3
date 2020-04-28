@@ -426,15 +426,10 @@ class VNode {
       // Something changed
       for (let i = 0; i < newmap.length; i++) {
         if (newmap[i] === -1) {
-          if (oldvnode.children[i].type === "#text") {
-            oldvnode.children[i] = newvnode.children[i];
-            node.childNodes[i].nodeValue = newvnode.children[i].value;
-          } else {
-            oldvnode.children[i].redraw({
-              node: node.childNodes[i],
-              vnode: newvnode.children[i],
-            });
-          }
+          oldvnode.children[i].redraw({
+            node: node.childNodes[i],
+            vnode: newvnode.children[i],
+          });
         }
       }
     } else {
