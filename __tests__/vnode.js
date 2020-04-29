@@ -152,6 +152,24 @@ describe("VNode", () => {
     expect(node.childNodes[1].textContent).toEqual("c");
   });
 
+  it("should provide a redraw method that is able to figure out differences in existing children", () => {
+    const oldvnode = h3("div", [
+      h3("span.test", "a"),
+      h3("span.test", "b"),
+      h3("span.test", "c"),
+    ]);
+    const newvnode = h3("div", [
+      h3("span.test", "a"),
+      h3("span.test1", "b"),
+      h3("span.test", "c"),
+    ]);
+    const node = oldvnode.render();
+    oldvnode.redraw({ node: node, vnode: newvnode });
+    expect(node.childNodes[0].classList[0]).toEqual("test");
+    expect(node.childNodes[1].classList[0]).toEqual("test1");
+    expect(node.childNodes[2].classList[0]).toEqual("test");
+  });
+
   it("should provide a redraw method that is able to update different attributes", () => {
     const oldvnode = h3("span", { title: "a", something: "b" });
     const newvnode = h3("span", { title: "b", id: "bbb" });
