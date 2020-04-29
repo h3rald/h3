@@ -405,7 +405,7 @@ class VNode {
       for (let j = 0; j < parent1.children.length; j++) {
         let found = false;
         for (let k = 0; k < parent2.children.length; k++) {
-          if (parent1.children[j].equal(parent2.children[k])) {
+          if (parent1.children[j].equal(parent2.children[k]) && !map.includes(k)) {
             map.push(k);
             found = true;
             break;
@@ -422,10 +422,10 @@ class VNode {
     var oldmap = mapChildren(oldvnode, newvnode);
     var notFoundInOld = newmap.indexOf(-1);
     var notFoundInNew = oldmap.indexOf(-1);
-    if (equal(newmap, oldmap) && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
+    if (newmap.length === oldmap.length && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
       // Something changed
       for (let i = 0; i < newmap.length; i++) {
-        if (newmap[i] === -1) {
+        if (newmap[i] === -1 || oldmap[i] === -1) {
           oldvnode.children[i].redraw({
             node: node.childNodes[i],
             vnode: newvnode.children[i],
