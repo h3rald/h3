@@ -130,7 +130,7 @@ A message name can be anything, but keep in mind that the following names (and t
 * `$navigation` &mdash; Dispatched after a navigation occurs.
 * `$log` &mdash; Dispatched after *any* message (except `$log` iself) is dispatched. Very useful for debugging.
 
-### h3.init(config: object))
+### h3.init(config: object)
 
 The initialization method of every H3 application. You _must_ call this method once to initialize your application by providing a component to render or configuration object with the following properties:
 

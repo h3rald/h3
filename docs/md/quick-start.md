@@ -40,7 +40,7 @@ After importing the `h3` object, you can start developing your SPA. A bare minim
 
 ```js
 // A simple component printing the current date and time
-// Pressig the Refresh button causes the applicationn to redraw
+// Pressig the Refresh button causes the application to redraw
 // And updates the displayed date/dime.
 const Page = () => {
   return h3("main", [
