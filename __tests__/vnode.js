@@ -129,15 +129,21 @@ describe("VNode", () => {
   });
 
   it("should provide a redraw method that is able to remove existing DOM nodes", () => {
-    const newvnode = h3("div", [h3("span")]);
-    const oldvnode = h3("div", [h3("span#a"), h3("span")]);
-    const node = oldvnode.render();
-    const span = node.childNodes[1];
+    let oldvnode = h3("div", [h3("span#a"), h3("span")]);
+    let newvnode = h3("div", [h3("span")]);
+    let node = oldvnode.render();
     oldvnode.redraw({ node: node, vnode: newvnode });
     expect(oldvnode).toEqual(newvnode);
     expect(oldvnode.children.length).toEqual(1);
     expect(node.childNodes.length).toEqual(1);
-    expect(span).toEqual(node.childNodes[0]);
+    oldvnode = h3("div.test-children", [h3("span.a"), h3("span.b")]);
+    node = oldvnode.render();
+    newvnode = h3("div.test-children", [h3("div.c")]);
+    oldvnode.redraw({ node: node, vnode: newvnode });
+    expect(oldvnode).toEqual(newvnode);
+    expect(oldvnode.children.length).toEqual(1);
+    expect(node.childNodes.length).toEqual(1);
+    expect(oldvnode.children[0].classList[0]).toEqual("c");
   });
 
   it("should provide a redraw method that is able to figure out differences in children", () => {

@@ -314,6 +314,8 @@ class VNode {
       oldvnode.from(newvnode);
       return;
     }
+    // $key
+    oldvnode.$key = newvnode.$key;
     // ID
     if (oldvnode.id !== newvnode.id) {
       node.id = newvnode.id || "";
@@ -398,14 +400,15 @@ class VNode {
       oldvnode.eventListeners = newvnode.eventListeners;
     }
     // Children
-    var newmap = []; // Map positions of newvnode children in relation to oldvnode children
-    var oldmap = []; // Map positions of oldvnode children in relation to newvnode children
     function mapChildren(parent1, parent2) {
       const map = [];
       for (let j = 0; j < parent1.children.length; j++) {
         let found = false;
         for (let k = 0; k < parent2.children.length; k++) {
-          if (parent1.children[j].equal(parent2.children[k])) {
+          if (
+            parent1.children[j].equal(parent2.children[k]) &&
+            !map.includes(k)
+          ) {
             map.push(k);
             found = true;
             break;
@@ -418,40 +421,43 @@ class VNode {
       }
       return map;
     }
-    var newmap = mapChildren(newvnode, oldvnode);
-    var oldmap = mapChildren(oldvnode, newvnode);
-    var notFoundInOld = newmap.indexOf(-1);
-    var notFoundInNew = oldmap.indexOf(-1);
-    if (equal(newmap, oldmap) && (notFoundInNew >= 0 || notFoundInOld >= 0)) {
+    // Map positions of newvnode children in relation to oldvnode children
+    let newmap = mapChildren(newvnode, oldvnode);
+    // Map positions of oldvnode children in relation to newvnode children
+    let oldmap = mapChildren(oldvnode, newvnode);
+    let notFoundInOld = newmap.indexOf(-1);
+    let notFoundInNew = oldmap.indexOf(-1);
+    if (newmap.length === oldmap.length && notFoundInNew >= 0) {
       // Something changed
       for (let i = 0; i < newmap.length; i++) {
-        if (newmap[i] === -1) {
-          if (oldvnode.children[i].type === "#text") {
-            oldvnode.children[i] = newvnode.children[i];
-            node.childNodes[i].nodeValue = newvnode.children[i].value;
-          } else {
-            oldvnode.children[i].redraw({
-              node: node.childNodes[i],
-              vnode: newvnode.children[i],
-            });
-          }
+        if (newmap[i] === -1 || oldmap[i] === -1) {
+          oldvnode.children[i].redraw({
+            node: node.childNodes[i],
+            vnode: newvnode.children[i],
+          });
         }
       }
     } else {
-      var notFoundInOld = newmap.indexOf(-1);
-      var notFoundInNew = oldmap.indexOf(-1);
       while (notFoundInOld >= 0 || notFoundInNew >= 0) {
         // First remove children not found in new map, then add the missing ones.
         if (notFoundInNew >= 0) {
-          // while there are children not found in newvnode, remove them and re-check
-          node.removeChild(node.childNodes[notFoundInNew]);
-          oldvnode.children.splice(notFoundInNew, 1);
-          newmap = mapChildren(newvnode, oldvnode);
-          oldmap = mapChildren(oldvnode, newvnode);
-          notFoundInNew = oldmap.indexOf(-1);
-          notFoundInOld = newmap.indexOf(-1);
-        }
-        if (notFoundInOld >= 0) {
+          const childOfNew =
+            newvnode.children.length > notFoundInNew &&
+            newvnode.children[notFoundInNew];
+          const childofOld = oldvnode.children[notFoundInNew];
+          if (childOfNew && childofOld && childofOld.type === childOfNew.type) {
+            // optimization to avoid removing nodes of the same type
+            oldvnode.children[notFoundInNew].redraw({
+              node: node.childNodes[notFoundInNew],
+              vnode: newvnode.children[notFoundInNew],
+            });
+          } else {
+            // while there are children not found in newvnode, remove them and re-check
+            node.removeChild(node.childNodes[notFoundInNew]);
+            oldvnode.children.splice(notFoundInNew, 1);
+          }
+        } else {
+          //(notFoundInOld >= 0) {
           // while there are children not found in oldvnode, add them and re-check
           node.insertBefore(
             newvnode.children[notFoundInOld].render(),
@@ -462,11 +468,11 @@ class VNode {
             0,
             newvnode.children[notFoundInOld]
           );
-          newmap = mapChildren(newvnode, oldvnode);
-          oldmap = mapChildren(oldvnode, newvnode);
-          notFoundInNew = oldmap.indexOf(-1);
-          notFoundInOld = newmap.indexOf(-1);
         }
+        newmap = mapChildren(newvnode, oldvnode);
+        oldmap = mapChildren(oldvnode, newvnode);
+        notFoundInNew = oldmap.indexOf(-1);
+        notFoundInOld = newmap.indexOf(-1);
       }
     }
     // innerHTML
