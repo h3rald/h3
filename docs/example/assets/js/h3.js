@@ -414,7 +414,6 @@ class VNode {
             break;
           }
         }
-        // node not in oldvnode
         if (!found) {
           map.push(-1);
         }
@@ -446,19 +445,18 @@ class VNode {
             newvnode.children[notFoundInNew];
           const childofOld = oldvnode.children[notFoundInNew];
           if (childOfNew && childofOld && childofOld.type === childOfNew.type) {
-            // optimization to avoid removing nodes of the same type
+            // Optimization to avoid removing nodes of the same type
             oldvnode.children[notFoundInNew].redraw({
               node: node.childNodes[notFoundInNew],
               vnode: newvnode.children[notFoundInNew],
             });
           } else {
-            // while there are children not found in newvnode, remove them and re-check
+            // While there are children not found in newvnode, remove them and re-check
             node.removeChild(node.childNodes[notFoundInNew]);
             oldvnode.children.splice(notFoundInNew, 1);
           }
         } else {
-          //(notFoundInOld >= 0) {
-          // while there are children not found in oldvnode, add them and re-check
+          // While there are children not found in oldvnode, add them and re-check
           node.insertBefore(
             newvnode.children[notFoundInOld].render(),
             node.childNodes[notFoundInOld]
