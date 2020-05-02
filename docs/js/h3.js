@@ -588,6 +588,7 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
+      this.store.dispatch("$navigation", this.route);
       // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
@@ -597,7 +598,6 @@ class Router {
       this.setRedraw(vnode);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw", this.route);
-      this.store.dispatch("$navigation", this.route);
     };
     processPath();
     window.addEventListener("hashchange", processPath);
