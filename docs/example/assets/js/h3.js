@@ -267,6 +267,10 @@ class VNode {
         a.value = this.attributes[attr];
         node.setAttributeNode(a);
       }
+      // Handle boolean attributes
+      if (this.attributes[attr] === false) {
+        node[attr] = false;
+      }
     });
     // Event Listeners
     Object.keys(this.eventListeners).forEach((event) => {
@@ -364,13 +368,17 @@ class VNode {
     // Attributes
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
-        if (!newvnode.attributes[a]) {
-          node.removeAttribute(a);
-        } else if (
-          newvnode.attributes[a] &&
-          newvnode.attributes[a] !== oldvnode.attributes[a]
-        ) {
-          node.setAttribute(a, newvnode.attributes[a]);
+        if ([false, true].includes(newvnode.attributes.checked)) {
+          node.checked = newvnode.attributes.checked;
+        } else {
+          if (!newvnode.attributes[a]) {
+            node.removeAttribute(a);
+          } else if (
+            newvnode.attributes[a] &&
+            newvnode.attributes[a] !== oldvnode.attributes[a]
+          ) {
+            node.setAttribute(a, newvnode.attributes[a]);
+          }
         }
       });
       Object.keys(newvnode.attributes).forEach((a) => {
@@ -414,7 +422,6 @@ class VNode {
             break;
           }
         }
-        // node not in oldvnode
         if (!found) {
           map.push(-1);
         }
@@ -446,19 +453,18 @@ class VNode {
             newvnode.children[notFoundInNew];
           const childofOld = oldvnode.children[notFoundInNew];
           if (childOfNew && childofOld && childofOld.type === childOfNew.type) {
-            // optimization to avoid removing nodes of the same type
+            // Optimization to avoid removing nodes of the same type
             oldvnode.children[notFoundInNew].redraw({
               node: node.childNodes[notFoundInNew],
               vnode: newvnode.children[notFoundInNew],
             });
           } else {
-            // while there are children not found in newvnode, remove them and re-check
+            // While there are children not found in newvnode, remove them and re-check
             node.removeChild(node.childNodes[notFoundInNew]);
             oldvnode.children.splice(notFoundInNew, 1);
           }
         } else {
-          //(notFoundInOld >= 0) {
-          // while there are children not found in oldvnode, add them and re-check
+          // While there are children not found in oldvnode, add them and re-check
           node.insertBefore(
             newvnode.children[notFoundInOld].render(),
             node.childNodes[notFoundInOld]

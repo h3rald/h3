@@ -267,8 +267,9 @@ class VNode {
         a.value = this.attributes[attr];
         node.setAttributeNode(a);
       }
-      if ([false, true].includes(this.attributes.checked)) {
-        node.checked = this.attributes.checked;
+      // Handle boolean attributes
+      if (this.attributes[attr] === false) {
+        node[attr] = false;
       }
     });
     // Event Listeners
@@ -367,17 +368,16 @@ class VNode {
     // Attributes
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
-        if ([false, true].includes(newvnode.attributes.checked)) {
-          node.checked = newvnode.attributes.checked;
-        } else {
-          if (!newvnode.attributes[a]) {
-            node.removeAttribute(a);
-          } else if (
-            newvnode.attributes[a] &&
-            newvnode.attributes[a] !== oldvnode.attributes[a]
-          ) {
-            node.setAttribute(a, newvnode.attributes[a]);
-          }
+        if (newvnode.attributes[a] === false) {
+          node[a] = false;
+        }
+        if (!newvnode.attributes[a]) {
+          node.removeAttribute(a);
+        } else if (
+          newvnode.attributes[a] &&
+          newvnode.attributes[a] !== oldvnode.attributes[a]
+        ) {
+          node.setAttribute(a, newvnode.attributes[a]);
         }
       });
       Object.keys(newvnode.attributes).forEach((a) => {
