@@ -6,11 +6,12 @@
   "main": "h3.js",
   "scripts": {
     "test": "jest",
-    "coverage": "jest --env=jsdom --coverage && cat ./coverage/lcov.info | coveralls",
+    "coverage": "jest --coverage ",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
     "copy": "cp h3.js docs/js/h3.js && cp h3.js docs/example/assets/js/h3.js",
     "release": "node scripts/release.js",
     "guide": "hastyscribe docs/H3_DeveloperGuide.md",
-    "update": "npm run release && npm run copy && npm run guide"
+    "regenerate": "npm run release && npm run copy && npm run guide"
   },
   "repository": {
     "type": "git",

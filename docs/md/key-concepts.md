@@ -53,13 +53,13 @@ const CounterButton = () => {
 
 ### Store
 
-H3 essentially uses something very, *very* similar to [Storeon](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side message dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to actions (messages).
+H3 essentially uses something very, *very* similar to [Storeon](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side event dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to events.
 
 The current application state is accessible via the `h3.state` property.
 
 ### Modules
 
-The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific messages are received. A simple module looks like this:
+The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific events are received. A simple module looks like this:
 
 ```js
 const error = () => {
@@ -69,7 +69,7 @@ const error = () => {
 };
 ```
 
-Essentially a module is just a function that typically is meant to run only once to define one or more message subscriptions. Modules are the place where you should handle state changes in your application.
+Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.
 
 ### Router
 
@@ -77,7 +77,7 @@ H3 comes with a very minimal but fully functional URL fragment router. You creat
 
 The current route is always accessible via the `h3.route` property.
 
-### Sequence Diagram
+### How everything works...
 
 The following sequence diagram summarizes how H3 works, from its initialization to the redraw and navigation phases.
 
@@ -87,22 +87,25 @@ When the `h3.init()` method is called at application level, the following operat
 
 1. The *Store* is created and initialized.
 2. Any *Module* specified when calling `h3.init()` is executed.
-3. The **$init** message is dispatched.
+3. The **$init** event is dispatched.
 4. The *preStart* function (if specified when calling `h3.init()`) is executed.
 5. The *Router* is initialized and started.
-6. All *Components* matching the current route are rendered for the first time.
-7. The **$redraw** and **$navigation** messages are dispatched.
+6. The **$navigation** event is dispatched.
+7. All *Components* matching the current route are rendered for the first time.
+8. The **$redraw** event is dispatched.
 
 Then, whenever the `h3.redraw()` method is called (typically within a component):
 
-1. The whole application is redrawn, i.e. every *Component* currently rendered on the page is redrawn.
-2. The **$redraw** message is dispatched.
+1. A page redraw is scheduled to be executed before the next browser repaint using the [window.requestAnimationFrame()](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) method.
+2. The whole application is redrawn, i.e. every *Component* currently rendered on the page is redrawn.
+3. The **$redraw** event is dispatched.
 
 Similarly, whenever the `h3.navigateTo()` method is called (typically within a component), or the URL fragment changes:
 
 1. The *Router* processes the new path and determine which component to render based on the routing configuration.
 2. All DOM nodes within the scope of the routing are removed, all components are removed.
-3. The *Component* matching the new route is rendered.
-4. The **$redraw** and **$navigation** messages are dispatched.
+3. The **$navigation** event is dispatched.
+4. The *Component* matching the new route is rendered.
+5. The **$redraw** event is dispatched.
 
 And that's it. The whole idea is to make the system extremely *simple* and *predictable* &mdash; which means everything should be very easy to debug, too.

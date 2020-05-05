@@ -15,13 +15,14 @@ H3 -> Store : dispatch($init)
 H3 -> Application : preStart()
 H3 -> Router : //initialize//
 H3 -> Router : start()
+Router -> Store: dispatch($navigation)
 Router -> Component : render()
 Router -> Store: dispatch($redraw)
-Router -> Store: dispatch($navigation)
+
 H3 -> Application : postStart()
 
 group redraw
-    Component -> H3 : <b>h3.redraw()</b>
+    Component --> H3 : <b>h3.redraw()</b>
     H3 -> Component : redraw()
     H3 -> Store: dispatch($redraw)
 end
@@ -29,11 +30,12 @@ end
 group navigation
     Component -> H3 : <b>h3.navigateTo()</b>
     H3 -> Router : processPath()
+    Router -> Store: dispatch($navigation)
     Router -> Application : //remove all DOM nodes//
     Application -> Component : //remove all DOM nodes//
     Router -> Component : render()
     Router -> Store: dispatch($redraw)
-    Router -> Store: dispatch($navigation)
+    
 end
 
 

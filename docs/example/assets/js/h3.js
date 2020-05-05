@@ -5,6 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+const checkProperties = (obj1, obj2) => {
+  for (const key in obj1) {
+    if (!(key in obj2)) {
+      return false;
+    }
+    if (!equal(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
@@ -44,18 +56,7 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  function checkProperties(obj1, obj2) {
-    for (const key in obj1) {
-      if (!(key in obj2)) {
-        return false;
-      }
-      if (!equal(obj1[key], obj2[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return checkProperties(obj1, obj2) && checkProperties(obj2, obj1);
+  return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
 const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
@@ -368,17 +369,16 @@ class VNode {
     // Attributes
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
-        if ([false, true].includes(newvnode.attributes.checked)) {
-          node.checked = newvnode.attributes.checked;
-        } else {
-          if (!newvnode.attributes[a]) {
-            node.removeAttribute(a);
-          } else if (
-            newvnode.attributes[a] &&
-            newvnode.attributes[a] !== oldvnode.attributes[a]
-          ) {
-            node.setAttribute(a, newvnode.attributes[a]);
-          }
+        if (newvnode.attributes[a] === false) {
+          node[a] = false;
+        }
+        if (!newvnode.attributes[a]) {
+          node.removeAttribute(a);
+        } else if (
+          newvnode.attributes[a] &&
+          newvnode.attributes[a] !== oldvnode.attributes[a]
+        ) {
+          node.setAttribute(a, newvnode.attributes[a]);
         }
       });
       Object.keys(newvnode.attributes).forEach((a) => {
@@ -552,9 +552,13 @@ class Router {
 
   setRedraw(vnode) {
     this.redraw = () => {
-      const fn = this.routes[this.route.def];
-      vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
-      this.store.dispatch("$redraw");
+      window.requestAnimationFrame(() => {
+        vnode.redraw({
+          node: this.element.childNodes[0],
+          vnode: this.routes[this.route.def](),
+        });
+        this.store.dispatch("$redraw");
+      });
     };
   }
 
@@ -603,7 +607,7 @@ class Router {
       this.element.appendChild(vnode.render());
       this.setRedraw(vnode);
       window.scrollTo(0, 0);
-      this.store.dispatch("$redraw", this.route);
+      this.store.dispatch("$redraw");
     };
     processPath();
     window.addEventListener("hashchange", processPath);

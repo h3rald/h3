@@ -1,6 +1,16 @@
 const h3 = require("../h3.js").default;
 
 describe("h3", () => {
+  beforeEach(() => {
+    jest
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((cb) => cb());
+  });
+
+  afterEach(() => {
+    window.requestAnimationFrame.mockRestore();
+  });
+
   it("should support a way to discriminate functions and objects", () => {
     const v1 = h3("div", { onclick: () => true });
     const v2 = h3("div", { onclick: () => true });
@@ -63,7 +73,10 @@ describe("h3", () => {
 
   it("should remove null/false/undefined children", () => {
     const v1 = h3("div", [false, "test", undefined, null, ""]);
-    expect(v1.children).toEqual([h3({ type: "#text", value: "test" }), h3({ type: "#text", value: "" })]);
+    expect(v1.children).toEqual([
+      h3({ type: "#text", value: "test" }),
+      h3({ type: "#text", value: "" }),
+    ]);
   });
 
   it("should support the creation of nodes with a single child node", () => {
