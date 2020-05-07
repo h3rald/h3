@@ -552,13 +552,11 @@ class Router {
 
   setRedraw(vnode) {
     this.redraw = () => {
-      window.requestAnimationFrame(() => {
-        vnode.redraw({
-          node: this.element.childNodes[0],
-          vnode: this.routes[this.route.def](),
-        });
-        this.store.dispatch("$redraw");
+      vnode.redraw({
+        node: this.element.childNodes[0],
+        vnode: this.routes[this.route.def](),
       });
+      this.store.dispatch("$redraw");
     };
   }
 
