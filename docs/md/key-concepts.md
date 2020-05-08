@@ -96,9 +96,8 @@ When the `h3.init()` method is called at application level, the following operat
 
 Then, whenever the `h3.redraw()` method is called (typically within a component):
 
-1. A page redraw is scheduled to be executed before the next browser repaint using the [window.requestAnimationFrame()](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) method.
-2. The whole application is redrawn, i.e. every *Component* currently rendered on the page is redrawn.
-3. The **$redraw** event is dispatched.
+1. The whole application is redrawn, i.e. every *Component* currently rendered on the page is redrawn.
+2. The **$redraw** event is dispatched.
 
 Similarly, whenever the `h3.navigateTo()` method is called (typically within a component), or the URL fragment changes:
 
