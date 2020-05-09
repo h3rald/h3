@@ -68,6 +68,15 @@ describe("VNode", () => {
     expect(node.childNodes[0].childNodes[0].data).toEqual("test1");
   });
 
+  it("should handle boolean attributes when redrawing", () => {
+    const vnode1 = h3("input", { type: "checkbox", checked: true });
+    const node = vnode1.render();
+    expect(node.checked).toEqual(true);
+    const vnode = h3("input", { type: "checkbox", checked: false });
+    vnode1.redraw({ node, vnode });
+    expect(node.checked).toEqual(false);
+  });
+
   it("should provide a render method able to render element nodes with a value", () => {
     const vnode = h3("input", { value: "test" });
     const createElement = jest.spyOn(document, "createElement");

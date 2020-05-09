@@ -5,6 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+const checkProperties = (obj1, obj2) => {
+  for (const key in obj1) {
+    if (!(key in obj2)) {
+      return false;
+    }
+    if (!equal(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const equal = (obj1, obj2) => {
   if (
     (obj1 === null && obj2 === null) ||
@@ -44,18 +56,7 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  function checkProperties(obj1, obj2) {
-    for (const key in obj1) {
-      if (!(key in obj2)) {
-        return false;
-      }
-      if (!equal(obj1[key], obj2[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return checkProperties(obj1, obj2) && checkProperties(obj2, obj1);
+  return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
 const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
@@ -267,6 +268,10 @@ class VNode {
         a.value = this.attributes[attr];
         node.setAttributeNode(a);
       }
+      // Handle boolean attributes
+      if (this.attributes[attr] === false) {
+        node[attr] = false;
+      }
     });
     // Event Listeners
     Object.keys(this.eventListeners).forEach((event) => {
@@ -364,6 +369,9 @@ class VNode {
     // Attributes
     if (!equal(oldvnode.attributes, newvnode.attributes)) {
       Object.keys(oldvnode.attributes).forEach((a) => {
+        if (newvnode.attributes[a] === false) {
+          node[a] = false;
+        }
         if (!newvnode.attributes[a]) {
           node.removeAttribute(a);
         } else if (
@@ -544,8 +552,10 @@ class Router {
 
   setRedraw(vnode) {
     this.redraw = () => {
-      const fn = this.routes[this.route.def];
-      vnode.redraw({ node: this.element.childNodes[0], vnode: fn() });
+      vnode.redraw({
+        node: this.element.childNodes[0],
+        vnode: this.routes[this.route.def](),
+      });
       this.store.dispatch("$redraw");
     };
   }
@@ -586,6 +596,7 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
+      this.store.dispatch("$navigation", this.route);
       // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
@@ -594,8 +605,7 @@ class Router {
       this.element.appendChild(vnode.render());
       this.setRedraw(vnode);
       window.scrollTo(0, 0);
-      this.store.dispatch("$redraw", this.route);
-      this.store.dispatch("$navigation", this.route);
+      this.store.dispatch("$redraw");
     };
     processPath();
     window.addEventListener("hashchange", processPath);

@@ -8,7 +8,7 @@ Well, because I typically use [H3RALD](https://h3rald.com) as my handle online..
 
 ### Why the weird release labels?
 
-Ubuntu started [naming their releases after animals](https://wiki.ubuntu.com/DevelopmentCodeNames) in alphabetical order... In a similar way, H3 releases are named after [Star Trek races](https://en.wikipedia.org/wiki/List_of_Star_Trek_races).
+Ubuntu started [naming their releases after animals](https://wiki.ubuntu.com/DevelopmentCodeNames) in alphabetical order... In a similar way, H3 releases are named after [Star Trek species](https://memory-alpha.fandom.com/wiki/Species).
 
 ### A brief history of H3
 

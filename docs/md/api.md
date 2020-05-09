@@ -115,20 +115,20 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 * The special `$key` attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.
 * The special `$html` attribute can be used to set the `innerHTML` property of the resulting HTML element. Use only if you know what you are doing!
 
-### h3.dispatch(message: string, data: any)
+### h3.dispatch(event: string, data: any)
 
-Dispatches a message and optionally some data. Messages are typically handled centrally by modules.
+Dispatches a event and optionally some data. Messages are typically handled centrally by modules.
 
 ```js
 h3.dispatch("settings/set", { logging: true });
 ```
 
-A message name can be anything, but keep in mind that the following names (and typically any name starting with `$`) are reserved for framework use:
+A event name can be any string, but keep in mind that the following names (and typically any name starting with `$`) are reserved for framework use:
 
 * `$init` &mdash; Dispatched when the application is initialized. Useful to initialize application state.
 * `$redraw` &mdash; Dispatched after an application redraw is triggered.
 * `$navigation` &mdash; Dispatched after a navigation occurs.
-* `$log` &mdash; Dispatched after *any* message (except `$log` iself) is dispatched. Very useful for debugging.
+* `$log` &mdash; Dispatched after *any* event (except `$log` iself) is dispatched. Very useful for debugging.
 
 ### h3.init(config: object)
 
@@ -162,9 +162,9 @@ The following call causes the application to switch to the following URL: `#/pos
 h3.navigateTo("/posts/", {orderBy: 'date', direction: 'desc'});
 ```
 
-### h3.on(message: string, handler: function)
+### h3.on(event: string, handler: function)
 
-Subscribes to the specified message and executes the specified handler function whenever the message is dispatches. Returns a function that can be used to delete the subscription.
+Subscribes to the specified event and executes the specified handler function whenever the event is dispatched. Returns a function that can be used to delete the subscription.
 
 Subscriptions should be typically managed in modules rather than in components: a component gets rendered several times and subscriptions *must* be properly cleaned up to avoid memory leaks.
 
@@ -193,4 +193,4 @@ An read-only property containing current route (Route object). A Route object ha
 
 ### h3.state
 
-A read-only property containing the current application state. The state is a plain object, but its properties should only be modified using message subscription handlers. 
+A read-only property containing the current application state. The state is a plain object, but its properties should only be modified using event subscription handlers. 
