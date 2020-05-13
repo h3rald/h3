@@ -70,6 +70,7 @@ class VNode {
     this.id = undefined;
     this.$key = undefined;
     this.$html = undefined;
+    this.$onrender = undefined;
     this.style = undefined;
     this.value = undefined;
     this.children = [];
@@ -159,6 +160,7 @@ class VNode {
     this.id = data.id;
     this.$key = data.$key;
     this.$html = data.$html;
+    this.$onrender = data.$onrender;
     this.style = data.style;
     this.data = data.data;
     this.value = data.value;
@@ -176,6 +178,7 @@ class VNode {
     this.id = this.id || attrs.id;
     this.$key = attrs.$key;
     this.$html = attrs.$html;
+    this.$onrender = attrs.$onrender;
     this.style = attrs.style;
     this.value = attrs.value;
     this.data = attrs.data || {};
@@ -198,6 +201,7 @@ class VNode {
     delete this.attributes.value;
     delete this.attributes.$key;
     delete this.attributes.$html;
+    delete this.attributes.$onrender;
     delete this.attributes.id;
     delete this.attributes.data;
     delete this.attributes.style;
@@ -295,7 +299,9 @@ class VNode {
     });
     // Children
     this.children.forEach((c) => {
-      node.appendChild(c.render());
+      const cnode = c.render();
+      node.appendChild(cnode);
+      c.$onrender && c.$onrender(cnode);
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -315,7 +321,9 @@ class VNode {
         oldvnode.type === "#text" &&
         oldvnode !== newvnode)
     ) {
-      node.parentNode.replaceChild(newvnode.render(), node);
+      const renderedNode = newvnode.render();
+      node.parentNode.replaceChild(renderedNode, node);
+      newvnode.$onrender && newvnode.$onrender(renderedNode);
       oldvnode.from(newvnode);
       return;
     }
@@ -465,10 +473,10 @@ class VNode {
           }
         } else {
           // While there are children not found in oldvnode, add them and re-check
-          node.insertBefore(
-            newvnode.children[notFoundInOld].render(),
-            node.childNodes[notFoundInOld]
-          );
+          const cnode = newvnode.children[notFoundInOld].render();
+          node.insertBefore(cnode, node.childNodes[notFoundInOld]);
+          newvnode.children[notFoundInOld].$onrender &&
+            newvnode.children[notFoundInOld].$onrender(cnode);
           oldvnode.children.splice(
             notFoundInOld,
             0,
@@ -602,7 +610,9 @@ class Router {
         this.element.removeChild(this.element.firstChild);
       }
       const vnode = this.routes[this.route.def]();
-      this.element.appendChild(vnode.render());
+      const node = vnode.render();
+      this.element.appendChild(node);
+      vnode.$onrender && vnode.$onrender(node);
       this.setRedraw(vnode);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");

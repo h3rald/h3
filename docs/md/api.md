@@ -114,6 +114,21 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 * The `data` attribute can be set to a simple object containing [data attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes).
 * The special `$key` attribute can be used to guarantee the uniqueness of two VNodes and it will not be translated into an HTML attribute.
 * The special `$html` attribute can be used to set the `innerHTML` property of the resulting HTML element. Use only if you know what you are doing!
+* The special `$onrender` attribute can be set to a function that will executed after the VNode is rendered for the first time. 
+
+The `$html` and the `$onrender` special attributes should be used sparingly, and typically only when interfacing with third-party libraries that need access to the real DOM. 
+
+For example, consider the following code snippet that can be used to initialize the [InscrybMDE](https://github.com/Inscryb/inscryb-markdown-editor) Markdown editor on a textarea element:
+
+```js
+h3("textarea", {
+  $onrender: (element) => {
+    const editor = new window.InscrybMDE({
+      element
+    });
+  }
+});
+```
 
 ### h3.dispatch(event: string, data: any)
 

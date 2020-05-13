@@ -68,6 +68,19 @@ describe("VNode", () => {
     expect(node.childNodes[0].childNodes[0].data).toEqual("test1");
   });
 
+  it("should provide an $onrender special attribute to execute code after the vnode is first rendered", () => {
+    const addClass = (node) => node.classList.add(node.tagName); 
+    const vnode = h3("div", h3("span", {$onrender: addClass}));
+    let node = vnode.render();
+    expect(node.childNodes[0].classList.contains("SPAN")).toEqual(true);
+    const vnode2 = h3("div", h3("div", {$onrender: addClass}));
+    vnode.redraw({node, vnode: vnode2});
+    expect(node.childNodes[0].classList.contains("DIV")).toEqual(true);
+    const vnode3 = h3("div", [h3("div", {$onrender: addClass}), h3("h1", {$onrender: addClass})]);
+    vnode.redraw({node, vnode: vnode3});
+    expect(node.childNodes[1].classList.contains("H1")).toEqual(true);
+  });
+
   it("should handle boolean attributes when redrawing", () => {
     const vnode1 = h3("input", { type: "checkbox", checked: true });
     const node = vnode1.render();
