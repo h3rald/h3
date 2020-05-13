@@ -1,9 +1,9 @@
 /**
+ * H3 v0.5.0 "Experienced El-Aurian"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 const checkProperties = (obj1, obj2) => {
   for (const key in obj1) {
