@@ -22,11 +22,12 @@ describe("h3 (Router)", () => {
     const preStart = () => (preStartCalled = true);
     const postStart = () => (postStartCalled = true);
     const C1 = () => {
+      const $onrender = (node) => node.classList.add("test");
       const parts = h3.route.parts;
       const content = Object.keys(parts).map((key) =>
         h3("li", `${key}: ${parts[key]}`)
       );
-      return h3("ul.c1", content);
+      return h3("ul.c1", { $onrender }, content);
     };
     const C2 = () => {
       const params = h3.route.params;
@@ -59,6 +60,9 @@ describe("h3 (Router)", () => {
     mockLocation.hash = "#/c1/1/2/3";
     expect(document.body.childNodes[0].childNodes[1].textContent).toEqual(
       "b: 2"
+    );
+    expect(document.body.childNodes[0].classList.contains("test")).toEqual(
+      true
     );
   });
 
