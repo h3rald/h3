@@ -410,4 +410,17 @@ describe("h3", () => {
     h3.redraw();
     expect(vnode.redraw).toHaveBeenCalled();
   });
+
+  it("should not redraw while a other redraw is in progress", async () => {
+    const vnode = h3("div");
+    await h3.init({
+      routes: {
+        "/": () => vnode
+      },
+    });
+    jest.spyOn(vnode, "redraw");
+    h3.redraw(true);
+    h3.redraw()
+    expect(vnode.redraw).toHaveBeenCalledTimes(1);
+  });
 });
