@@ -6,8 +6,20 @@ const overview = "./docs/md/overview.md";
 const app = "./docs/js/app.js";
 const tutorial = "./docs/md/tutorial.md";
 const package = "./package.json";
+const h3 = "./h3.js";
 
 const pkg = JSON.parse(fs.readFileSync(package, "utf8"));
+
+// Update h3.js
+
+const h3Data = fs.readFileSync(h3, "utf8");
+const notice = h3Data.match(/\/\*\*((.|\n|\r)+?)\*\//gm)[0];
+const newNotice = notice
+  .replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`)
+  .replace(/\"[^"]+\"/, `"${pkg.versionName}"`)
+  .replace(/Copyright \d+/, `Copyright ${new Date().getFullYear()}`);
+fs.writeFileSync(h3, h3Data.replace(notice, newNotice));
+
 
 // Update README.md
 let readmeData = fs.readFileSync(readme, "utf8");
@@ -16,7 +28,7 @@ readmeData = readmeData.replace(
   /Download v\d+\.\d+\.\d+ \([^)]+\)/,
   `Download v${pkg.version} (${pkg.versionName})`
 );
-readmeData = readmeData.replace(/### Can I download(\n|.)+/gm, '');
+readmeData = readmeData.replace(/### Can I download(\n|.)+/gm, "");
 fs.writeFileSync(readme, readmeData);
 
 // Remove badges and copy to overview.md

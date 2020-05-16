@@ -1,7 +1,7 @@
 {
   "name": "@h3rald/h3",
-  "version": "0.4.0",
-  "versionName": "Dedicated Denobulan",
+  "version": "0.5.0",
+  "versionName": "Experienced El-Aurian",
   "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
   "scripts": {
