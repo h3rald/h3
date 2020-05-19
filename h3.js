@@ -1,5 +1,5 @@
 /**
- * H3 v0.5.0 "Experienced El-Aurian"
+ * H3 v0.6.0 "Furtive Ferengi"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -558,18 +558,18 @@ class Router {
     this.routes = routes;
   }
 
-  setRedraw(vnode) {
+  setRedraw(vnode, state) {
     this.redraw = () => {
       vnode.redraw({
         node: this.element.childNodes[0],
-        vnode: this.routes[this.route.def](),
+        vnode: this.routes[this.route.def](state),
       });
       this.store.dispatch("$redraw");
     };
   }
 
   start() {
-    const processPath = (data) => {
+    const processPath = async (data) => {
       const fragment =
         (data &&
           data.newURL &&
@@ -604,18 +604,25 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
+      // Route component initialization
+      const obj = this.routes[this.route.def];
+      // Initialize component
+      const state = obj.state && obj.state();
+      obj.init && await obj.init(state);
+      redrawing = true;
       this.store.dispatch("$navigation", this.route);
       // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      const vnode = this.routes[this.route.def]();
+      const vnode = obj(state);
       const node = vnode.render();
       this.element.appendChild(node);
       vnode.$onrender && vnode.$onrender(node);
-      this.setRedraw(vnode);
+      this.setRedraw(vnode, state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
+      redrawing = false;
     };
     processPath();
     window.addEventListener("hashchange", processPath);
@@ -637,6 +644,7 @@ const h3 = (...args) => {
 
 let store = null;
 let router = null;
+let redrawing = false;
 
 h3.init = (config) => {
   let { element, routes, modules, preStart, postStart, location } = config;
@@ -715,13 +723,18 @@ h3.dispatch = (event, data) => {
   return store.dispatch(event, data);
 };
 
-h3.redraw = () => {
+h3.redraw = (setRedrawing) => {
   if (!router || !router.redraw) {
     throw new Error(
       "[h3.redraw] No application initialized, unable to update."
     );
   }
+  if (redrawing) {
+    return;
+  }
+  redrawing = true;
   router.redraw();
+  redrawing = setRedrawing || false;
 };
 
 export default h3;
