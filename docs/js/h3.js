@@ -570,6 +570,7 @@ class Router {
 
   start() {
     const processPath = async (data) => {
+      const oldRoute = this.route;
       const fragment =
         (data &&
           data.newURL &&
@@ -604,22 +605,30 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
-      // Route component initialization
-      const obj = this.routes[this.route.def];
-      // Initialize component
-      const state = obj.state && obj.state();
-      obj.init && await obj.init(state);
+      // Old route component exit
+      if (oldRoute) {
+        const oldRouteComponent = this.routes[oldRoute.def];
+        oldRouteComponent.exit &&
+          (await oldRouteComponent(oldRouteComponent.state));
+        oldRouteComponent.state = null;
+      }
+      // New route component enter
+      const newRouteComponent = this.routes[this.route.def];
+      newRouteComponent.state =
+        newRouteComponent.init && newRouteComponent.init();
+      newRouteComponent.enter &&
+        (await newRouteComponent.enter(newRouteComponent.state));
+      // Redrawing...
       redrawing = true;
       this.store.dispatch("$navigation", this.route);
-      // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      const vnode = obj(state);
+      const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
       vnode.$onrender && vnode.$onrender(node);
-      this.setRedraw(vnode, state);
+      this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
       redrawing = false;
