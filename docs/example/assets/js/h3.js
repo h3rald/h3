@@ -605,19 +605,18 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
-      // Old route component exit
+      // Old route component teardown
       if (oldRoute) {
         const oldRouteComponent = this.routes[oldRoute.def];
-        oldRouteComponent.exit &&
-          (await oldRouteComponent(oldRouteComponent.state));
-        oldRouteComponent.state = null;
+        oldRouteComponent.state =
+          oldRouteComponent.teardown &&
+          (await oldRouteComponent.teardown(oldRouteComponent.state));
       }
-      // New route component enter
+      // New route component setup
       const newRouteComponent = this.routes[this.route.def];
-      newRouteComponent.state =
-        newRouteComponent.init && newRouteComponent.init();
-      newRouteComponent.enter &&
-        (await newRouteComponent.enter(newRouteComponent.state));
+      newRouteComponent.state = {};
+      newRouteComponent.setup &&
+        (await newRouteComponent.setup(newRouteComponent.state));
       // Redrawing...
       redrawing = true;
       this.store.dispatch("$navigation", this.route);
