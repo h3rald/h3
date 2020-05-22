@@ -1,5 +1,5 @@
 /**
- * H3 v0.5.0 "Experienced El-Aurian"
+ * H3 v0.6.0 "Furtive Ferengi"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
