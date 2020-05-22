@@ -1,5 +1,5 @@
 /**
- * H3 v0.6.0 "Furtive Ferengi"
+ * H3 v0.5.0 "Experienced El-Aurian"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -59,6 +59,7 @@ const equal = (obj1, obj2) => {
   return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
+let $onrenderCallbacks = [];
 const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
@@ -301,7 +302,7 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && c.$onrender(cnode);
+      c.$onrender && $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -323,7 +324,8 @@ class VNode {
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
-      newvnode.$onrender && newvnode.$onrender(renderedNode);
+      newvnode.$onrender &&
+        $onrenderCallbacks.push(() => newvnode.$onrender(renderedNode));
       oldvnode.from(newvnode);
       return;
     }
@@ -476,7 +478,9 @@ class VNode {
           const cnode = newvnode.children[notFoundInOld].render();
           node.insertBefore(cnode, node.childNodes[notFoundInOld]);
           newvnode.children[notFoundInOld].$onrender &&
-            newvnode.children[notFoundInOld].$onrender(cnode);
+            $onrenderCallbacks.push(() =>
+              newvnode.children[notFoundInOld].$onrender(cnode)
+            );
           oldvnode.children.splice(
             notFoundInOld,
             0,
@@ -626,7 +630,9 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
-      vnode.$onrender && vnode.$onrender(node);
+      vnode.$onrender && $onrenderCallbacks.push(() => vnode.$onrender(node));
+      $onrenderCallbacks.forEach((cbk) => cbk());
+      $onrenderCallbacks = [];
       this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
