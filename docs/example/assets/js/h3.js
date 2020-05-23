@@ -302,11 +302,11 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
     }
+    this.$onrender && $onrenderCallbacks.push(() => this.$onrender(node));
     return node;
   }
 
@@ -324,8 +324,6 @@ class VNode {
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
-      newvnode.$onrender &&
-        $onrenderCallbacks.push(() => newvnode.$onrender(renderedNode));
       oldvnode.from(newvnode);
       return;
     }
@@ -477,10 +475,6 @@ class VNode {
           // While there are children not found in oldvnode, add them and re-check
           const cnode = newvnode.children[notFoundInOld].render();
           node.insertBefore(cnode, node.childNodes[notFoundInOld]);
-          newvnode.children[notFoundInOld].$onrender &&
-            $onrenderCallbacks.push(() =>
-              newvnode.children[notFoundInOld].$onrender(cnode)
-            );
           oldvnode.children.splice(
             notFoundInOld,
             0,
@@ -572,7 +566,7 @@ class Router {
     };
   }
 
-  start() {
+  async start() {
     const processPath = async (data) => {
       const oldRoute = this.route;
       const fragment =
@@ -585,6 +579,7 @@ class Router {
       const rawQuery = fragment.match(/\?(.+)$/);
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
       const pathParts = path.split("/").slice(1);
+
       let parts = {};
       for (let def of Object.keys(this.routes)) {
         let routeParts = def.split("/").slice(1);
@@ -630,7 +625,6 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
-      vnode.$onrender && $onrenderCallbacks.push(() => vnode.$onrender(node));
       $onrenderCallbacks.forEach((cbk) => cbk());
       $onrenderCallbacks = [];
       this.setRedraw(vnode, newRouteComponent.state);
@@ -638,8 +632,8 @@ class Router {
       this.store.dispatch("$redraw");
       redrawing = false;
     };
-    processPath();
     window.addEventListener("hashchange", processPath);
+    await processPath();
   }
 
   navigateTo(path, params) {
@@ -740,7 +734,7 @@ h3.dispatch = (event, data) => {
 h3.redraw = (setRedrawing) => {
   if (!router || !router.redraw) {
     throw new Error(
-      "[h3.redraw] No application initialized, unable to update."
+      "[h3.redraw] No application initialized, unable to redraw."
     );
   }
   if (redrawing) {
