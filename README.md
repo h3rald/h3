@@ -11,7 +11,7 @@
 
 H3 is also:
 
-- **tiny**, under [700 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
+- **tiny**, under [750 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
 - **modern**, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
 - **easy** to learn, its API is comprised of only six methods and two properties.
 
@@ -19,7 +19,7 @@ H3 is also:
 
 Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/v0.5.0/h3.js" target="_blank" class="button primary">Download v0.5.0 (Experienced El-Aurian)</a>
+<a href="https://raw.githubusercontent.com/h3rald/h3/v0.6.0/h3.js" target="_blank" class="button primary">Download v0.6.0 (Furtive Ferengi)</a>
 
 Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 

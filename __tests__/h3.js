@@ -409,6 +409,10 @@ describe("h3", () => {
     jest.spyOn(vnode, "redraw");
     h3.redraw();
     expect(vnode.redraw).toHaveBeenCalled();
+    h3.redraw(true);
+    h3.redraw();
+    h3.redraw();
+    expect(vnode.redraw).toHaveBeenCalledTimes(2);
   });
 
   it("should not redraw while a other redraw is in progress", async () => {

@@ -1,5 +1,5 @@
 /**
- * H3 v0.5.0 "Experienced El-Aurian"
+ * H3 v0.6.0 "Furtive Ferengi"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -59,6 +59,7 @@ const equal = (obj1, obj2) => {
   return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
+let $onrenderCallbacks = [];
 const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
@@ -301,11 +302,11 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && c.$onrender(cnode);
     });
     if (this.$html) {
       node.innerHTML = this.$html;
     }
+    this.$onrender && $onrenderCallbacks.push(() => this.$onrender(node));
     return node;
   }
 
@@ -323,7 +324,6 @@ class VNode {
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
-      newvnode.$onrender && newvnode.$onrender(renderedNode);
       oldvnode.from(newvnode);
       return;
     }
@@ -475,8 +475,6 @@ class VNode {
           // While there are children not found in oldvnode, add them and re-check
           const cnode = newvnode.children[notFoundInOld].render();
           node.insertBefore(cnode, node.childNodes[notFoundInOld]);
-          newvnode.children[notFoundInOld].$onrender &&
-            newvnode.children[notFoundInOld].$onrender(cnode);
           oldvnode.children.splice(
             notFoundInOld,
             0,
@@ -558,18 +556,19 @@ class Router {
     this.routes = routes;
   }
 
-  setRedraw(vnode) {
+  setRedraw(vnode, state) {
     this.redraw = () => {
       vnode.redraw({
         node: this.element.childNodes[0],
-        vnode: this.routes[this.route.def](),
+        vnode: this.routes[this.route.def](state),
       });
       this.store.dispatch("$redraw");
     };
   }
 
-  start() {
-    const processPath = (data) => {
+  async start() {
+    const processPath = async (data) => {
+      const oldRoute = this.route;
       const fragment =
         (data &&
           data.newURL &&
@@ -580,6 +579,7 @@ class Router {
       const rawQuery = fragment.match(/\?(.+)$/);
       const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
       const pathParts = path.split("/").slice(1);
+
       let parts = {};
       for (let def of Object.keys(this.routes)) {
         let routeParts = def.split("/").slice(1);
@@ -604,23 +604,36 @@ class Router {
       if (!this.route) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
+      // Old route component teardown
+      if (oldRoute) {
+        const oldRouteComponent = this.routes[oldRoute.def];
+        oldRouteComponent.state =
+          oldRouteComponent.teardown &&
+          (await oldRouteComponent.teardown(oldRouteComponent.state));
+      }
+      // New route component setup
+      const newRouteComponent = this.routes[this.route.def];
+      newRouteComponent.state = {};
+      newRouteComponent.setup &&
+        (await newRouteComponent.setup(newRouteComponent.state));
+      // Redrawing...
       redrawing = true;
       this.store.dispatch("$navigation", this.route);
-      // Display View
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
-      const vnode = this.routes[this.route.def]();
+      const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
-      vnode.$onrender && vnode.$onrender(node);
-      this.setRedraw(vnode);
+      $onrenderCallbacks.forEach((cbk) => cbk());
+      $onrenderCallbacks = [];
+      this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
       redrawing = false;
     };
-    processPath();
     window.addEventListener("hashchange", processPath);
+    await processPath();
   }
 
   navigateTo(path, params) {
@@ -721,7 +734,7 @@ h3.dispatch = (event, data) => {
 h3.redraw = (setRedrawing) => {
   if (!router || !router.redraw) {
     throw new Error(
-      "[h3.redraw] No application initialized, unable to update."
+      "[h3.redraw] No application initialized, unable to redraw."
     );
   }
   if (redrawing) {
