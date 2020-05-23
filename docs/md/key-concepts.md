@@ -85,11 +85,12 @@ A route components is a top-level component specified to handle a specific route
 * may have a dedicated *setup* (after the route component is added to the DOM) and *teardown* phase (after the route component is removed from the DOM and the new route component is loaded).
 * may have built-in local state, initialized during setup and (typically) destroyed during teardown.
 
-Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** method on them (Functions are Objects in JavaScript after all...) to be executed during the corresponding phase.
+Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (Functions are Objects in JavaScript after all...) to be executed during the corresponding phase.
 
 Note that:
 * Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during teardowns.
 * The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state is deleted.
+* Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
 
 ### How everything works...
 

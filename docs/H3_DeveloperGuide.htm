@@ -7515,11 +7515,12 @@ const CounterButton = () =&gt; {
 </ul>
 
 
-<p>Route components are stll created using ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> method on them (Functions are Objects in JavaScript after all&hellip;) to be executed during the corresponding phase.</p>
+<p>Route components are stll created using ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> async methods on them (Functions are Objects in JavaScript after all&hellip;) to be executed during the corresponding phase.</p>
 
 <p>Note that:
 * Both the <strong>setup</strong> method take an object as a parameter, representing the component state. Such object will be empty the first time the <strong>setup</strong> method is called for a given component, but it may contain properties not removed during teardowns.
-* The <strong>teardown</strong> method can return an object, which will be retained as component state. If however nothing is returned, the component state is deleted.</p>
+* The <strong>teardown</strong> method can return an object, which will be retained as component state. If however nothing is returned, the component state is deleted.
+* Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.</p>
 
 <a name="How-everything-works..."></a>
 <h3>How everything works&hellip;<a href="#document-top" title="Go to top"></a></h3>
