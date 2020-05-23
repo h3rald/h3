@@ -4,7 +4,7 @@
 
 H3 is also:
 
-- **tiny**, under [700 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
+- **tiny**, under [750 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
 - **modern**, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
 - **easy** to learn, its API is comprised of only six methods and two properties.
 
