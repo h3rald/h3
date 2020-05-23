@@ -308,28 +308,4 @@ describe("VNode", () => {
     v3.redraw({ node: n3, vnode: v4 });
     expect(v3).toEqual(v4);
   });
-
-  it("should expose an $onrender special attribute to execute a callback after rendering", async () => {
-    let test;
-    const vnode = h3("div", { $onrender: () => (test = 1) });
-    await h3.init({
-      routes: {
-        "/": () => vnode,
-      },
-    });
-    expect(test).toEqual(1);
-    const vnode1 = h3("div", h3("div"));
-    const vnode2 = h3("div", h3("span", { $onrender: () => (test = 2) }));
-    const node1 = vnode1.render();
-    vnode1.redraw({ node: node1, vnode: vnode2 });
-    expect(test).toEqual(2);
-    const vnode3 = h3("div", h3("div", { $onrender: () => (test = 4) }));
-    const vnode4 = h3("div", [
-      h3("div", { $onrender: () => (test = 4) }),
-      h3("div", { $onrender: () => (test = 5) }),
-    ]);
-    const node3 = vnode3.render();
-    vnode3.redraw({ node: node3, vnode: vnode4 });
-    expect(test).toEqual(5);
-  });
 });
