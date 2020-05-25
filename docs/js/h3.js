@@ -1,5 +1,5 @@
 /**
- * H3 v0.6.0 "Furtive Ferengi"
+ * H3 v0.7.0 "Gory Gorn"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the

@@ -19,7 +19,7 @@ H3 is also:
 
 Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/v0.6.0/h3.js" target="_blank" class="button primary">Download v0.6.0 (Furtive Ferengi)</a>
+<a href="https://raw.githubusercontent.com/h3rald/h3/v0.7.0/h3.js" target="_blank" class="button primary">Download v0.7.0 (Gory Gorn)</a>
 
 Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
