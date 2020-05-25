@@ -442,8 +442,8 @@ class VNode {
     let oldmap = mapChildren(oldvnode, newvnode);
     let notFoundInOld = newmap.indexOf(-1);
     let notFoundInNew = oldmap.indexOf(-1);
-    if (newmap.length === oldmap.length && notFoundInNew >= 0) {
-      // Something changed
+    if (equal(newmap, oldmap) && notFoundInNew >= 0) {
+      // Something changed (some nodes are different at the same position)
       for (let i = 0; i < newmap.length; i++) {
         if (newmap[i] === -1 || oldmap[i] === -1) {
           oldvnode.children[i].redraw({
@@ -459,9 +459,15 @@ class VNode {
           const childOfNew =
             newvnode.children.length > notFoundInNew &&
             newvnode.children[notFoundInNew];
-          const childofOld = oldvnode.children[notFoundInNew];
-          if (childOfNew && childofOld && childofOld.type === childOfNew.type) {
-            // Optimization to avoid removing nodes of the same type
+          const childOfOld = oldvnode.children[notFoundInNew];
+          if (
+            childOfNew &&
+            childOfOld &&
+            childOfOld.type === childOfNew.type &&
+            childOfNew.children.length === 0 &&
+            childOfNew.children.length === 0
+          ) {
+            // Optimization to avoid removing simple nodes of the same type
             oldvnode.children[notFoundInNew].redraw({
               node: node.childNodes[notFoundInNew],
               vnode: newvnode.children[notFoundInNew],
