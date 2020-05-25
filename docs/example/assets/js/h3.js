@@ -574,6 +574,7 @@ class Router {
 
   async start() {
     const processPath = async (data) => {
+      $onrenderCallbacks = [];
       const oldRoute = this.route;
       const fragment =
         (data &&
