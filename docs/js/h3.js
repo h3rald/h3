@@ -60,7 +60,7 @@ const equal = (obj1, obj2) => {
 };
 
 let $onrenderCallbacks = [];
-const selectorRegex = /^([a-z0-9:_=-]+)(#[a-z0-9:_=-]+)?(\..+)?$/i;
+const selectorRegex = /^([a-z][a-z0-9:_=-]*)(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
@@ -436,20 +436,45 @@ class VNode {
       }
       return map;
     }
-    // Map positions of newvnode children in relation to oldvnode children
-    let newmap = mapChildren(newvnode, oldvnode);
-    // Map positions of oldvnode children in relation to newvnode children
-    let oldmap = mapChildren(oldvnode, newvnode);
-    let notFoundInOld = newmap.indexOf(-1);
-    let notFoundInNew = oldmap.indexOf(-1);
-    if (equal(newmap, oldmap) && notFoundInNew >= 0) {
-      // Something changed (some nodes are different at the same position)
-      for (let i = 0; i < newmap.length; i++) {
-        if (newmap[i] === -1 || oldmap[i] === -1) {
-          oldvnode.children[i].redraw({
-            node: node.childNodes[i],
-            vnode: newvnode.children[i],
-          });
+    let newmap, oldmap, notFoundInNew, notFoundInOld;
+    const remap = () => {
+      // Map positions of newvnode children in relation to oldvnode children
+      newmap = mapChildren(newvnode, oldvnode);
+      // Map positions of oldvnode children in relation to newvnode children
+      oldmap = mapChildren(oldvnode, newvnode);
+      notFoundInOld = newmap.indexOf(-1);
+      notFoundInNew = oldmap.indexOf(-1);
+    };
+    remap();
+    if (newmap.length === oldmap.length) {
+      if (equal(newmap, oldmap) && notFoundInNew >= 0) {
+        // Something changed (some nodes are different at the same position)
+        for (let i = 0; i < newmap.length; i++) {
+          if (newmap[i] === -1 || oldmap[i] === -1) {
+            oldvnode.children[i].redraw({
+              node: node.childNodes[i],
+              vnode: newvnode.children[i],
+            });
+          }
+        }
+      } else {
+        // Nodes in different position (maps have same nodes)
+        let index = 0;
+        while (!equal(oldmap, [...Array(oldmap.length).keys()])) {
+          if (newmap[index] !== index) {
+            const child = node.childNodes[newmap[index]];
+            node.removeChild(child);
+            node.insertBefore(child, node.childNodes[index]);
+            const cnode = oldvnode.children[newmap[index]];
+            oldvnode.children = oldvnode.children.filter(
+              (c) => !equal(c, cnode)
+            );
+            oldvnode.children.splice(index, 0, cnode);
+            remap();
+            index = 0;
+          } else {
+            index++;
+          }
         }
       }
     } else {
@@ -487,16 +512,18 @@ class VNode {
             newvnode.children[notFoundInOld]
           );
         }
-        newmap = mapChildren(newvnode, oldvnode);
-        oldmap = mapChildren(oldvnode, newvnode);
-        notFoundInNew = oldmap.indexOf(-1);
-        notFoundInOld = newmap.indexOf(-1);
+        remap();
       }
     }
+    // $onrender
+    if (!equal(oldvnode.$onrender, newvnode.$onrender)) {
+      oldvnode.$onrender = newvnode.$onrender;
+    }
     // innerHTML
-    if (newvnode.$html) {
+    if (oldvnode.$html !== newvnode.$html) {
       node.innerHTML = newvnode.$html;
       oldvnode.$html = newvnode.$html;
+      oldvnode.$onrender && oldvnode.$onrender(node);
     }
   }
 }
@@ -574,6 +601,7 @@ class Router {
 
   async start() {
     const processPath = async (data) => {
+      $onrenderCallbacks = [];
       const oldRoute = this.route;
       const fragment =
         (data &&

@@ -28,8 +28,10 @@ readmeData = readmeData.replace(
   /Download v\d+\.\d+\.\d+ \([^)]+\)/,
   `Download v${pkg.version} (${pkg.versionName})`
 );
-readmeData = readmeData.replace(/### Can I download(\n|.)+/gm, "");
 fs.writeFileSync(readme, readmeData);
+
+// Remove link to download guide in overview.md
+readmeData = readmeData.replace(/### Can I download(\n|\r|.)+/gm, "");
 
 // Remove badges and copy to overview.md
 const overviewData = readmeData.replace(/[^\*]+\*\*\*\s+/m, "");

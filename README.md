@@ -46,3 +46,6 @@ Yes. It's [MIT-licensed](https://github.com/h3rald/h3/blob/master/LICENSE).
 
 Go fix it! Or at least open an issue on the [Github repo](https://github.com/h3rald/h3), pleasy.
 
+### Can I download a copy of this site as a standalone HTML file?
+
+What a weird thing to ask... sure you can: [here](/H3_DeveloperGuide.htm)!
