@@ -1,7 +1,7 @@
 {
   "name": "@h3rald/h3",
-  "version": "0.7.0",
-  "versionName": "Gory Gorn",
+  "version": "0.8.0",
+  "versionName": "Humble Human",
   "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
   "scripts": {
