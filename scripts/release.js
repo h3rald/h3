@@ -30,9 +30,6 @@ readmeData = readmeData.replace(
 );
 fs.writeFileSync(readme, readmeData);
 
-// Remove link to download guide in overview.md
-readmeData = readmeData.replace(/### Can I download(\n|\r|.)+/gm, "");
-
 // Remove badges and copy to overview.md
 const overviewData = readmeData.replace(/[^\*]+\*\*\*\s+/m, "");
 fs.writeFileSync(overview, overviewData);

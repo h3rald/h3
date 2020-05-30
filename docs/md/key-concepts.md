@@ -80,16 +80,16 @@ The current route is always accessible via the `h3.route` property.
 
 #### Route Components
 
-A route components is a top-level component specified to handle a specific route. Unlike ordinary components, route components:
+A route component is a top-level component that handles a route. Unlike ordinary components, route components:
 
-* may have a dedicated *setup* (after the route component is added to the DOM) and *teardown* phase (after the route component is removed from the DOM and the new route component is loaded).
+* may have a dedicated *setup* (after the route component is added to the DOM) and *teardown* phase (after the route component is removed from the DOM and before the new route component is loaded).
 * may have built-in local state, initialized during setup and (typically) destroyed during teardown.
 
-Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (Functions are Objects in JavaScript after all...) to be executed during the corresponding phase.
+Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (functions are objects in JavaScript after all...) to be executed during each corresponding phase.
 
 Note that:
-* Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during teardowns.
-* The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state is deleted.
+* Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during subsequent teardowns.
+* The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
 * Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
 
 ### How everything works...
