@@ -217,6 +217,15 @@ describe("VNode", () => {
     expect(container.childNodes[0].constructor).toEqual(HTMLDivElement);
   });
 
+  it("should provide redraw method to detect position changes in child nodes", () => {
+    const v1 = h3("ul", [h3("li.a"), h3("li.b"), h3("li.c"), h3("li.d")]);
+    const v2 = h3("ul", [h3("li.c"), h3("li.b"), h3("li.a"), h3("li.d")]);
+    const n = v1.render();
+    expect(n.childNodes[0].classList[0]).toEqual("a");
+    v1.redraw({ node: n, vnode: v2 });
+    expect(n.childNodes[0].classList[0]).toEqual("c");
+  });
+
   it("should provide redraw method to detect changed nodes if they have different node types", () => {
     const oldvnode = h3("span.c", { title: "b" });
     const newvnode = h3({ type: "#text", value: "test" });
@@ -255,7 +264,7 @@ describe("VNode", () => {
     expect(node.childNodes[1].getAttribute("id")).toEqual("ccc");
   });
 
-  it("should provide a redraw method able to detect specific changes to style, data, value, attributes and eventListeners", () => {
+  it("should provide a redraw method able to detect specific changes to style, data, value, attributes, $onrender and eventListeners", () => {
     const fn = () => false;
     const oldvnode = h3("input", {
       style: "margin: auto;",
@@ -275,6 +284,7 @@ describe("VNode", () => {
       placeholder: "test",
       onkeydown: () => true,
       onkeypress: () => false,
+      $onrender: () => true,
       onhover: () => true,
     });
     const container = document.createElement("div");
@@ -295,7 +305,10 @@ describe("VNode", () => {
   it("should provide a redraw method able to detect changes in child content", () => {
     const v1 = h3("ul", [h3("li", "a"), h3("li", "b")]);
     const n1 = v1.render();
-    const v2 = h3("ul", { $html: "<li>a</li><li>b</li>" });
+    const v2 = h3("ul", {
+      $html: "<li>a</li><li>b</li>",
+      $onrender: (node) => node.classList.add("test"),
+    });
     const v3 = h3("ul", [h3("li", "a")]);
     const v4 = h3("ul", [h3("li", "b")]);
     const n2 = v2.render();
@@ -304,6 +317,7 @@ describe("VNode", () => {
       n1.childNodes[0].childNodes[0].data
     );
     v1.redraw({ node: n1, vnode: v2 });
+    expect(n1.classList[0]).toEqual("test");
     expect(v1).toEqual(v2);
     v3.redraw({ node: n3, vnode: v4 });
     expect(v3).toEqual(v4);

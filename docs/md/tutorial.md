@@ -118,8 +118,8 @@ const Header = () => {
       h3("img", { alt: "H3", src: "images/h3.svg" }),
     ]),
     h3("div.version.col-sm.col-md", [
-      h3("div.version-number", "v0.6.0"),
-      h3("div.version-label", "“Furtive Ferengi“"),
+      h3("div.version-number", "v0.7.0"),
+      h3("div.version-label", "“Gory Gorn“"),
     ]),
     h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
