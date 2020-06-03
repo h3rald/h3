@@ -11,7 +11,7 @@
 
 H3 is also:
 
-- **tiny**, under [750 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
+- **tiny**, under [800 sloc](https://github.com/h3rald/h3/blob/master/h3.js).
 - **modern**, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
 - **easy** to learn, its API is comprised of only six methods and two properties.
 
@@ -19,7 +19,7 @@ H3 is also:
 
 Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/v0.7.0/h3.js" target="_blank" class="button primary">Download v0.7.0 (Gory Gorn)</a>
+<a href="https://raw.githubusercontent.com/h3rald/h3/v0.8.0/h3.js" target="_blank" class="button primary">Download v0.8.0 (Humble Human)</a>
 
 Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
@@ -46,6 +46,6 @@ Yes. It's [MIT-licensed](https://github.com/h3rald/h3/blob/master/LICENSE).
 
 Go fix it! Or at least open an issue on the [Github repo](https://github.com/h3rald/h3), pleasy.
 
-### Can I download a copy of this site as a standalone HTML file?
+### Can I download a copy of all the documentation as a standalone HTML file?
 
-What a weird thing to ask... sure you can: [here](/H3_DeveloperGuide.htm)!
+What a weird thing to ask... sure you can: [here](https://h3.js.org/H3_DeveloperGuide.htm)!

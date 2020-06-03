@@ -7245,6 +7245,7 @@ div .terminal {
    <li><a href="#Something-more-complex?">Something more complex?</a></li>
    <li><a href="#Can-I-use-it-then,-no-strings-attached?">Can I use it then, no strings attached?</a></li>
    <li><a href="#What-if-something-is-broken?">What if something is broken?</a></li>
+   <li><a href="#Can-I-download-a-copy-of-all-the-documentation-as-a-standalone-HTML-file?">Can I download a copy of all the documentation as a standalone HTML file?</a></li>
   </ul>
   </li>
   <li><a href="#Quick-Start">Quick Start</a>
@@ -7324,7 +7325,7 @@ div .terminal {
 <p>H3 is also:</p>
 
 <ul>
-<li><strong>tiny</strong>, under <a href="https://github.com/h3rald/h3/blob/master/h3.js">750 sloc</a>.</li>
+<li><strong>tiny</strong>, under <a href="https://github.com/h3rald/h3/blob/master/h3.js">800 sloc</a>.</li>
 <li><strong>modern</strong>, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge &amp; similar).</li>
 <li><strong>easy</strong> to learn, its API is comprised of only six methods and two properties.</li>
 </ul>
@@ -7335,7 +7336,7 @@ div .terminal {
 
 <p>Here, look, it&rsquo;s just one file:</p>
 
-<p><a href="https://raw.githubusercontent.com/h3rald/h3/v0.7.0/h3.js" target="_blank" class="button primary">Download v0.7.0 (Gory Gorn)</a></p>
+<p><a href="https://raw.githubusercontent.com/h3rald/h3/v0.8.0/h3.js" target="_blank" class="button primary">Download v0.8.0 (Humble Human)</a></p>
 
 <p>Yes there is also a <a href="https://www.npmjs.com/package/@h3rald/h3">NPM package</a> if you want to use it with WebPack and similar, but let me repeat: <em>it&rsquo;s just one file</em>.</p>
 
@@ -7364,6 +7365,11 @@ h3.init(() =&gt; h3("h1", "Hello, World!"));
 <h3>What if something is broken?<a href="#document-top" title="Go to top"></a></h3>
 
 <p>Go fix it! Or at least open an issue on the <a href="https://github.com/h3rald/h3">Github repo</a>, pleasy.</p>
+
+<a name="Can-I-download-a-copy-of-all-the-documentation-as-a-standalone-HTML-file?"></a>
+<h3>Can I download a copy of all the documentation as a standalone HTML file?<a href="#document-top" title="Go to top"></a></h3>
+
+<p>What a weird thing to ask&hellip; sure you can: <a href="https://h3.js.org/H3_DeveloperGuide.htm">here</a>!</p>
 
 <a name="Quick-Start"></a>
 <h2>Quick Start<a href="#document-top" title="Go to top"></a></h2>
@@ -7507,19 +7513,19 @@ const CounterButton = () =&gt; {
 <a name="Route-Components"></a>
 <h4>Route Components<a href="#document-top" title="Go to top"></a></h4>
 
-<p>A route components is a top-level component specified to handle a specific route. Unlike ordinary components, route components:</p>
+<p>A route component is a top-level component that handles a route. Unlike ordinary components, route components:</p>
 
 <ul>
-<li>may have a dedicated <em>setup</em> (after the route component is added to the DOM) and <em>teardown</em> phase (after the route component is removed from the DOM and the new route component is loaded).</li>
+<li>may have a dedicated <em>setup</em> (after the route component is added to the DOM) and <em>teardown</em> phase (after the route component is removed from the DOM and before the new route component is loaded).</li>
 <li>may have built-in local state, initialized during setup and (typically) destroyed during teardown.</li>
 </ul>
 
 
-<p>Route components are stll created using ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> async methods on them (Functions are Objects in JavaScript after all&hellip;) to be executed during the corresponding phase.</p>
+<p>Route components are stll created using ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> async methods on them (functions are objects in JavaScript after all&hellip;) to be executed during each corresponding phase.</p>
 
 <p>Note that:
-* Both the <strong>setup</strong> method take an object as a parameter, representing the component state. Such object will be empty the first time the <strong>setup</strong> method is called for a given component, but it may contain properties not removed during teardowns.
-* The <strong>teardown</strong> method can return an object, which will be retained as component state. If however nothing is returned, the component state is deleted.
+* Both the <strong>setup</strong> method take an object as a parameter, representing the component state. Such object will be empty the first time the <strong>setup</strong> method is called for a given component, but it may contain properties not removed during subsequent teardowns.
+* The <strong>teardown</strong> method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
 * Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.</p>
 
 <a name="How-everything-works..."></a>
@@ -7693,8 +7699,8 @@ const fetchPage = async (pages, id, md) =&gt; {
       h3("img", { alt: "H3", src: "images/h3.svg" }),
     ]),
     h3("div.version.col-sm.col-md", [
-      h3("div.version-number", "v0.7.0"),
-      h3("div.version-label", "“Gory Gorn“"),
+      h3("div.version-number", "v0.8.0"),
+      h3("div.version-label", "“Humble Human“"),
     ]),
     h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
@@ -8044,7 +8050,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
     </div>
     <div id="footer">
-      <p><span class="copy"></span> Fabio Cevasco &ndash; May 29, 2020</p>
+      <p><span class="copy"></span> Fabio Cevasco &ndash; May 30, 2020</p>
       <p><span>Powered by</span> <a href="https://h3rald.com/hastyscribe"><span class="hastyscribe"></span></a></p>
     </div>
   </div>
