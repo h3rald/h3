@@ -1,5 +1,5 @@
 /**
- * H3 v0.7.0 "Gory Gorn"
+ * H3 v0.8.0 "Humble Human"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -189,7 +189,7 @@ class VNode {
         : this.classList;
     this.attributes = attrs;
     Object.keys(attrs)
-      .filter((a) => a.startsWith("on"))
+      .filter((a) => a.startsWith("on") && attrs[a])
       .forEach((key) => {
         if (typeof attrs[key] !== "function") {
           throw new Error(
@@ -416,104 +416,84 @@ class VNode {
       oldvnode.eventListeners = newvnode.eventListeners;
     }
     // Children
-    function mapChildren(parent1, parent2) {
-      const map = [];
-      for (let j = 0; j < parent1.children.length; j++) {
-        let found = false;
-        for (let k = 0; k < parent2.children.length; k++) {
-          if (
-            parent1.children[j].equal(parent2.children[k]) &&
-            !map.includes(k)
-          ) {
-            map.push(k);
-            found = true;
-            break;
+
+    function mapChildren(oldvnode, newvnode) {
+      const maxLength = Math.max(
+        oldvnode.children.length,
+        newvnode.children.length
+      );
+      let map = [];
+      for (let oldIndex = 0; oldIndex < oldvnode.children.length; oldIndex++) {
+        if (oldIndex >= newvnode.children.length) {
+          // not found in new node, remove from old
+          map.push(-3);
+        } else {
+          let found = -1;
+          for (let index = 0; index < oldvnode.children.length; index++) {
+            if (
+              equal(oldvnode.children[oldIndex], newvnode.children[index]) &&
+              !map.includes(index)
+            ) {
+              found = index;
+              break;
+            }
           }
+          map.push(found);
         }
-        if (!found) {
-          map.push(-1);
-        }
+      }
+      // other nodes are new, needs to be added
+      if (maxLength > oldvnode.children.length) {
+        map = map.concat(
+          [...Array(maxLength - oldvnode.children.length)].map(() => -2)
+        );
       }
       return map;
     }
-    let newmap, oldmap, notFoundInNew, notFoundInOld;
-    const remap = () => {
-      // Map positions of newvnode children in relation to oldvnode children
-      newmap = mapChildren(newvnode, oldvnode);
-      // Map positions of oldvnode children in relation to newvnode children
-      oldmap = mapChildren(oldvnode, newvnode);
-      notFoundInOld = newmap.indexOf(-1);
-      notFoundInNew = oldmap.indexOf(-1);
-    };
-    remap();
-    if (newmap.length === oldmap.length) {
-      if (equal(newmap, oldmap) && notFoundInNew >= 0) {
-        // Something changed (some nodes are different at the same position)
-        for (let i = 0; i < newmap.length; i++) {
-          if (newmap[i] === -1 || oldmap[i] === -1) {
-            oldvnode.children[i].redraw({
-              node: node.childNodes[i],
-              vnode: newvnode.children[i],
-            });
-          }
+    let childMap = mapChildren(oldvnode, newvnode);
+    let resultMap = [...Array(childMap.length).keys()];
+    while (!equal(childMap, resultMap)) {
+      let count = -1;
+      for (let i of childMap) {
+        count++;
+        let breakFor = false;
+        if (i === count) {
+          // Matching nodes;
+          continue;
         }
-      } else {
-        // Nodes in different position (maps have same nodes)
-        let index = 0;
-        while (!equal(oldmap, [...Array(oldmap.length).keys()])) {
-          if (newmap[index] !== index) {
-            const child = node.childNodes[newmap[index]];
-            node.removeChild(child);
-            node.insertBefore(child, node.childNodes[index]);
-            const cnode = oldvnode.children[newmap[index]];
-            oldvnode.children = oldvnode.children.filter(
-              (c) => !equal(c, cnode)
-            );
-            oldvnode.children.splice(index, 0, cnode);
-            remap();
-            index = 0;
-          } else {
-            index++;
-          }
+        switch (i) {
+          case -1:
+            // different node, check
+            oldvnode.children[count].redraw({
+              node: node.childNodes[count],
+              vnode: newvnode.children[count],
+            });
+            break;
+          case -2:
+            // add node
+            oldvnode.children.push(newvnode.children[count]);
+            node.appendChild(newvnode.children[count].render());
+            breakFor = true;
+            break;
+          case -3:
+            // remove node
+            oldvnode.children.splice(count, 1);
+            node.removeChild(node.childNodes[count]);
+            breakFor = true;
+            break;
+          default:
+            // Node found, move nodes and remap
+            const vtarget = oldvnode.children.splice(i, 1)[0];
+            oldvnode.children.splice(count, 0, vtarget);
+            node.insertBefore(node.childNodes[i], node.childNodes[count]);
+            breakFor = true;
+            break;
+        }
+        if (breakFor) {
+          break;
         }
       }
-    } else {
-      while (notFoundInOld >= 0 || notFoundInNew >= 0) {
-        // First remove children not found in new map, then add the missing ones.
-        if (notFoundInNew >= 0) {
-          const childOfNew =
-            newvnode.children.length > notFoundInNew &&
-            newvnode.children[notFoundInNew];
-          const childOfOld = oldvnode.children[notFoundInNew];
-          if (
-            childOfNew &&
-            childOfOld &&
-            childOfOld.type === childOfNew.type &&
-            childOfNew.children.length === 0 &&
-            childOfNew.children.length === 0
-          ) {
-            // Optimization to avoid removing simple nodes of the same type
-            oldvnode.children[notFoundInNew].redraw({
-              node: node.childNodes[notFoundInNew],
-              vnode: newvnode.children[notFoundInNew],
-            });
-          } else {
-            // While there are children not found in newvnode, remove them and re-check
-            node.removeChild(node.childNodes[notFoundInNew]);
-            oldvnode.children.splice(notFoundInNew, 1);
-          }
-        } else {
-          // While there are children not found in oldvnode, add them and re-check
-          const cnode = newvnode.children[notFoundInOld].render();
-          node.insertBefore(cnode, node.childNodes[notFoundInOld]);
-          oldvnode.children.splice(
-            notFoundInOld,
-            0,
-            newvnode.children[notFoundInOld]
-          );
-        }
-        remap();
-      }
+      childMap = mapChildren(oldvnode, newvnode);
+      resultMap = [...Array(childMap.length).keys()];
     }
     // $onrender
     if (!equal(oldvnode.$onrender, newvnode.$onrender)) {
