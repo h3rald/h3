@@ -59,7 +59,6 @@ const equal = (obj1, obj2) => {
   return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
-let $onrenderCallbacks = [];
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 
 // Virtual Node Implementation with HyperScript-like syntax
@@ -302,11 +301,11 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
+      c.$onrender && c.$onrender(cnode);
     });
     if (this.$html) {
       node.innerHTML = this.$html;
     }
-    this.$onrender && $onrenderCallbacks.push(() => this.$onrender(node));
     return node;
   }
 
@@ -324,6 +323,7 @@ class VNode {
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
+      newvnode.$onrender && newvnode.$onrender(renderedNode);
       oldvnode.from(newvnode);
       return;
     }
@@ -471,7 +471,9 @@ class VNode {
           case -2:
             // add node
             oldvnode.children.push(newvnode.children[count]);
-            node.appendChild(newvnode.children[count].render());
+            const renderedNode = newvnode.children[count].render();
+            node.appendChild(renderedNode);
+            newvnode.children[count].$onrender && newvnode.children[count].$onrender(renderedNode);
             breakFor = true;
             break;
           case -3:
@@ -581,7 +583,6 @@ class Router {
 
   async start() {
     const processPath = async (data) => {
-      $onrenderCallbacks = [];
       const oldRoute = this.route;
       const fragment =
         (data &&
@@ -639,8 +640,6 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
-      $onrenderCallbacks.forEach((cbk) => cbk());
-      $onrenderCallbacks = [];
       this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
