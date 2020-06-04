@@ -473,7 +473,8 @@ class VNode {
             oldvnode.children.push(newvnode.children[count]);
             const renderedNode = newvnode.children[count].render();
             node.appendChild(renderedNode);
-            newvnode.children[count].$onrender && newvnode.children[count].$onrender(renderedNode);
+            newvnode.children[count].$onrender &&
+              newvnode.children[count].$onrender(renderedNode);
             breakFor = true;
             break;
           case -3:
@@ -640,6 +641,7 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
+      vnode.$onrender && vnode.$onrender(node);
       this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");

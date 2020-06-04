@@ -22,15 +22,12 @@ const mockLocation = {
     window.dispatchEvent(event);
   },
 };
-const $onrender = (node) => {
-  node.classList.add("test");
-};
 const C1 = () => {
   const parts = h3.route.parts;
   const content = Object.keys(parts).map((key) =>
     h3("li", `${key}: ${parts[key]}`)
   );
-  return h3("ul.c1", { $onrender }, content);
+  return h3("ul.c1", content);
 };
 
 const C2 = () => {
@@ -38,7 +35,7 @@ const C2 = () => {
   const content = Object.keys(params).map((key) =>
     h3("li", `${key}: ${params[key]}`)
   );
-  return h3("ul.c2", { $onrender }, content);
+  return h3("ul.c2", content);
 };
 
 describe("h3 (Router)", () => {
@@ -70,9 +67,6 @@ describe("h3 (Router)", () => {
       expect(document.body.childNodes[0].childNodes[1].textContent).toEqual(
         "b: 2"
       );
-      expect(document.body.childNodes[0].classList.contains("test")).toEqual(
-        true
-      );
       sub();
       done();
     });
@@ -102,34 +96,6 @@ describe("h3 (Router)", () => {
     } catch (e) {
       expect(e.message).toMatch(/No route matches/);
     }
-  });
-
-  it("should execute $onrender callback after each navigation", async () => {
-    let executions = [];
-    let count = 0;
-    const c = () => {
-      return h3(
-        "div",
-        {
-          $onrender: (node) => {
-            executions.push("test1");
-          },
-        },
-        [
-          h3("span", {
-            $onrender: (node) => {
-              executions.push("test2");
-            },
-          }),
-        ]
-      );
-    };
-    expect(executions).toEqual([]);
-    await h3.init({
-      element: document.body,
-      routes: { "/": c },
-    });
-    expect(executions).toEqual(["test2", "test1"]);
   });
 
   it("should execute setup and teardown methods", (done) => {

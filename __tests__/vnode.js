@@ -322,4 +322,24 @@ describe("VNode", () => {
     v3.redraw({ node: n3, vnode: v4 });
     expect(v3).toEqual(v4);
   });
+
+  it("should execute $onrender callbacks whenever a child node is added to the DOM", async () => {
+    let n;
+    const $onrender = (node) => {
+      n = node;
+    };
+    const vn1 = h3("ul", [h3("li")]);
+    const vn2 = h3("ul", [h3("li"), h3("li.vn2", { $onrender })]);
+    const n1 = vn1.render();
+    vn1.redraw({ node: n1, vnode: vn2 });
+    expect(n.classList.value).toEqual("vn2");
+    const vn3 = h3("ul", [h3("span.vn3", { $onrender })]);
+    vn1.redraw({ node: n1, vnode: vn3 });
+    expect(n.classList.value).toEqual("vn3");
+    vn2.render();
+    expect(n.classList.value).toEqual("vn2");
+    const rc = () => h3("div.rc", { $onrender });
+    await h3.init(rc);
+    expect(n.classList.value).toEqual("rc");
+  });
 });
