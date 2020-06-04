@@ -108,8 +108,7 @@ When the `h3.init()` method is called at application level, the following operat
 6. The **setup()** method of the matching Route Component is called (if any).
 8. The **$navigation** event is dispatched.
 9. The *Route Component* matching the current route and all its child components are rendered for the first time.
-10. Any callback specified via the **$onrender** special attributes in the loaded components is executed once all components are rendered.
-11. The **$redraw** event is dispatched.
+10. The **$redraw** event is dispatched.
 
 Then, whenever the `h3.redraw()` method is called (typically within a component):
 
@@ -122,11 +121,9 @@ Similarly, whenever the `h3.navigateTo()` method is called (typically within a c
 2. The **teardow()** method of the current Route Component is called (if any).
 3. The **setup()** method of the new matching Route Component is called (if any).
 4. All DOM nodes within the scope of the routing are removed, all components are removed.
-5. Any **$onrender** callback defined in the added components is executed once all components are rendered.
 6. The **$navigation** event is dispatched.
 7. All DOM nodes are removed.
 8. The *Route Component* matching the new route and all its child components are rendered.
-9. Any callback specified via the **$onrender** special attributes in the loaded components is executed once all components are rendered.
 10. The **$redraw** event is dispatched.
 
 And that's it. The whole idea is to make the system extremely *simple* and *predictable* &mdash; which means everything should be very easy to debug, too.
