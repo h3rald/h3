@@ -7517,7 +7517,7 @@ const CounterButton = () =&gt; {
 
 <ul>
 <li>may have a dedicated <em>setup</em> (after the route component is added to the DOM) and <em>teardown</em> phase (after the route component is removed from the DOM and before the new route component is loaded).</li>
-<li>may have built-in local state, initialized during setup and (typically) destroyed during teardown.</li>
+<li>may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the route component when executed.</li>
 </ul>
 
 
@@ -7768,6 +7768,10 @@ const Footer = () =&gt; {
 <h3>Next steps<a href="#document-top" title="Go to top"></a></h3>
 
 <p>Made it this far? Good. Wanna know more? Have a look at the code of the <a href="https://github.com/h3rald/h3/tree/master/docs/example">todo list example</a> and try it out <a href="https://h3.js.org/example/index.html">here</a>.</p>
+
+<p>Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, route components, forms, confirmation messages, plenty of third-party components etc., have a look at <a href="https://github.com/h3rald/litepad">LitePad</a>. You can see it in action here: <a href="https://litepad.h3rald.com/">litepad.h3rald.com</a>.</p>
+
+<p>Note: the LitePad online demo will store all its data in localStorage.</p>
 
 <a name="API"></a>
 <h2>API<a href="#document-top" title="Go to top"></a></h2>
@@ -8047,7 +8051,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
     </div>
     <div id="footer">
-      <p><span class="copy"></span> Fabio Cevasco &ndash; June 4, 2020</p>
+      <p><span class="copy"></span> Fabio Cevasco &ndash; June 8, 2020</p>
       <p><span>Powered by</span> <a href="https://h3rald.com/hastyscribe"><span class="hastyscribe"></span></a></p>
     </div>
   </div>

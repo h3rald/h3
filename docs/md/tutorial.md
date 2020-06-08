@@ -189,3 +189,7 @@ h3.on("$redraw", () => Prism.highlightAll());
 ### Next steps
 
 Made it this far? Good. Wanna know more? Have a look at the code of the [todo list example](https://github.com/h3rald/h3/tree/master/docs/example) and try it out [here](https://h3.js.org/example/index.html).
+
+Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, route components, forms, confirmation messages, plenty of third-party components etc., have a look at [LitePad](https://github.com/h3rald/litepad). You can see it in action here: [litepad.h3rald.com](https://litepad.h3rald.com/).
+
+Note: the LitePad online demo will store all its data in localStorage.

@@ -83,7 +83,7 @@ The current route is always accessible via the `h3.route` property.
 A route component is a top-level component that handles a route. Unlike ordinary components, route components:
 
 * may have a dedicated *setup* (after the route component is added to the DOM) and *teardown* phase (after the route component is removed from the DOM and before the new route component is loaded).
-* may have built-in local state, initialized during setup and (typically) destroyed during teardown.
+* may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the route component when executed.
 
 Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (functions are objects in JavaScript after all...) to be executed during each corresponding phase.
 
