@@ -61,6 +61,8 @@ const equal = (obj1, obj2) => {
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 
+let $onrenderCallbacks = [];
+
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   constructor(...args) {
@@ -68,7 +70,6 @@ class VNode {
     this.attributes = {};
     this.data = {};
     this.id = undefined;
-    this.$key = undefined;
     this.$html = undefined;
     this.$onrender = undefined;
     this.style = undefined;
@@ -158,7 +159,6 @@ class VNode {
     this.value = data.value;
     this.type = data.type;
     this.id = data.id;
-    this.$key = data.$key;
     this.$html = data.$html;
     this.$onrender = data.$onrender;
     this.style = data.style;
@@ -176,7 +176,6 @@ class VNode {
 
   processProperties(attrs) {
     this.id = this.id || attrs.id;
-    this.$key = attrs.$key;
     this.$html = attrs.$html;
     this.$onrender = attrs.$onrender;
     this.style = attrs.style;
@@ -199,7 +198,6 @@ class VNode {
         delete this.attributes[key];
       });
     delete this.attributes.value;
-    delete this.attributes.$key;
     delete this.attributes.$html;
     delete this.attributes.$onrender;
     delete this.attributes.id;
@@ -301,7 +299,7 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && c.$onrender(cnode);
+      c.$onrender && $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -327,8 +325,6 @@ class VNode {
       oldvnode.from(newvnode);
       return;
     }
-    // $key
-    oldvnode.$key = newvnode.$key;
     // ID
     if (oldvnode.id !== newvnode.id) {
       node.id = newvnode.id || "";
@@ -416,41 +412,67 @@ class VNode {
       oldvnode.eventListeners = newvnode.eventListeners;
     }
     // Children
-
     function mapChildren(oldvnode, newvnode) {
-      const maxLength = Math.max(
-        oldvnode.children.length,
-        newvnode.children.length
-      );
       let map = [];
+      let oldNodesFound = 0;
+      let newNodesFound = 0;
+      // First look for existing nodes
       for (let oldIndex = 0; oldIndex < oldvnode.children.length; oldIndex++) {
-        if (oldIndex >= newvnode.children.length) {
-          // not found in new node, remove from old
-          map.push(-3);
-        } else {
-          let found = -1;
-          for (let index = 0; index < oldvnode.children.length; index++) {
-            if (
-              equal(oldvnode.children[oldIndex], newvnode.children[index]) &&
-              !map.includes(index)
-            ) {
-              found = index;
-              break;
-            }
+        let found = -1;
+        for (let index = 0; index < newvnode.children.length; index++) {
+          if (
+            equal(oldvnode.children[oldIndex], newvnode.children[index]) &&
+            !map.includes(index)
+          ) {
+            found = index;
+            newNodesFound++;
+            oldNodesFound++;
+            break;
           }
-          map.push(found);
+        }
+        map.push(found);
+      }
+      if (
+        newNodesFound === oldNodesFound &&
+        newvnode.children.length === oldvnode.children.length
+      ) {
+        // something changed but everything else is the same
+        return map;
+      }
+      if (newNodesFound === newvnode.children.length) {
+        // All children in newvnode exist in oldvnode
+        // All nodes that are not found must be removed
+        for (let i = 0; i < map.length; i++) {
+          if (map[i] === -1) {
+            map[i] = -3;
+          }
         }
       }
-      // other nodes are new, needs to be added
-      if (maxLength > oldvnode.children.length) {
-        map = map.concat(
-          [...Array(maxLength - oldvnode.children.length)].map(() => -2)
-        );
+      if (oldNodesFound === oldvnode.children.length) {
+        // All children in oldvnode exist in newvnode
+        // Check where the missing newvnodes children need to be added
+        for (
+          let newIndex = 0;
+          newIndex < newvnode.children.length;
+          newIndex++
+        ) {
+          if (!map.includes(newIndex)) {
+            map.splice(newIndex, 0, -2);
+          }
+        }
+      }
+      // Check if nodes needs to be removed (if there are fewer children)
+      if (newvnode.children.length < oldvnode.children.length) {
+        for (let i = 0; i < map.length; i++) {
+          if (map[i] === -1 && !newvnode.children[i]) {
+            map[i] = -3;
+          }
+        }
       }
       return map;
     }
     let childMap = mapChildren(oldvnode, newvnode);
-    let resultMap = [...Array(childMap.length).keys()];
+    let resultMap = [...Array(childMap.filter((i) => i !== -3).length).keys()];
     while (!equal(childMap, resultMap)) {
       let count = -1;
       for (let i of childMap) {
@@ -470,9 +492,9 @@ class VNode {
             break;
           case -2:
             // add node
-            oldvnode.children.push(newvnode.children[count]);
+            oldvnode.children.splice(count, 0, newvnode.children[count]);
             const renderedNode = newvnode.children[count].render();
-            node.appendChild(renderedNode);
+            node.insertBefore(renderedNode, node.childNodes[count]);
             newvnode.children[count].$onrender &&
               newvnode.children[count].$onrender(renderedNode);
             breakFor = true;
@@ -642,6 +664,8 @@ class Router {
       const node = vnode.render();
       this.element.appendChild(node);
       vnode.$onrender && vnode.$onrender(node);
+      $onrenderCallbacks.forEach((cbk) => cbk());
+      $onrenderCallbacks = [];
       this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");

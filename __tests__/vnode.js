@@ -7,7 +7,6 @@ describe("VNode", () => {
       id: "test",
       type: "input",
       value: "AAA",
-      $key: "123",
       $html: "",
       data: { a: "1", b: "2" },
       eventListeners: { click: fn },
@@ -20,7 +19,6 @@ describe("VNode", () => {
     vnode1.from(obj);
     const vnode2 = h3("input#test.a1.a2", {
       value: "AAA",
-      $key: "123",
       $html: "",
       data: { a: "1", b: "2" },
       onclick: fn,
@@ -336,10 +334,11 @@ describe("VNode", () => {
     const vn3 = h3("ul", [h3("span.vn3", { $onrender })]);
     vn1.redraw({ node: n1, vnode: vn3 });
     expect(n.classList.value).toEqual("vn3");
-    vn2.render();
-    expect(n.classList.value).toEqual("vn2");
     const rc = () => h3("div.rc", { $onrender });
     await h3.init(rc);
     expect(n.classList.value).toEqual("rc");
+    const rc2 = () => vn2;
+    await h3.init(rc2);
+    expect(n.classList.value).toEqual("vn2");
   });
 });

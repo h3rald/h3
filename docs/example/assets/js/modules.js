@@ -3,7 +3,9 @@ import h3 from "./h3.js";
 const app = () => {
   h3.on("app/load", () => {
     const storedData = localStorage.getItem("h3_todo_list");
-    const { todos, settings } = storedData ? JSON.parse(storedData) : {todos: [], settings: {}};
+    const { todos, settings } = storedData
+      ? JSON.parse(storedData)
+      : { todos: [], settings: {} };
     return { todos, settings };
   });
   h3.on("app/save", (state, data) => {
@@ -37,13 +39,13 @@ const todos = () => {
     });
     return { todos };
   });
-  h3.on("todos/remove", (state, data) => {
-    const todos = state.todos.filter(({ key }) => key !== data.key);
+  h3.on("todos/remove", (state, k) => {
+    const todos = state.todos.filter(({ key }) => key !== k);
     return { todos };
   });
-  h3.on("todos/toggle", (state, data) => {
+  h3.on("todos/toggle", (state, k) => {
     const todos = state.todos;
-    const todo = state.todos.find((t) => t.key === data.key);
+    const todo = state.todos.find(({ key }) => key === k);
     todo.done = !todo.done;
     return { todos };
   });
