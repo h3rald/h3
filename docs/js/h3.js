@@ -1,5 +1,5 @@
 /**
- * H3 v0.7.0 "Gory Gorn"
+ * H3 v0.8.0 "Humble Human"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * This source code is licensed under the MIT license found in the
@@ -59,8 +59,9 @@ const equal = (obj1, obj2) => {
   return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
-let $onrenderCallbacks = [];
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
+
+let $onrenderCallbacks = [];
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
@@ -69,7 +70,6 @@ class VNode {
     this.attributes = {};
     this.data = {};
     this.id = undefined;
-    this.$key = undefined;
     this.$html = undefined;
     this.$onrender = undefined;
     this.style = undefined;
@@ -159,7 +159,6 @@ class VNode {
     this.value = data.value;
     this.type = data.type;
     this.id = data.id;
-    this.$key = data.$key;
     this.$html = data.$html;
     this.$onrender = data.$onrender;
     this.style = data.style;
@@ -177,7 +176,6 @@ class VNode {
 
   processProperties(attrs) {
     this.id = this.id || attrs.id;
-    this.$key = attrs.$key;
     this.$html = attrs.$html;
     this.$onrender = attrs.$onrender;
     this.style = attrs.style;
@@ -189,7 +187,7 @@ class VNode {
         : this.classList;
     this.attributes = attrs;
     Object.keys(attrs)
-      .filter((a) => a.startsWith("on"))
+      .filter((a) => a.startsWith("on") && attrs[a])
       .forEach((key) => {
         if (typeof attrs[key] !== "function") {
           throw new Error(
@@ -200,7 +198,6 @@ class VNode {
         delete this.attributes[key];
       });
     delete this.attributes.value;
-    delete this.attributes.$key;
     delete this.attributes.$html;
     delete this.attributes.$onrender;
     delete this.attributes.id;
@@ -302,11 +299,11 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
+      c.$onrender && $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
     }
-    this.$onrender && $onrenderCallbacks.push(() => this.$onrender(node));
     return node;
   }
 
@@ -324,11 +321,10 @@ class VNode {
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
+      newvnode.$onrender && newvnode.$onrender(renderedNode);
       oldvnode.from(newvnode);
       return;
     }
-    // $key
-    oldvnode.$key = newvnode.$key;
     // ID
     if (oldvnode.id !== newvnode.id) {
       node.id = newvnode.id || "";
@@ -416,104 +412,113 @@ class VNode {
       oldvnode.eventListeners = newvnode.eventListeners;
     }
     // Children
-    function mapChildren(parent1, parent2) {
-      const map = [];
-      for (let j = 0; j < parent1.children.length; j++) {
-        let found = false;
-        for (let k = 0; k < parent2.children.length; k++) {
+    function mapChildren(oldvnode, newvnode) {
+      let map = [];
+      let oldNodesFound = 0;
+      let newNodesFound = 0;
+      // First look for existing nodes
+      for (let oldIndex = 0; oldIndex < oldvnode.children.length; oldIndex++) {
+        let found = -1;
+        for (let index = 0; index < newvnode.children.length; index++) {
           if (
-            parent1.children[j].equal(parent2.children[k]) &&
-            !map.includes(k)
+            equal(oldvnode.children[oldIndex], newvnode.children[index]) &&
+            !map.includes(index)
           ) {
-            map.push(k);
-            found = true;
+            found = index;
+            newNodesFound++;
+            oldNodesFound++;
             break;
           }
         }
-        if (!found) {
-          map.push(-1);
+        map.push(found);
+      }
+      if (
+        newNodesFound === oldNodesFound &&
+        newvnode.children.length === oldvnode.children.length
+      ) {
+        // something changed but everything else is the same
+        return map;
+      }
+      if (newNodesFound === newvnode.children.length) {
+        // All children in newvnode exist in oldvnode
+        // All nodes that are not found must be removed
+        for (let i = 0; i < map.length; i++) {
+          if (map[i] === -1) {
+            map[i] = -3;
+          }
+        }
+      }
+      if (oldNodesFound === oldvnode.children.length) {
+        // All children in oldvnode exist in newvnode
+        // Check where the missing newvnodes children need to be added
+        for (
+          let newIndex = 0;
+          newIndex < newvnode.children.length;
+          newIndex++
+        ) {
+          if (!map.includes(newIndex)) {
+            map.splice(newIndex, 0, -2);
+          }
+        }
+      }
+      // Check if nodes needs to be removed (if there are fewer children)
+      if (newvnode.children.length < oldvnode.children.length) {
+        for (let i = 0; i < map.length; i++) {
+          if (map[i] === -1 && !newvnode.children[i]) {
+            map[i] = -3;
+          }
         }
       }
       return map;
     }
-    let newmap, oldmap, notFoundInNew, notFoundInOld;
-    const remap = () => {
-      // Map positions of newvnode children in relation to oldvnode children
-      newmap = mapChildren(newvnode, oldvnode);
-      // Map positions of oldvnode children in relation to newvnode children
-      oldmap = mapChildren(oldvnode, newvnode);
-      notFoundInOld = newmap.indexOf(-1);
-      notFoundInNew = oldmap.indexOf(-1);
-    };
-    remap();
-    if (newmap.length === oldmap.length) {
-      if (equal(newmap, oldmap) && notFoundInNew >= 0) {
-        // Something changed (some nodes are different at the same position)
-        for (let i = 0; i < newmap.length; i++) {
-          if (newmap[i] === -1 || oldmap[i] === -1) {
-            oldvnode.children[i].redraw({
-              node: node.childNodes[i],
-              vnode: newvnode.children[i],
-            });
-          }
+    let childMap = mapChildren(oldvnode, newvnode);
+    let resultMap = [...Array(childMap.filter((i) => i !== -3).length).keys()];
+    while (!equal(childMap, resultMap)) {
+      let count = -1;
+      for (let i of childMap) {
+        count++;
+        let breakFor = false;
+        if (i === count) {
+          // Matching nodes;
+          continue;
         }
-      } else {
-        // Nodes in different position (maps have same nodes)
-        let index = 0;
-        while (!equal(oldmap, [...Array(oldmap.length).keys()])) {
-          if (newmap[index] !== index) {
-            const child = node.childNodes[newmap[index]];
-            node.removeChild(child);
-            node.insertBefore(child, node.childNodes[index]);
-            const cnode = oldvnode.children[newmap[index]];
-            oldvnode.children = oldvnode.children.filter(
-              (c) => !equal(c, cnode)
-            );
-            oldvnode.children.splice(index, 0, cnode);
-            remap();
-            index = 0;
-          } else {
-            index++;
-          }
+        switch (i) {
+          case -1:
+            // different node, check
+            oldvnode.children[count].redraw({
+              node: node.childNodes[count],
+              vnode: newvnode.children[count],
+            });
+            break;
+          case -2:
+            // add node
+            oldvnode.children.splice(count, 0, newvnode.children[count]);
+            const renderedNode = newvnode.children[count].render();
+            node.insertBefore(renderedNode, node.childNodes[count]);
+            newvnode.children[count].$onrender &&
+              newvnode.children[count].$onrender(renderedNode);
+            breakFor = true;
+            break;
+          case -3:
+            // remove node
+            oldvnode.children.splice(count, 1);
+            node.removeChild(node.childNodes[count]);
+            breakFor = true;
+            break;
+          default:
+            // Node found, move nodes and remap
+            const vtarget = oldvnode.children.splice(i, 1)[0];
+            oldvnode.children.splice(count, 0, vtarget);
+            node.insertBefore(node.childNodes[i], node.childNodes[count]);
+            breakFor = true;
+            break;
+        }
+        if (breakFor) {
+          break;
         }
       }
-    } else {
-      while (notFoundInOld >= 0 || notFoundInNew >= 0) {
-        // First remove children not found in new map, then add the missing ones.
-        if (notFoundInNew >= 0) {
-          const childOfNew =
-            newvnode.children.length > notFoundInNew &&
-            newvnode.children[notFoundInNew];
-          const childOfOld = oldvnode.children[notFoundInNew];
-          if (
-            childOfNew &&
-            childOfOld &&
-            childOfOld.type === childOfNew.type &&
-            childOfNew.children.length === 0 &&
-            childOfNew.children.length === 0
-          ) {
-            // Optimization to avoid removing simple nodes of the same type
-            oldvnode.children[notFoundInNew].redraw({
-              node: node.childNodes[notFoundInNew],
-              vnode: newvnode.children[notFoundInNew],
-            });
-          } else {
-            // While there are children not found in newvnode, remove them and re-check
-            node.removeChild(node.childNodes[notFoundInNew]);
-            oldvnode.children.splice(notFoundInNew, 1);
-          }
-        } else {
-          // While there are children not found in oldvnode, add them and re-check
-          const cnode = newvnode.children[notFoundInOld].render();
-          node.insertBefore(cnode, node.childNodes[notFoundInOld]);
-          oldvnode.children.splice(
-            notFoundInOld,
-            0,
-            newvnode.children[notFoundInOld]
-          );
-        }
-        remap();
-      }
+      childMap = mapChildren(oldvnode, newvnode);
+      resultMap = [...Array(childMap.length).keys()];
     }
     // $onrender
     if (!equal(oldvnode.$onrender, newvnode.$onrender)) {
@@ -601,7 +606,6 @@ class Router {
 
   async start() {
     const processPath = async (data) => {
-      $onrenderCallbacks = [];
       const oldRoute = this.route;
       const fragment =
         (data &&
@@ -659,6 +663,7 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
+      vnode.$onrender && vnode.$onrender(node);
       $onrenderCallbacks.forEach((cbk) => cbk());
       $onrenderCallbacks = [];
       this.setRedraw(vnode, newRouteComponent.state);
