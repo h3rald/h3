@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const terser = require("terser");
 
 const readme = "./README.md";
 const overview = "./docs/md/overview.md";
@@ -7,18 +8,21 @@ const app = "./docs/js/app.js";
 const tutorial = "./docs/md/tutorial.md";
 const package = "./package.json";
 const h3 = "./h3.js";
+const h3min = "./h3.min.js";
 
 const pkg = JSON.parse(fs.readFileSync(package, "utf8"));
 
 // Update h3.js
 
-const h3Data = fs.readFileSync(h3, "utf8");
+let h3Data = fs.readFileSync(h3, "utf8");
 const notice = h3Data.match(/\/\*\*((.|\n|\r)+?)\*\//gm)[0];
 const newNotice = notice
   .replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`)
   .replace(/\"[^"]+\"/, `"${pkg.versionName}"`)
   .replace(/Copyright \d+/, `Copyright ${new Date().getFullYear()}`);
-fs.writeFileSync(h3, h3Data.replace(notice, newNotice));
+h3Data = h3Data.replace(notice, newNotice)
+fs.writeFileSync(h3, h3Data);
+fs.writeFileSync(h3min, terser.minify(h3Data).code);
 
 
 // Update README.md
