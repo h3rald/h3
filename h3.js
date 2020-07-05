@@ -59,7 +59,7 @@ const equal = (obj1, obj2) => {
   return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
 };
 
-const selectorRegex = /^([a-z][a-z0-9:_=-]*)(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
+const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 
 let $onrenderCallbacks = [];
 
@@ -663,13 +663,13 @@ class Router {
       const vnode = newRouteComponent(newRouteComponent.state);
       const node = vnode.render();
       this.element.appendChild(node);
+      this.setRedraw(vnode, newRouteComponent.state);
+      redrawing = false;
       vnode.$onrender && vnode.$onrender(node);
       $onrenderCallbacks.forEach((cbk) => cbk());
       $onrenderCallbacks = [];
-      this.setRedraw(vnode, newRouteComponent.state);
       window.scrollTo(0, 0);
       this.store.dispatch("$redraw");
-      redrawing = false;
     };
     window.addEventListener("hashchange", processPath);
     await processPath();
