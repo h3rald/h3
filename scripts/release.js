@@ -9,6 +9,7 @@ const tutorial = "./docs/md/tutorial.md";
 const package = "./package.json";
 const h3 = "./h3.js";
 const h3min = "./h3.min.js";
+const h3map = "./h3.js.map";
 
 const pkg = JSON.parse(fs.readFileSync(package, "utf8"));
 
@@ -20,10 +21,19 @@ const newNotice = notice
   .replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`)
   .replace(/\"[^"]+\"/, `"${pkg.versionName}"`)
   .replace(/Copyright \d+/, `Copyright ${new Date().getFullYear()}`);
-h3Data = h3Data.replace(notice, newNotice)
+h3Data = h3Data.replace(notice, newNotice);
 fs.writeFileSync(h3, h3Data);
-fs.writeFileSync(h3min, terser.minify(h3Data).code);
-
+const minified = terser.minify(h3Data, {
+  sourceMap: { filename: "h3.js", url: "h3.js.map" },
+});
+fs.writeFileSync(
+  h3min,
+  minified.code
+);
+fs.writeFileSync(
+  h3map,
+  minified.map
+);
 
 // Update README.md
 let readmeData = fs.readFileSync(readme, "utf8");
