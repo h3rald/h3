@@ -95,3 +95,7 @@ h6 {
 h4 {
   font-size: 16px;
 }
+
+a.button {
+  margin: 0;
+}

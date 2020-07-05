@@ -28,6 +28,7 @@ fs.writeFileSync(h3min, terser.minify(h3Data).code);
 // Update README.md
 let readmeData = fs.readFileSync(readme, "utf8");
 readmeData = readmeData.replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`);
+readmeData = readmeData.replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`);
 readmeData = readmeData.replace(
   /Download v\d+\.\d+\.\d+ \([^)]+\)/,
   `Download v${pkg.version} (${pkg.versionName})`
