@@ -1,7 +1,7 @@
 {
   "name": "@h3rald/h3",
-  "version": "0.8.0",
-  "versionName": "Humble Human",
+  "version": "0.9.0",
+  "versionName": "Impeccable Iconian",
   "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
   "scripts": {
@@ -38,6 +38,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "coveralls": "^3.0.11",
-    "jest": "^25.3.0"
+    "jest": "^25.3.0",
+    "terser": "^4.8.0"
   }
 }

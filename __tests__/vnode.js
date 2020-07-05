@@ -75,6 +75,32 @@ describe("VNode", () => {
     expect(node.checked).toEqual(false);
   });
 
+  it("should handle non-string attributes as properties and not create attributes", () => {
+    const v = h3("div", {
+      test: true,
+      obj: { a: 1, b: 2 },
+      arr: [1, 2, 3],
+      num: 2.3,
+      str: "test",
+      s: "",
+      title: "testing!",
+      value: false,
+    });
+    const n = v.render();
+    expect(n.test).toEqual(true);
+    expect(n.obj).toEqual({ a: 1, b: 2 });
+    expect(n.arr).toEqual([1, 2, 3]);
+    expect(n.num).toEqual(2.3);
+    expect(n.str).toEqual("test");
+    expect(n.getAttribute("str")).toEqual("test");
+    expect(n.s).toEqual("");
+    expect(n.getAttribute("s")).toEqual(null);
+    expect(n.title).toEqual("testing!");
+    expect(n.getAttribute("title")).toEqual("testing!");
+    expect(n.value).toEqual(undefined);
+    expect(n.getAttribute("value")).toEqual(null);
+  });
+
   it("should provide a render method able to render element nodes with a value", () => {
     const vnode = h3("input", { value: "test" });
     const createElement = jest.spyOn(document, "createElement");
