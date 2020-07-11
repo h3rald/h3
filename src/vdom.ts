@@ -557,7 +557,7 @@ export const update = (oldvnode: HTMLElement | VNode, newvnode?: VNode): VNode =
   } else {
     // Firse time
     newvnode.element = newvnode.render() as FlexibleElement;
-    (oldvnode as FlexibleElement).parentNode.replaceChild(oldvnode, newvnode.element);
+    (oldvnode as HTMLElement).parentNode.replaceChild(oldvnode, newvnode.element);
     return newvnode;
   }
 }
