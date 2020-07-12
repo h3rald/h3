@@ -1,5 +1,5 @@
 /**
- * H3 v0.9.0 "Impeccable Iconian"
+ * H3 v0.10.0 "Jittery Jem'Hadar"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  * 
  * @license MIT
