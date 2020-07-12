@@ -41,8 +41,6 @@ const equal = (obj1, obj2) => {
     }
   }
   if ([String, Number, Boolean].includes(obj1.constructor)) {
-    if (obj1 !== obj2) {
-    }
     return obj1 === obj2;
   }
   if (obj1.constructor === Array) {
@@ -207,7 +205,7 @@ class VNode {
   }
 
   processSelector(selector) {
-    if (!selector.match(selectorRegex)) {
+    if (!selector.match(selectorRegex) || selector.length === 0) {
       throw new Error(`[VNode] Invalid selector: ${selector}`);
     }
     const [, type, id, classes] = selector.match(selectorRegex);
