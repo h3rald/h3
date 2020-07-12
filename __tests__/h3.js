@@ -49,7 +49,6 @@ describe("h3", () => {
     const invalid2nd2 = () => h3("div", true, []);
     const invalid2nd3 = () => h3("div", null, []);
     const invalidChildren = () => h3("div", ["test", 1, 2]);
-    const tooManyArgs = () => h3("div", { id: "test" }, "test", "aaa");
     const emptySelector = () => h3("");
     expect(empty).toThrowError(/No arguments passed/);
     expect(invalid1st).toThrowError(/Invalid first argument/);
@@ -61,8 +60,16 @@ describe("h3", () => {
     expect(invalid2nd2).toThrowError(/Invalid second argument/);
     expect(invalid2nd3).toThrowError(/Invalid second argument/);
     expect(invalidChildren).toThrowError(/not a VNode: 1/);
-    expect(tooManyArgs).toThrowError(/Too many arguments/);
     expect(emptySelector).toThrowError(/Invalid selector/);
+  });
+
+  it("should support several child arguments", () => {
+    let vnode = h3("div", {test: "a"}, "a", "b", "c");
+    expect(vnode.children.length).toEqual(3);
+    vnode = h3("div", "a", "b", "c");
+    expect(vnode.children.length).toEqual(3);
+    vnode = h3("div", "a", "b");
+    expect(vnode.children.length).toEqual(2);
   });
 
   it("should support the creation of elements with a single, non-array child", () => {

@@ -1,7 +1,7 @@
 /**
- * H3 v0.9.0 "Impeccable Iconian"
+ * H3 v0.10.0 "Jittery Jem'Hadar"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
- * 
+ *
  * @license MIT
  * For the full license, see: https://github.com/h3rald/h3/blob/master/LICENSE
  */
@@ -41,8 +41,6 @@ const equal = (obj1, obj2) => {
     }
   }
   if ([String, Number, Boolean].includes(obj1.constructor)) {
-    if (obj1 !== obj2) {
-    }
     return obj1 === obj2;
   }
   if (obj1.constructor === Array) {
@@ -133,25 +131,34 @@ class VNode {
           this.processProperties(data);
         }
       }
-    } else if (args.length === 3) {
+    } else {
       let [selector, props, children] = args;
+      if (args.length > 3) {
+        children = args.slice(2);
+      }
+      children = Array.isArray(children) ? children : [children];
       if (typeof selector !== "string") {
         throw new Error(
           "[VNode] Invalid first argument passed to VNode constructor."
         );
       }
       this.processSelector(selector);
-      if (typeof props !== "object" || props === null) {
-        throw new Error(
-          "[VNode] Invalid second argument passed to VNode constructor."
-        );
+      if (
+        props instanceof Function ||
+        props instanceof VNode ||
+        typeof props === "string"
+      ) {
+        // 2nd argument is a child
+        children = [props].concat(children);
+      } else {
+        if (typeof props !== "object" || props === null) {
+          throw new Error(
+            "[VNode] Invalid second argument passed to VNode constructor."
+          );
+        }
+        this.processProperties(props);
       }
-      this.processProperties(props);
       this.processChildren(children);
-    } else {
-      throw new Error(
-        "[VNode] Too many arguments passed to VNode constructor."
-      );
     }
   }
 
@@ -207,7 +214,7 @@ class VNode {
   }
 
   processSelector(selector) {
-    if (!selector.match(selectorRegex)) {
+    if (!selector.match(selectorRegex) || selector.length === 0) {
       throw new Error(`[VNode] Invalid selector: ${selector}`);
     }
     const [, type, id, classes] = selector.match(selectorRegex);
