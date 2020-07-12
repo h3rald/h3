@@ -27,7 +27,7 @@ describe("h3", () => {
     expect(h3("div")).toEqual({
       type: "div",
       children: [],
-      attributes: {},
+      props: {},
       classList: [],
       data: {},
       eventListeners: {},
@@ -94,7 +94,7 @@ describe("h3", () => {
         {
           type: "#text",
           children: [],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},
@@ -104,7 +104,7 @@ describe("h3", () => {
           value: "test",
         },
       ],
-      attributes: {},
+      props: {},
       classList: [],
       data: {},
       eventListeners: {},
@@ -124,7 +124,7 @@ describe("h3", () => {
     expect(a).toEqual({
       type: "div",
       children: [],
-      attributes: {},
+      props: {},
       classList: ["a", "b", "c"],
       data: {},
       eventListeners: {},
@@ -137,13 +137,13 @@ describe("h3", () => {
     expect(a).toEqual(b);
   });
 
-  it("should support the creation of virtual node elements with attributes and classes", () => {
+  it("should support the creation of virtual node elements with props and classes", () => {
     expect(h3("div.test1.test2", { id: "test" })).toEqual({
       type: "div",
       children: [],
       classList: ["test1", "test2"],
       data: {},
-      attributes: {},
+      props: {},
       eventListeners: {},
       id: "test",
       $html: undefined,
@@ -158,7 +158,7 @@ describe("h3", () => {
       type: "div",
       children: [
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -170,7 +170,7 @@ describe("h3", () => {
           value: "a",
         },
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -182,7 +182,7 @@ describe("h3", () => {
           value: "b",
         },
       ],
-      attributes: {},
+      props: {},
       classList: ["test"],
       data: {},
       eventListeners: {},
@@ -193,14 +193,14 @@ describe("h3", () => {
     });
   });
 
-  it("should support the creation of virtual node elements with text children, attributes, and classes", () => {
+  it("should support the creation of virtual node elements with text children, props, and classes", () => {
     expect(
       h3("div.test", { title: "Test...", id: "test" }, ["a", "b"])
     ).toEqual({
       type: "div",
       children: [
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -212,7 +212,7 @@ describe("h3", () => {
           value: "a",
         },
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -230,12 +230,12 @@ describe("h3", () => {
       $html: undefined,
       style: undefined,
       value: undefined,
-      attributes: { title: "Test..." },
+      props: { title: "Test..." },
       classList: ["test"],
     });
   });
 
-  it("should support the creation of virtual node elements with attributes", () => {
+  it("should support the creation of virtual node elements with props", () => {
     expect(h3("input", { type: "text", value: "AAA" })).toEqual({
       type: "input",
       children: [],
@@ -245,7 +245,7 @@ describe("h3", () => {
       $html: undefined,
       style: undefined,
       value: "AAA",
-      attributes: { type: "text" },
+      props: { type: "text" },
       classList: [],
     });
   });
@@ -263,7 +263,7 @@ describe("h3", () => {
       $html: undefined,
       style: undefined,
       value: undefined,
-      attributes: {},
+      props: {},
       classList: [],
     });
     expect(() => h3("span", { onclick: "something" })).toThrowError(
@@ -275,11 +275,11 @@ describe("h3", () => {
     expect(
       h3("div.test", ["a", h3("span", ["test1"]), () => h3("span", ["test2"])])
     ).toEqual({
-      attributes: {},
+      props: {},
       type: "div",
       children: [
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -294,7 +294,7 @@ describe("h3", () => {
           type: "span",
           children: [
             {
-              attributes: {},
+              props: {},
               children: [],
               classList: [],
               data: {},
@@ -306,7 +306,7 @@ describe("h3", () => {
               value: "test1",
             },
           ],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},
@@ -319,7 +319,7 @@ describe("h3", () => {
           type: "span",
           children: [
             {
-              attributes: {},
+              props: {},
               children: [],
               classList: [],
               data: {},
@@ -331,7 +331,7 @@ describe("h3", () => {
               value: "test2",
             },
           ],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},

@@ -11,7 +11,7 @@ describe("VNode", () => {
       data: { a: "1", b: "2" },
       eventListeners: { click: fn },
       children: [],
-      attributes: { title: "test" },
+      props: { title: "test" },
       classList: ["a1", "a2"],
       style: "padding: 2px",
     };
@@ -44,7 +44,7 @@ describe("VNode", () => {
     expect(node.constructor).toEqual(HTMLBRElement);
   });
 
-  it("should provide a render method able to render element nodes with attributes and classes", () => {
+  it("should provide a render method able to render element nodes with props and classes", () => {
     const createElement = jest.spyOn(document, "createElement");
     const vnode = h3("span.test1.test2", { title: "test", falsy: false });
     const node = vnode.render();
@@ -66,7 +66,7 @@ describe("VNode", () => {
     expect(node.childNodes[0].childNodes[0].data).toEqual("test1");
   });
 
-  it("should handle boolean attributes when redrawing", () => {
+  it("should handle boolean props when redrawing", () => {
     const vnode1 = h3("input", { type: "checkbox", checked: true });
     const node = vnode1.render();
     expect(node.checked).toEqual(true);
@@ -75,7 +75,7 @@ describe("VNode", () => {
     expect(node.checked).toEqual(false);
   });
 
-  it("should handle non-string attributes as properties and not create attributes", () => {
+  it("should handle non-string props as properties and not create props", () => {
     const v = h3("div", {
       test: true,
       obj: { a: 1, b: 2 },
@@ -128,7 +128,7 @@ describe("VNode", () => {
     expect(addEventListener).toHaveBeenCalledWith("click", handler);
   });
 
-  it("it should provide a render method able to render elements with special attributes", () => {
+  it("it should provide a render method able to render elements with special props", () => {
     const vnode = h3("div", {
       id: "test",
       style: "margin: auto;",
@@ -209,7 +209,7 @@ describe("VNode", () => {
     expect(node.childNodes[2].classList[0]).toEqual("test");
   });
 
-  it("should provide a redraw method that is able to update different attributes", () => {
+  it("should provide a redraw method that is able to update different props", () => {
     const oldvnode = h3("span", { title: "a", something: "b" });
     const newvnode = h3("span", { title: "b", id: "bbb" });
     const node = oldvnode.render();
@@ -288,7 +288,7 @@ describe("VNode", () => {
     expect(node.childNodes[1].getAttribute("id")).toEqual("ccc");
   });
 
-  it("should provide a redraw method able to detect specific changes to style, data, value, attributes, $onrender and eventListeners", () => {
+  it("should provide a redraw method able to detect specific changes to style, data, value, props, $onrender and eventListeners", () => {
     const fn = () => false;
     const oldvnode = h3("input", {
       style: "margin: auto;",

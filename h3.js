@@ -63,9 +63,10 @@ let $onrenderCallbacks = [];
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
+
   constructor(...args) {
     this.type = undefined;
-    this.attributes = {};
+    this.props = {};
     this.data = {};
     this.id = undefined;
     this.$html = undefined;
@@ -173,7 +174,7 @@ class VNode {
     this.value = data.value;
     this.eventListeners = data.eventListeners;
     this.children = data.children;
-    this.attributes = data.attributes;
+    this.props = data.props;
     this.classList = data.classList;
   }
 
@@ -192,7 +193,7 @@ class VNode {
       attrs.classList && attrs.classList.length > 0
         ? attrs.classList
         : this.classList;
-    this.attributes = attrs;
+    this.props = attrs;
     Object.keys(attrs)
       .filter((a) => a.startsWith("on") && attrs[a])
       .forEach((key) => {
@@ -202,15 +203,15 @@ class VNode {
           );
         }
         this.eventListeners[key.slice(2)] = attrs[key];
-        delete this.attributes[key];
+        delete this.props[key];
       });
-    delete this.attributes.value;
-    delete this.attributes.$html;
-    delete this.attributes.$onrender;
-    delete this.attributes.id;
-    delete this.attributes.data;
-    delete this.attributes.style;
-    delete this.attributes.classList;
+    delete this.props.value;
+    delete this.props.$html;
+    delete this.props.$onrender;
+    delete this.props.id;
+    delete this.props.data;
+    delete this.props.style;
+    delete this.props.classList;
   }
 
   processSelector(selector) {
@@ -270,16 +271,16 @@ class VNode {
     if (this.id) {
       node.id = this.id;
     }
-    Object.keys(this.attributes).forEach((attr) => {
-      // Set attributes (only if non-empty strings)
-      if (this.attributes[attr] && typeof this.attributes[attr] === "string") {
+    Object.keys(this.props).forEach((attr) => {
+      // Set props (only if non-empty strings)
+      if (this.props[attr] && typeof this.props[attr] === "string") {
         const a = document.createAttribute(attr);
-        a.value = this.attributes[attr];
+        a.value = this.props[attr];
         node.setAttributeNode(a);
       }
       // Set properties
-      if (typeof this.attributes[attr] !== "string" || !node[attr]) {
-        node[attr] = this.attributes[attr];
+      if (typeof this.props[attr] !== "string" || !node[attr]) {
+        node[attr] = this.props[attr];
       }
     });
     // Event Listeners
@@ -377,27 +378,27 @@ class VNode {
       });
       oldvnode.data = newvnode.data;
     }
-    // Attributes
-    if (!equal(oldvnode.attributes, newvnode.attributes)) {
-      Object.keys(oldvnode.attributes).forEach((a) => {
-        if (newvnode.attributes[a] === false) {
+    // props
+    if (!equal(oldvnode.props, newvnode.props)) {
+      Object.keys(oldvnode.props).forEach((a) => {
+        if (newvnode.props[a] === false) {
           node[a] = false;
         }
-        if (!newvnode.attributes[a]) {
+        if (!newvnode.props[a]) {
           node.removeAttribute(a);
         } else if (
-          newvnode.attributes[a] &&
-          newvnode.attributes[a] !== oldvnode.attributes[a]
+          newvnode.props[a] &&
+          newvnode.props[a] !== oldvnode.props[a]
         ) {
-          node.setAttribute(a, newvnode.attributes[a]);
+          node.setAttribute(a, newvnode.props[a]);
         }
       });
-      Object.keys(newvnode.attributes).forEach((a) => {
-        if (!oldvnode.attributes[a] && newvnode.attributes[a]) {
-          node.setAttribute(a, newvnode.attributes[a]);
+      Object.keys(newvnode.props).forEach((a) => {
+        if (!oldvnode.props[a] && newvnode.props[a]) {
+          node.setAttribute(a, newvnode.props[a]);
         }
       });
-      oldvnode.attributes = newvnode.attributes;
+      oldvnode.props = newvnode.props;
     }
     // Event listeners
     if (!equal(oldvnode.eventListeners, newvnode.eventListeners)) {
