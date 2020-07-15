@@ -1,13 +1,17 @@
-const h3 = require("../h3.js").default;
+const Router = require("../src/router.js").Router;
+const h = require("../src/vdom.js").h;
+const Store = require("../src/store.js").Store;
 
 let preStartCalled = false;
 let postStartCalled = false;
 let count = 0;
 let result = 0;
+let store;
+let router;
 
 const setCount = () => {
   count = count + 2;
-  h3.dispatch("count/set", count);
+  store.dispatch("count/set", count);
 };
 let hash = "#/c2";
 const mockLocation = {
@@ -23,47 +27,64 @@ const mockLocation = {
   },
 };
 const C1 = () => {
-  const parts = h3.route.parts;
+  const parts = router.route.parts;
   const content = Object.keys(parts).map((key) =>
-    h3("li", `${key}: ${parts[key]}`)
+    h("li", `${key}: ${parts[key]}`)
   );
-  return h3("ul.c1", content);
+  return h("ul.c1", content);
 };
+
+let c2Redraws = 0;
 
 const C2 = () => {
-  const params = h3.route.params;
+  const params = router.route.params;
   const content = Object.keys(params).map((key) =>
-    h3("li", `${key}: ${params[key]}`)
+    h("li", `${key}: ${params[key]}`)
   );
-  return h3("ul.c2", content);
+  c2Redraws = c2Redraws+1;
+  return h("ul.c2", content);
 };
 
-describe("h3 (Router)", () => {
+describe("Router", () => {
   beforeEach(async () => {
-    const preStart = () => (preStartCalled = true);
-    const postStart = () => (postStartCalled = true);
-    await h3.init({
+    store = new Store();
+    router = new Router({
       routes: {
         "/c1/:a/:b/:c": C1,
         "/c2": C2,
       },
+      store,
       location: mockLocation,
-      preStart: preStart,
-      postStart: postStart,
     });
+    await router.start();
+  });
+
+  afterEach(() => {
+    mockLocation.hash = "#/c2";
+    c2Redraws = 0;
+  })
+
+  it("should throw an error if no routes are defined", () => {
+    expect(() => new Router({})).toThrowError(/no routes/i);
+  });
+
+  it("should redraw the current component when needed", () => {
+    router.redraw();
+    router.redraw();
+    expect(c2Redraws).toEqual(3);
+  });
+
+  it("should not navigate if no route match", () => {
+    router.navigateTo("/unknown");
+    expect(router.route.path).toEqual("/c2");
   });
 
   it("should support routing configuration at startup", () => {
-    expect(h3.route.def).toEqual("/c2");
-  });
-
-  it("should support pre/post start hooks", () => {
-    expect(preStartCalled).toEqual(true);
-    expect(postStartCalled).toEqual(true);
+    expect(router.route.def).toEqual("/c2");
   });
 
   it("should support the capturing of parts within the current route", (done) => {
-    const sub = h3.on("$redraw", () => {
+    const sub = store.on("$redraw", () => {
       expect(document.body.childNodes[0].childNodes[1].textContent).toEqual(
         "b: 2"
       );
@@ -74,23 +95,23 @@ describe("h3 (Router)", () => {
   });
 
   it("should expose a navigateTo method to navigate to another path", (done) => {
-    const sub = h3.on("$redraw", () => {
+    const sub = store.on("$redraw", () => {
       expect(document.body.childNodes[0].childNodes[1].textContent).toEqual(
         "test2: 2"
       );
       sub();
       done();
     });
-    h3.navigateTo("/c2", { test1: 1, test2: 2 });
+    router.navigateTo("/c2", { test1: 1, test2: 2 });
   });
 
   it("should throw an error if no route matches", async () => {
     try {
-      await h3.init({
+      new Router({
         element: document.body,
         routes: {
-          "/c1/:a/:b/:c": () => h3("div"),
-          "/c2": () => h3("div"),
+          "/c1/:a/:b/:c": () => h("div"),
+          "/c2": () => h("div"),
         },
       });
     } catch (e) {
@@ -102,7 +123,7 @@ describe("h3 (Router)", () => {
     let redraws = 0;
     C1.setup = (cstate) => {
       cstate.result = cstate.result || 0;
-      cstate.sub = h3.on("count/set", (state, count) => {
+      cstate.sub = store.on("count/set", (state, count) => {
         cstate.result = count * count;
       });
     };
@@ -111,14 +132,14 @@ describe("h3 (Router)", () => {
       result = cstate.result;
       return { result: cstate.result };
     };
-    const sub = h3.on("$redraw", () => {
+    const sub = store.on("$redraw", () => {
       redraws++;
       setCount();
       setCount();
       if (redraws === 1) {
         expect(count).toEqual(4);
         expect(result).toEqual(0);
-        h3.navigateTo("/c2");
+        router.navigateTo("/c2");
       }
       if (redraws === 2) {
         expect(count).toEqual(8);
@@ -129,6 +150,6 @@ describe("h3 (Router)", () => {
         done();
       }
     });
-    h3.navigateTo("/c1/a/b/c");
+    router.navigateTo("/c1/a/b/c");
   });
 });
