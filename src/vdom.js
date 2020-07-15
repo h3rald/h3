@@ -1,8 +1,8 @@
 const checkProperties = (obj1, obj2) => {
+  if (Object.keys(obj1).length !== Object.keys(obj2).length) {
+    return false;
+  }
   for (const key in obj1) {
-    if (!(key in obj2)) {
-      return false;
-    }
     if (!equal(obj1[key], obj2[key])) {
       return false;
     }
@@ -28,12 +28,7 @@ const equal = (obj1, obj2) => {
   if (obj1.constructor !== obj2.constructor) {
     return false;
   }
-  if (typeof obj1 === "function") {
-    if (obj1.toString() !== obj2.toString()) {
-      return false;
-    }
-  }
-  if ([String, Number, Boolean].includes(obj1.constructor)) {
+  if ([String, Number, Boolean, Function].includes(obj1.constructor)) {
     return obj1 === obj2;
   }
   if (obj1.constructor === Array) {
@@ -47,14 +42,11 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
+  return checkProperties(obj1, obj2);
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 
-let $onrenderCallbacks = [];
-
-// Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   constructor(...args) {
     this.type = undefined;
@@ -299,7 +291,7 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && $onrenderCallbacks.push(() => c.$onrender(cnode));
+      c.$onrender && c.$onrender(cnode);
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -397,9 +389,7 @@ class VNode {
       Object.keys(oldvnode.eventListeners).forEach((a) => {
         if (!newvnode.eventListeners[a]) {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
-        } else if (
-          !equal(newvnode.eventListeners[a], oldvnode.eventListeners[a])
-        ) {
+        } else {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
           node.addEventListener(a, newvnode.eventListeners[a]);
         }
@@ -540,10 +530,14 @@ export const h = (...args) => {
 export const update = (oldvnode, newvnode) => {
   if (oldvnode instanceof HTMLElement) {
     // First time
-    oldvnode.parentNode.replaceChild(oldvnode, newvnode.render());
-    newvnode.element = oldvnode;
+    const element = newvnode.render();
+    oldvnode.parentNode.replaceChild(element, oldvnode);
+    newvnode.element = element;
     return newvnode;
   }
-  oldvnode.redraw(newvnode);
+  if (!oldvnode.element) {
+    throw new Error("[update] Old VNode does not include a reference to its corresponding DOM element.")
+  }
+  oldvnode.redraw({ node: oldvnode.element, vnode: newvnode });
   return oldvnode;
 };
