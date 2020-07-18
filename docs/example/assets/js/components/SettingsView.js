@@ -1,4 +1,4 @@
-import h3 from "../h3.js";
+import { h3, h } from "../h3.js";
 
 export default function () {
   const toggleLogging = (e) => {
@@ -6,15 +6,15 @@ export default function () {
     h3.dispatch("settings/set", { logging: value });
     h3.dispatch("app/save");
   };
-  return h3("div.settings.container", [
-    h3("h1", "Settings"),
-    h3("div.options", [
-      h3("input", {
+  return h("div.settings.container", [
+    h("h1", "Settings"),
+    h("div.options", [
+      h("input", {
         type: "checkbox",
         onclick: toggleLogging,
         checked: h3.state.settings.logging,
       }),
-      h3(
+      h(
         "label#options-logging-label",
         {
           for: "logging",
@@ -22,7 +22,7 @@ export default function () {
         "Logging"
       ),
     ]),
-    h3(
+    h(
       "a.nav-link",
       {
         onclick: () => h3.navigateTo("/"),

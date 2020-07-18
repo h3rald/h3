@@ -1,4 +1,4 @@
-import h3 from "../h3.js";
+import { h3, h } from "../h3.js";
 import Paginator from "./Paginator.js";
 
 export default function NavigationBar() {
@@ -8,8 +8,8 @@ export default function NavigationBar() {
     h3.redraw();
   };
   // Filtering function for todo items
-  return h3("div.navigation-bar", [
-    h3(
+  return h("div.navigation-bar", [
+    h(
       "a.nav-link",
       {
         title: "Settings",
@@ -17,7 +17,7 @@ export default function NavigationBar() {
       },
       "⚙"
     ),
-    h3("input", {
+    h("input", {
       id: "filter-text",
       placeholder: "Type to filter todo items...",
       oninput: setFilter,

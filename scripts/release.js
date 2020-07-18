@@ -1,39 +1,28 @@
 const fs = require("fs");
 const path = require("path");
-const terser = require("terser");
 
 const readme = "./README.md";
 const overview = "./docs/md/overview.md";
 const app = "./docs/js/app.js";
 const tutorial = "./docs/md/tutorial.md";
 const package = "./package.json";
-const h3 = "./h3.js";
-const h3min = "./h3.min.js";
-const h3map = "./h3.js.map";
+const files = ["h3", "router", "vdom", "store"];
+
+const updateCopyright = (file) => {
+  let data = fs.readFileSync(`./${file}.js`, "utf8");
+  const notice = data.match(/\/\*\*((.|\n|\r)+?)\*\//gm)[0];
+  const newNotice = notice
+    .replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`)
+    .replace(/\"[^"]+\"/, `"${pkg.versionName}"`)
+    .replace(/Copyright \d+/, `Copyright ${new Date().getFullYear()}`);
+  data = data.replace(notice, newNotice);
+  fs.writeFileSync(`./${file}.js`, data);
+};
 
 const pkg = JSON.parse(fs.readFileSync(package, "utf8"));
 
-// Update h3.js
-
-let h3Data = fs.readFileSync(h3, "utf8");
-const notice = h3Data.match(/\/\*\*((.|\n|\r)+?)\*\//gm)[0];
-const newNotice = notice
-  .replace(/v\d+\.\d+\.\d+/, `v${pkg.version}`)
-  .replace(/\"[^"]+\"/, `"${pkg.versionName}"`)
-  .replace(/Copyright \d+/, `Copyright ${new Date().getFullYear()}`);
-h3Data = h3Data.replace(notice, newNotice);
-fs.writeFileSync(h3, h3Data);
-const minified = terser.minify(h3Data, {
-  sourceMap: { filename: "h3.js", url: "h3.js.map" },
-});
-fs.writeFileSync(
-  h3min,
-  minified.code
-);
-fs.writeFileSync(
-  h3map,
-  minified.map
-);
+// Update copyright notices
+files.forEach(updateCopyright);
 
 // Update README.md
 let readmeData = fs.readFileSync(readme, "utf8");
@@ -56,8 +45,7 @@ const updateCode = (file) => {
   data = data.replace(/“.+“/, `“${pkg.versionName}“`);
   fs.writeFileSync(file, data);
 };
-updateCode(app);
-updateCode(tutorial);
+[app, tutorial].forEach(updateCode);
 
 // Update package.json
 const packageData = JSON.parse(fs.readFileSync(package, "utf8"));

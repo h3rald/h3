@@ -1,4 +1,4 @@
-import h3 from "../h3.js";
+import { h3, h } from "../h3.js";
 
 export default function EmptyTodoError(data, actions) {
   const emptyTodoErrorClass = h3.state.displayEmptyTodoError ? "" : ".hidden";
@@ -6,9 +6,9 @@ export default function EmptyTodoError(data, actions) {
     h3.dispatch('error/clear');
     h3.redraw();
   }
-  return h3(`div#empty-todo-error.error${emptyTodoErrorClass}`, [
-    h3("span.error-message", ["Please enter a non-empty todo item."]),
-    h3(
+  return h(`div#empty-todo-error.error${emptyTodoErrorClass}`, [
+    h("span.error-message", ["Please enter a non-empty todo item."]),
+    h(
       "span.dismiss-error",
       {
         onclick: clearError,

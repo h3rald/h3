@@ -1,4 +1,4 @@
-import h3 from "../h3.js";
+import { h3, h } from "../h3.js";
 
 export default function Paginator() {
   const hash = window.location.hash;
@@ -19,16 +19,16 @@ export default function Paginator() {
     h3.dispatch("pages/set", newPage);
     h3.navigateTo("/", { page: newPage });
   }
-  return h3("div.paginator", [
-    h3(
+  return h("div.paginator", [
+    h(
       `span.previous-page${previousClass}`,
       {
         onclick: () => setPage(-1),
       },
       ["←"]
     ),
-    h3("span.current-page", [`${String(page)}/${String(pages)}`]),
-    h3(
+    h("span.current-page", [`${String(page)}/${String(pages)}`]),
+    h(
       `span.next-page${nextClass}`,
       {
         onclick: () => setPage(+1),

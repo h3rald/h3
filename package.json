@@ -8,7 +8,7 @@
     "test": "jest",
     "coverage": "jest --coverage ",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
-    "copy": "cp h3.js docs/js/h3.js && cp h3.js docs/example/assets/js/h3.js",
+    "copy": "cp *.js docs/js/ && cp *.js docs/example/assets/js/",
     "release": "node scripts/release.js",
     "guide": "hastyscribe docs/H3_DeveloperGuide.md",
     "regenerate": "npm run release && npm run copy && npm run guide"
@@ -38,7 +38,6 @@
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "coveralls": "^3.0.11",
-    "jest": "^25.3.0",
-    "terser": "^4.8.0"
+    "jest": "^25.3.0"
   }
 }

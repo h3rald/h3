@@ -1,4 +1,4 @@
-import h3 from "../h3.js";
+import { h3, h } from "../h3.js";
 
 export default function AddTodoForm() {
   const focus = () => document.getElementById("new-todo").focus();  
@@ -24,15 +24,15 @@ export default function AddTodoForm() {
       e.preventDefault();
     }
   };
-  const newTodo = h3("input", {
+  const newTodo = h("input", {
     id: "new-todo",
     placeholder: "What do you want to do?",
     oninput: (e) => newTodo.value = e.target.value,
     onkeydown: addTodoOnEnter,
   });
-  return h3("form.add-todo-form", [
+  return h("form.add-todo-form", [
     newTodo,
-    h3(
+    h(
       "span.submit-todo",
       {
         title: "Add Todo",
