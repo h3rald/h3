@@ -8,7 +8,7 @@
     "test": "jest",
     "coverage": "jest --coverage ",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
-    "copy": "cp *.js docs/js/ && cp *.js docs/example/assets/js/",
+    "copy": "cp h3.js docs/js/ && cp h3.js docs/example/assets/js/",
     "release": "node scripts/release.js",
     "guide": "hastyscribe docs/H3_DeveloperGuide.md",
     "regenerate": "npm run release && npm run copy && npm run guide"

@@ -1,5 +1,5 @@
-const h3 = require("../h3.js").default;
-const h = require("../h3.js").h;
+const h3 = require("../framework.js").default;
+const h = require("../vdom.js").h;
 
 describe("h3", () => {
   beforeEach(() => {
