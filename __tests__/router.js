@@ -1,6 +1,6 @@
-const Router = require("../src/router.js").Router;
-const h = require("../src/vdom.js").h;
-const Store = require("../src/store.js").Store;
+const Router = require("../router.js").Router;
+const h = require("../vdom.js").h;
+const Store = require("../store.js").Store;
 
 let preStartCalled = false;
 let postStartCalled = false;

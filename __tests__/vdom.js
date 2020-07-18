@@ -1,4 +1,4 @@
-const lib = require("../src/vdom.js");
+const lib = require("../vdom.js");
 const update = lib.update;
 const h = lib.h;
 

@@ -1,4 +1,4 @@
-const Store = require("../src/store.js").Store;
+const Store = require("../store.js").Store;
 
 let store;
 

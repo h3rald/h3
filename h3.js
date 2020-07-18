@@ -5,15 +5,14 @@
  * @license MIT
  * For the full license, see: https://github.com/h3rald/h3/blob/master/LICENSE
  */
+import { Store } from "./store.js";
+import { Router } from "./router.js";
 
 // High Level API
-const h3 = (...args) => {
-  return new VNode(...args);
-};
+export const h3 = {};
 
 let store = null;
 let router = null;
-let redrawing = false;
 
 h3.init = (config) => {
   let { element, routes, modules, preStart, postStart, location } = config;
@@ -98,12 +97,13 @@ h3.redraw = (setRedrawing) => {
       "[h3.redraw] No application initialized, unable to redraw."
     );
   }
-  if (redrawing) {
+  if (router.redrawing) {
     return;
   }
-  redrawing = true;
+  router.redrawing = true;
   router.redraw();
-  redrawing = setRedrawing || false;
+  router.redrawing = setRedrawing || false;
 };
 
+export { h } from "./vdom.js";
 export default h3;
