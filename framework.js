@@ -8,10 +8,13 @@
 
 import { Router } from "./router.js";
 import { Store } from "./store.js";
+export { h } from "./vdom.js";
+import { settings, $onrenderCallbacks } from "./vdom";
 
 /*** High Level API ***/
 export const h3 = {};
 
+settings.$onrenderCallbacks = true;
 let store = null;
 let router = null;
 
@@ -37,7 +40,7 @@ h3.init = (config) => {
   });
   store.dispatch("$init");
   // Initialize router
-  router = new Router({ element, routes, store, location });
+  router = new Router({ element, routes, store, location, $onrenderCallbacks });
   return Promise.resolve(preStart && preStart())
     .then(() => router.start())
     .then(() => postStart && postStart());

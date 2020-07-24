@@ -7,6 +7,12 @@
  */
 
 
+
+export const settings = {
+  $onrenderCallbacks: false,
+};
+export let $onrenderCallbacks = [];
+
 const checkProperties = (obj1, obj2) => {
   if (Object.keys(obj1).length !== Object.keys(obj2).length) {
     return false;
@@ -300,7 +306,9 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && c.$onrender(cnode);
+      typeof $onrenderCallbacks !== "undefined" &&
+        c.$onrender &&
+        $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -545,7 +553,9 @@ export const update = (oldvnode, newvnode) => {
     return newvnode;
   }
   if (!oldvnode.element) {
-    throw new Error("[update] Old VNode does not include a reference to its corresponding DOM element.")
+    throw new Error(
+      "[update] Old VNode does not include a reference to its corresponding DOM element."
+    );
   }
   oldvnode.redraw({ node: oldvnode.element, vnode: newvnode });
   return oldvnode;
@@ -603,7 +613,7 @@ class Route {
 }
 
 export class Router {
-  constructor({ element, routes, store, location }) {
+  constructor({ element, routes, store, location, $onrenderCallbacks }) {
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
@@ -612,6 +622,7 @@ export class Router {
     this.redraw = null;
     this.redrawing = false;
     this.store = store;
+    this.$onrenderCallbacks = $onrenderCallbacks;
     this.location = location || window.location;
   }
 
@@ -686,9 +697,11 @@ export class Router {
     this.element.appendChild(node);
     this.setRedraw(vnode, newRouteComponent.state);
     this.redrawing = false;
-    //vnode.$onrender && vnode.$onrender(node);
-    //$onrenderCallbacks.forEach((cbk) => cbk());
-    //$onrenderCallbacks = [];
+    vnode.$onrender && vnode.$onrender(node);
+    if (this.$onrenderCallbacks) {
+      this.$onrenderCallbacks.forEach((cbk) => cbk());
+      this.$onrenderCallbacks = [];
+    }
     window.scrollTo(0, 0);
     this.store && this.store.dispatch("$redraw");
   }
@@ -711,6 +724,7 @@ export class Router {
 /*** High Level API ***/
 export const h3 = {};
 
+settings.$onrenderCallbacks = true;
 let store = null;
 let router = null;
 
@@ -736,7 +750,7 @@ h3.init = (config) => {
   });
   store.dispatch("$init");
   // Initialize router
-  router = new Router({ element, routes, store, location });
+  router = new Router({ element, routes, store, location, $onrenderCallbacks });
   return Promise.resolve(preStart && preStart())
     .then(() => router.start())
     .then(() => postStart && postStart());

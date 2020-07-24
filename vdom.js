@@ -5,6 +5,12 @@
  * @license MIT
  * For the full license, see: https://github.com/h3rald/h3/blob/master/LICENSE
  */
+
+export const settings = {
+  $onrenderCallbacks: false,
+};
+export let $onrenderCallbacks = [];
+
 const checkProperties = (obj1, obj2) => {
   if (Object.keys(obj1).length !== Object.keys(obj2).length) {
     return false;
@@ -298,7 +304,9 @@ class VNode {
     this.children.forEach((c) => {
       const cnode = c.render();
       node.appendChild(cnode);
-      c.$onrender && c.$onrender(cnode);
+      typeof $onrenderCallbacks !== "undefined" &&
+        c.$onrender &&
+        $onrenderCallbacks.push(() => c.$onrender(cnode));
     });
     if (this.$html) {
       node.innerHTML = this.$html;
@@ -543,7 +551,9 @@ export const update = (oldvnode, newvnode) => {
     return newvnode;
   }
   if (!oldvnode.element) {
-    throw new Error("[update] Old VNode does not include a reference to its corresponding DOM element.")
+    throw new Error(
+      "[update] Old VNode does not include a reference to its corresponding DOM element."
+    );
   }
   oldvnode.redraw({ node: oldvnode.element, vnode: newvnode });
   return oldvnode;

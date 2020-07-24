@@ -23,7 +23,7 @@ class Route {
 }
 
 export class Router {
-  constructor({ element, routes, store, location }) {
+  constructor({ element, routes, store, location, $onrenderCallbacks }) {
     if (!routes || Object.keys(routes).length === 0) {
       throw new Error("[Router] No routes defined.");
     }
@@ -32,6 +32,7 @@ export class Router {
     this.redraw = null;
     this.redrawing = false;
     this.store = store;
+    this.$onrenderCallbacks = $onrenderCallbacks;
     this.location = location || window.location;
   }
 
@@ -106,9 +107,11 @@ export class Router {
     this.element.appendChild(node);
     this.setRedraw(vnode, newRouteComponent.state);
     this.redrawing = false;
-    //vnode.$onrender && vnode.$onrender(node);
-    //$onrenderCallbacks.forEach((cbk) => cbk());
-    //$onrenderCallbacks = [];
+    vnode.$onrender && vnode.$onrender(node);
+    if (this.$onrenderCallbacks) {
+      this.$onrenderCallbacks.forEach((cbk) => cbk());
+      this.$onrenderCallbacks = [];
+    }
     window.scrollTo(0, 0);
     this.store && this.store.dispatch("$redraw");
   }

@@ -111,4 +111,26 @@ describe("h3", () => {
     });
     h3.navigateTo("/aaa");
   });
+
+  it("should execute $onrender callbacks whenever a child node is added to the DOM", async () => {
+    let n;
+    const $onrender = (node) => {
+      n = node;
+    };
+    const vn1 = h("ul", [h("li")]);
+    const vn2 = h("ul", [h("li"), h("li.vn2", { $onrender })]);
+    const n1 = vn1.render();
+    vn1.redraw({ node: n1, vnode: vn2 });
+    expect(n.classList.value).toEqual("vn2");
+    const vn3 = h("ul", [h("span.vn3", { $onrender })]);
+    vn1.redraw({ node: n1, vnode: vn3 });
+    expect(n.classList.value).toEqual("vn3");
+    const rc = () => h("div.rc", { $onrender });
+    await h3.init(rc);
+    expect(n.classList.value).toEqual("rc");
+    const rc2 = () => vn2;
+    console.log("-----");
+    await h3.init(rc2);
+    expect(n.classList.value).toEqual("vn2");
+  });
 });
