@@ -63,7 +63,7 @@ const equal = (obj1, obj2) => {
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
-const [PATCH, PUSH, POP] = [-1, -2, -3];
+const [PATCH, INSERT, DELETE] = [-1, -2, -3];
 
 class VNode {
   constructor(...args) {
@@ -420,10 +420,21 @@ class VNode {
     });
     oldvnode.eventListeners = newvnode.eventListeners;
     // Children
-    // Create a map of the positions of "old" children within "new" children array.
-    /////
     let childMap = mapChildren(oldvnode, newvnode);
     let resultMap = [...Array(newvnode.children.length).keys()];
+    if (
+      childMap.filter((c) => c >= 0).length === oldvnode.children.length &&
+      oldvnode.children.length > 0
+    ) {
+      // Changes are insertions only
+      childMap = childMap.map((c) => (c === PATCH ? INSERT : PATCH));
+    } else if (
+      childMap.filter((c) => c >= 0).length === newvnode.children.length &&
+      newvnode.children.length > 0
+    ) {
+      // Changes are deletions only
+      childMap = childMap.map((c) => (c === PATCH ? DELETE : PATCH));
+    }
     while (!equal(childMap, resultMap)) {
       let count = -1;
       for (let i of childMap) {
@@ -435,32 +446,28 @@ class VNode {
         }
         switch (i) {
           case PATCH:
-            // different node, patch and remap
             oldvnode.children[count].redraw({
               node: node.childNodes[count],
               vnode: newvnode.children[count],
             });
-            console.log("PATCH", count)
             remap = true;
             break;
-          case PUSH:
-            oldvnode.children.push(newvnode.children[count]);
+          case INSERT:
+            oldvnode.children.splice(count, 0, newvnode.children[count]);
             const renderedNode = newvnode.children[count].render();
-            console.log("PUSH:", count, renderedNode.textContent);
-            node.appendChild(renderedNode);
+            node.insertBefore(renderedNode, node.childNodes[count]);
             newvnode.children[count].$onrender &&
               newvnode.children[count].$onrender(renderedNode);
+            remap = true;
             break;
-          case POP:
-            oldvnode.children.pop();
-            console.log("POP:", count, node.childNodes[node.childNodes.length -1].textContent);
-            node.removeChild(node.childNodes[node.childNodes.length -1]);
+          case DELETE:
+            oldvnode.children.splice(count, 1);
+            node.removeChild(node.childNodes[count]);
+            remap = true;
             break;
           default:
-            // Node found, move nodes and remap
             const vtarget = oldvnode.children.splice(i, 1)[0];
             oldvnode.children.splice(count, 0, vtarget);
-            console.log("MOVE", node.childNodes[i].textContent, "->", node.childNodes[count].textContent)
             node.insertBefore(node.childNodes[i], node.childNodes[count]);
             remap = true;
             break;
@@ -498,11 +505,11 @@ const mapChildren = (oldvnode, newvnode) => {
     if (op < 0) {
       if (newList.length >= oldList.length) {
         if (map.length >= oldList.length) {
-          op = PUSH;
+          op = INSERT;
         }
       } else {
         if (map.length >= newList.length) {
-          op = POP;
+          op = DELETE;
         }
       }
     }
@@ -510,7 +517,9 @@ const mapChildren = (oldvnode, newvnode) => {
   }
   if (oldList.length > newList.length) {
     // Remove remaining nodes
-    [...Array(oldList.length - newList.length).keys()].forEach(() => map.push(POP));
+    [...Array(oldList.length - newList.length).keys()].forEach(() =>
+      map.push(DELETE)
+    );
   }
   return map;
 };
