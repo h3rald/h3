@@ -63,7 +63,7 @@ const equal = (obj1, obj2) => {
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
-const [PATCH, PUSH, POP] = [-1, -2, -3];
+const [PATCH, INSERT, DELETE] = [-1, -2, -3];
 
 class VNode {
   constructor(...args) {
@@ -420,58 +420,7 @@ class VNode {
     });
     oldvnode.eventListeners = newvnode.eventListeners;
     // Children
-    // Create a map of the positions of "old" children within "new" children array.
-    /////
-    let childMap = mapChildren(oldvnode, newvnode);
-    let resultMap = [...Array(newvnode.children.length).keys()];
-    while (!equal(childMap, resultMap)) {
-      let count = -1;
-      for (let i of childMap) {
-        count++;
-        let remap = false;
-        if (i === count) {
-          // Matching nodes;
-          continue;
-        }
-        switch (i) {
-          case PATCH:
-            // different node, patch and remap
-            oldvnode.children[count].redraw({
-              node: node.childNodes[count],
-              vnode: newvnode.children[count],
-            });
-            console.log("PATCH", count)
-            remap = true;
-            break;
-          case PUSH:
-            oldvnode.children.push(newvnode.children[count]);
-            const renderedNode = newvnode.children[count].render();
-            console.log("PUSH:", count, renderedNode.textContent);
-            node.appendChild(renderedNode);
-            newvnode.children[count].$onrender &&
-              newvnode.children[count].$onrender(renderedNode);
-            break;
-          case POP:
-            oldvnode.children.pop();
-            console.log("POP:", count, node.childNodes[node.childNodes.length -1].textContent);
-            node.removeChild(node.childNodes[node.childNodes.length -1]);
-            break;
-          default:
-            // Node found, move nodes and remap
-            const vtarget = oldvnode.children.splice(i, 1)[0];
-            oldvnode.children.splice(count, 0, vtarget);
-            console.log("MOVE", node.childNodes[i].textContent, "->", node.childNodes[count].textContent)
-            node.insertBefore(node.childNodes[i], node.childNodes[count]);
-            remap = true;
-            break;
-        }
-        if (remap) {
-          break;
-        }
-      }
-      childMap = mapChildren(oldvnode, newvnode);
-      resultMap = [...Array(newvnode.children.length).keys()];
-    }
+    updateChildren(node, oldvnode, newvnode);
     // $onrender
     oldvnode.$onrender = newvnode.$onrender;
     // innerHTML
@@ -483,36 +432,65 @@ class VNode {
   }
 }
 
-const mapChildren = (oldvnode, newvnode) => {
-  const newList = newvnode.children;
-  const oldList = oldvnode.children;
-  let map = [];
-  for (let nIdx = 0; nIdx < newList.length; nIdx++) {
-    let op = PATCH;
-    for (let oIdx = 0; oIdx < oldList.length; oIdx++) {
-      if (equal(newList[nIdx], oldList[oIdx]) && !map.includes(oIdx)) {
-        op = oIdx; // Same node found
-        break;
+const appendChild = (node, oldChildren, vnode) => {
+  oldChildren.push(vnode);
+  const renderedNode = vnode.render();
+  console.log("PUSH:", renderedNode.textContent);
+  node.appendChild(renderedNode);
+  vnode.$onrender && vnode.$onrender(renderedNode);
+};
+
+const removeChild = (node, oldChildren, index) => {
+  oldChildren.pop();
+  console.log("POP");
+  node.removeChild(node.childNodes[index]);
+};
+
+const updateChildren = (node, oldvnode, newvnode) => {
+  const newChildren = newvnode.children;
+  const oldChildren = oldvnode.children;
+  // Same number of children
+  // Update in place if necessary
+  if (oldChildren.length === newChildren.length) {
+    console.log("UPDATE ALL")
+    oldChildren.forEach((o, i) => {
+      if (!equal(o, newChildren[i])) {
+        console.log("PATCH", i);
+        o.redraw({ node: node.childNodes[i], vnode: newChildren[i] });
       }
-    }
-    if (op < 0) {
-      if (newList.length >= oldList.length) {
-        if (map.length >= oldList.length) {
-          op = PUSH;
-        }
-      } else {
-        if (map.length >= newList.length) {
-          op = POP;
-        }
+    });
+    return;
+  }
+  // More old children than new children
+  // Update & remove extras
+  if (oldChildren.length > newChildren.length) {
+    console.log("UPDATE & REMOVE")
+    newChildren.forEach((n, i) => {
+      if (!equal(n, oldChildren[i])) {
+        console.log("PATCH", i);
+        oldChildren[i].redraw({ node: node.childNodes[i], vnode: n });
       }
+    });
+    for (let i = newChildren.length; i < oldChildren.length; i++) {
+      removeChild(node, oldChildren, i);
     }
-    map.push(op);
+    return;
   }
-  if (oldList.length > newList.length) {
-    // Remove remaining nodes
-    [...Array(oldList.length - newList.length).keys()].forEach(() => map.push(POP));
+  // More new children than old children
+  // Update & add extras
+  if (newChildren.length > oldChildren.length) {
+    console.log("UPDATE & ADD")
+    oldChildren.forEach((o, i) => {
+      if (!equal(o, newChildren[i])) {
+        console.log("PATCH", i);
+        o.redraw({ node: node.childNodes[i], vnode: newChildren[i] });
+      }
+    });
+    for (let i = oldChildren.length; i < newChildren.length; i++) {
+      appendChild(node, oldChildren, newChildren[i]);
+    }
+    return;
   }
-  return map;
 };
 
 export const h = (...args) => {
