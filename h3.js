@@ -344,8 +344,12 @@ class VNode {
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
-      node.value = newvnode.value || "";
       oldvnode.value = newvnode.value;
+      if (["textarea", "input"].includes(oldvnode.type)) {
+        node.value = newvnode.value || "";
+      } else {
+        node.setAttribute("value", newvnode.value || "");
+      }
     }
     // Classes
     if (!equal(oldvnode.classList, newvnode.classList)) {
@@ -385,10 +389,13 @@ class VNode {
     // props
     if (!equal(oldvnode.props, newvnode.props)) {
       Object.keys(oldvnode.props).forEach((a) => {
-        if (newvnode.props[a] === false) {
-          node[a] = false;
-        }
-        if (!newvnode.props[a]) {
+        if (typeof newvnode.props[a] === "boolean") {
+          if (newvnode.props[a]) {
+            node.setAttribute(a, "");
+          } else {
+            node.removeAttribute(a);
+          }
+        } else if (!newvnode.props[a]) {
           node.removeAttribute(a);
         } else if (
           newvnode.props[a] &&
