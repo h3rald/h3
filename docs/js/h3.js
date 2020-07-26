@@ -487,6 +487,7 @@ class VNode {
       childMap = mapChildren(oldvnode, newvnode);
       resultMap = [...Array(newvnode.children.length).keys()];
     }
+    oldvnode.children = newvnode.children;
     // $onrender
     oldvnode.$onrender = newvnode.$onrender;
     // innerHTML
@@ -615,17 +616,21 @@ export class Router {
         this.routes = routes;
         this.redraw = null;
         this.redrawing = false;
+        this.vnode = null;
+        this.node = null;
         this.store = store;
         this.$onrenderCallbacks = $onrenderCallbacks;
         this.location = location || window.location;
     }
 
-    setRedraw(vnode, state) {
+    setRedraw(state) {
         this.redraw = () => {
-            vnode.redraw({
-                node: this.element.childNodes[0],
-                vnode: this.routes[this.route.def](state),
+            const newvnode = this.routes[this.route.def](state);
+            this.vnode.redraw({
+                node: this.node,
+                vnode: newvnode,
             });
+            this.vnode = newvnode;
             this.store && this.store.dispatch("$redraw");
         };
     }
@@ -686,12 +691,12 @@ export class Router {
         while (this.element.firstChild) {
             this.element.removeChild(this.element.firstChild);
         }
-        const vnode = newRouteComponent(newRouteComponent.state);
-        const node = vnode.render();
-        this.element.appendChild(node);
-        this.setRedraw(vnode, newRouteComponent.state);
+        this.vnode = newRouteComponent(newRouteComponent.state);
+        this.node = this.vnode.render();
+        this.element.appendChild(this.node);
+        this.setRedraw(newRouteComponent.state);
         this.redrawing = false;
-        vnode.$onrender && vnode.$onrender(node);
+        this.vnode.$onrender && this.vnode.$onrender(node);
         if (this.$onrenderCallbacks) {
             this.$onrenderCallbacks.forEach((cbk) => cbk());
             this.$onrenderCallbacks.length = 0;

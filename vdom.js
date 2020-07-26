@@ -485,6 +485,7 @@ class VNode {
       childMap = mapChildren(oldvnode, newvnode);
       resultMap = [...Array(newvnode.children.length).keys()];
     }
+    oldvnode.children = newvnode.children;
     // $onrender
     oldvnode.$onrender = newvnode.$onrender;
     // innerHTML

@@ -14,7 +14,6 @@ export default function AddTodoForm() {
       key: `todo_${Date.now()}__${btoa(newTodo.value)}`, 
       text: newTodo.value
     });
-    newTodo.value = "";
     h3.redraw()
     focus();
   };
