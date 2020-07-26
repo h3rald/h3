@@ -455,6 +455,7 @@ class VNode {
               node: node.childNodes[count],
               vnode: newvnode.children[count],
             });
+            oldvnode.children[count] = newvnode.children[count];
             remap = true;
             break;
           case INSERT:
@@ -547,5 +548,5 @@ export const update = (oldvnode, newvnode) => {
     );
   }
   oldvnode.redraw({ node: oldvnode.element, vnode: newvnode });
-  return oldvnode;
+  return newvnode;
 };
