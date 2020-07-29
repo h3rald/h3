@@ -61,36 +61,6 @@ const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 const [PATCH, INSERT, DELETE] = [-1, -2, -3];
 let $onrenderCallbacks = [];
 
-const mapChildren = (oldvnode, newvnode) => {
-    const newList = newvnode.children;
-    const oldList = oldvnode.children;
-    const map = [];
-    for (let nIdx = 0; nIdx < newList.length; nIdx++) {
-        let op = PATCH;
-        for (let oIdx = 0; oIdx < oldList.length; oIdx++) {
-            if (equal(newList[nIdx], oldList[oIdx]) && !map.includes(oIdx)) {
-                op = oIdx; // Same node found
-                break;
-            }
-        }
-        if (
-            op < 0 &&
-            newList.length >= oldList.length &&
-            map.length >= oldList.length
-        ) {
-            op = INSERT;
-        }
-        map.push(op);
-    }
-    if (oldList.length > newList.length) {
-        // Remove remaining nodes
-        [...Array(oldList.length - newList.length).keys()].forEach(() =>
-            map.push(DELETE)
-        );
-    }
-    return map;
-};
-
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
     constructor(...args) {
@@ -329,9 +299,9 @@ class VNode {
         // Value
         if (this.value) {
             if (["textarea", "input"].includes(this.type)) {
-                node.value = this.value || "";
+                node.value = this.value;
             } else {
-                node.setAttribute("value", this.value || "");
+                node.setAttribute("value", this.value);
             }
         }
         // Style
@@ -538,6 +508,40 @@ class VNode {
         }
     }
 }
+
+const mapChildren = (oldvnode, newvnode) => {
+    const newList = newvnode.children;
+    const oldList = oldvnode.children;
+    let map = [];
+    for (let nIdx = 0; nIdx < newList.length; nIdx++) {
+        let op = PATCH;
+        for (let oIdx = 0; oIdx < oldList.length; oIdx++) {
+            if (equal(newList[nIdx], oldList[oIdx]) && !map.includes(oIdx)) {
+                op = oIdx; // Same node found
+                break;
+            }
+        }
+        if (
+            op < 0 &&
+            newList.length >= oldList.length &&
+            map.length >= oldList.length
+        ) {
+            op = INSERT;
+        }
+        map.push(op);
+    }
+    const oldNodesFound = map.filter((c) => c >= 0);
+    if (oldList.length > newList.length) {
+        // Remove remaining nodes
+        [...Array(oldList.length - newList.length).keys()].forEach(() =>
+            map.push(DELETE)
+        );
+    } else if (oldNodesFound.length === oldList.length) {
+        // All nodes not found are insertions
+        map = map.map((c) => (c < 0 ? INSERT : c));
+    }
+    return map;
+};
 
 /**
  * The code of the following class is heavily based on Storeon

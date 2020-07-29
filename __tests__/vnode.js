@@ -108,7 +108,7 @@ describe("VNode", () => {
         expect(n.title).toEqual("testing!");
         expect(n.getAttribute("title")).toEqual("testing!");
         expect(n.value).toEqual(undefined);
-        expect(n.getAttribute("value")).toEqual("");
+        expect(n.getAttribute("value")).toEqual(null);
         v.redraw({ node: n, vnode: v2 });
         expect(n.getAttribute("value")).toEqual("true");
         v2.value = null;
@@ -117,12 +117,19 @@ describe("VNode", () => {
     });
 
     it("should provide a render method able to render element nodes with a value", () => {
-        const vnode = h("input", { value: "test" });
+        let vnode = h("input", { value: "test" });
         const createElement = jest.spyOn(document, "createElement");
-        const node = vnode.render();
+        let node = vnode.render();
         expect(createElement).toHaveBeenCalledWith("input");
         expect(node.constructor).toEqual(HTMLInputElement);
         expect(node.value).toEqual("test");
+        vnode = h("input", { value: null });
+        node = vnode.render();
+        expect(node.value).toEqual("");
+        vnode = h("test", { value: 123 });
+        node = vnode.render();
+        expect(node.getAttribute("value")).toEqual("123");
+        expect(node.value).toEqual(undefined);
     });
 
     it("should provide a render method able to render element nodes with event handlers", () => {
