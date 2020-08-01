@@ -7264,7 +7264,7 @@ div .terminal {
    <li><a href="#Modules">Modules</a></li>
    <li><a href="#Router">Router</a>
    <ul>
-    <li><a href="#Route-Components">Route Components</a></li>
+    <li><a href="#Screen">Screen</a></li>
    </ul>
    </li>
    <li><a href="#How-everything-works...">How everything works...</a></li>
@@ -7274,13 +7274,13 @@ div .terminal {
   <ul>
    <li><a href="#Create-a-simple-HTML-file">Create a simple HTML file</a></li>
    <li><a href="#Create-a-single-page-application">Create a single-page application</a></li>
-   <li><a href="#Initialization-and-post-redraw-operations">Initialization and post-redraw operations</a></li>
+   <li><a href="#Initialization">Initialization</a></li>
    <li><a href="#Next-steps">Next steps</a></li>
   </ul>
   </li>
   <li><a href="#API">API</a>
   <ul>
-   <li><a href="#h3(selector:-string,-attributes:-object,-children:-array)">h3(selector: string, attributes: object, children: array)</a>
+   <li><a href="#h(selector:-string,-attributes:-object,-children:-array)">h(selector: string, attributes: object, children: array)</a>
    <ul>
     <li><a href="#Create-an-element,-with-an-ID,-classes,-attributes-and-children">Create an element, with an ID, classes, attributes and children</a></li>
     <li><a href="#Create-an-empty-element">Create an empty element</a></li>
@@ -7291,6 +7291,7 @@ div .terminal {
     <li><a href="#Special-attributes">Special attributes</a></li>
    </ul>
    </li>
+   <li><a href="#h3.screen({setup,-display,-teardown})">h3.screen({setup, display, teardown})</a></li>
    <li><a href="#h3.dispatch(event:-string,-data:-any)">h3.dispatch(event: string, data: any)</a></li>
    <li><a href="#h3.init(config:-object)">h3.init(config: object)</a></li>
    <li><a href="#h3.navigateTo(path:-string,-params:-object)">h3.navigateTo(path: string, params: object)</a></li>
@@ -7326,9 +7327,9 @@ div .terminal {
 <p>H3 is also:</p>
 
 <ul>
-<li><strong>tiny</strong>, less than 4KB minified gzipped.</li>
+<li><strong>tiny</strong>, less than 4KB minified and gzipped.</li>
 <li><strong>modern</strong>, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge &amp; similar).</li>
-<li><strong>easy</strong> to learn, its API is comprised of only six methods and two properties.</li>
+<li><strong>easy</strong> to learn, its API is comprised of only seven methods and two properties.</li>
 </ul>
 
 
@@ -7349,7 +7350,7 @@ div .terminal {
 <p>Here&rsquo;s an example of an extremely minimal SPA created with H3:</p>
 
 <pre><code class="js">import h3 from "./h3.js";
-h3.init(() =&gt; h3("h1", "Hello, World!"));
+h3.init(() =&gt; h("h1", "Hello, World!"));
 </code></pre>
 
 <p>This will render a <code>h1</code> tag within the document body, containing the text <code>"Hello, World!"</code>.</p>
@@ -7425,10 +7426,10 @@ h3.init(() =&gt; h3("h1", "Hello, World!"));
 // Pressig the Refresh button causes the application to redraw
 // And updates the displayed date/dime.
 const Page = () =&gt; {
-  return h3("main", [
-    h3("h1", "Welcome!"),
-    h3("p", `The current date and time is ${new Date()}`),
-    h3("button", {
+  return h("main", [
+    h("h1", "Welcome!"),
+    h("p", `The current date and time is ${new Date()}`),
+    h("button", {
       onclick: () =&gt; h3.redraw()
     }, "Refresh")
   ]);
@@ -7453,11 +7454,11 @@ h3.init(Page);
 
 <p>How, you ask? Like this:</p>
 
-<pre><code class="js">h3("div.test", [
-  h3("ul", [
-    h3("li", "This is..."),
-    h3("li", "...a simple..."),
-    h3("li", "unordered list.")
+<pre><code class="js">h("div.test", [
+  h("ul", [
+    h("li", "This is..."),
+    h("li", "...a simple..."),
+    h("li", "unordered list.")
   ])
 ]);
 </code></pre>
@@ -7484,7 +7485,7 @@ h3.init(Page);
 
 <pre><code class="js">let count = 0;
 const CounterButton = () =&gt; {
-  return h3("button", {
+  return h("button", {
     onclick: () =&gt; count +=1 &amp;&amp; h3.redraw()
   }, `You clicked me ${count} times.`);
 }
@@ -7518,18 +7519,18 @@ const CounterButton = () =&gt; {
 
 <p>The current route is always accessible via the <code>h3.route</code> property.</p>
 
-<a name="Route-Components"></a>
-<h4>Route Components<a href="#document-top" title="Go to top"></a></h4>
+<a name="Screen"></a>
+<h4>Screen<a href="#document-top" title="Go to top"></a></h4>
 
-<p>A route component is a top-level component that handles a route. Unlike ordinary components, route components:</p>
+<p>A screen is a top-level component that handles a route. Unlike ordinary components, screens:</p>
 
 <ul>
-<li>may have a dedicated <em>setup</em> (after the route component is added to the DOM) and <em>teardown</em> phase (after the route component is removed from the DOM and before the new route component is loaded).</li>
-<li>may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the route component when executed.</li>
+<li>may have a dedicated <em>setup</em> (after the screen is added to the DOM) and <em>teardown</em> phase (after the screen is removed from the DOM and before the new screen is loaded).</li>
+<li>may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the screen when executed.</li>
 </ul>
 
 
-<p>Route components are stll created using ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> async methods on them (functions are objects in JavaScript after all&hellip;) to be executed during each corresponding phase.</p>
+<p>Screens are typically created using the <strong>h3.screen</strong> shorthand method, but they can stll created using an ordinary function returning a VNode, but you can optionally define a <strong>setup</strong> and a <strong>teardown</strong> async methods on them (functions are objects in JavaScript after all&hellip;) to be executed during each corresponding phase.</p>
 
 <p>Note that:
 * Both the <strong>setup</strong> method take an object as a parameter, representing the component state. Such object will be empty the first time the <strong>setup</strong> method is called for a given component, but it may contain properties not removed during subsequent teardowns.
@@ -7551,9 +7552,9 @@ const CounterButton = () =&gt; {
 <li>The <strong>$init</strong> event is dispatched.</li>
 <li>The <em>preStart</em> function (if specified when calling <code>h3.init()</code>) is executed.</li>
 <li>The <em>Router</em> is initialized and started.</li>
-<li>The <strong>setup()</strong> method of the matching Route Component is called (if any).</li>
+<li>The <strong>setup()</strong> method of the matching Screen is called (if any).</li>
 <li>The <strong>$navigation</strong> event is dispatched.</li>
-<li>The <em>Route Component</em> matching the current route and all its child components are rendered for the first time.</li>
+<li>The <em>Screen</em> matching the current route and all its child components are rendered for the first time.</li>
 <li>The <strong>$redraw</strong> event is dispatched.</li>
 </ol>
 
@@ -7570,12 +7571,12 @@ const CounterButton = () =&gt; {
 
 <ol>
 <li>The <em>Router</em> processes the new path and determine which component to render based on the routing configuration.</li>
-<li>The <strong>teardow()</strong> method of the current Route Component is called (if any).</li>
-<li>The <strong>setup()</strong> method of the new matching Route Component is called (if any).</li>
+<li>The <strong>teardow()</strong> method of the current Screen is called (if any).</li>
+<li>The <strong>setup()</strong> method of the new matching Screen is called (if any).</li>
 <li>All DOM nodes within the scope of the routing are removed, all components are removed.</li>
 <li>The <strong>$navigation</strong> event is dispatched.</li>
 <li>All DOM nodes are removed.</li>
-<li>The <em>Route Component</em> matching the new route and all its child components are rendered.</li>
+<li>The <em>Screen</em> matching the new route and all its child components are rendered.</li>
 <li>The <strong>$redraw</strong> event is dispatched.</li>
 </ol>
 
@@ -7607,15 +7608,18 @@ const CounterButton = () =&gt; {
 
 <p>This will let you load an ES6 file containing imports to other files&hellip; it works in all major browsers, but it doesn&rsquo;t work in IE (but we don&rsquo;t care about that, do we?).</p>
 
-<pre><code class="html">&lt;!doctype html&gt;
+<pre><code class="html">&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
   &lt;head&gt;
     &lt;meta charset="utf-8" /&gt;
     &lt;title&gt;H3&lt;/title&gt;
-    &lt;meta name="description" content="A bare-bones client-side web microframework" /&gt;
+    &lt;meta
+      name="description"
+      content="A bare-bones client-side web microframework"
+    /&gt;
     &lt;meta name="author" content="Fabio Cevasco" /&gt;
     &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
-    &lt;link rel="shortcut icon" href="favicon.png" type="image/png"&gt;
+    &lt;link rel="shortcut icon" href="favicon.png" type="image/png" /&gt;
     &lt;link rel="stylesheet" href="css/mini-default.css" /&gt;
     &lt;link rel="stylesheet" href="css/prism.css" /&gt;
     &lt;link rel="stylesheet" href="css/style.css" /&gt;
@@ -7635,7 +7639,7 @@ const CounterButton = () =&gt; {
 
 <p>Start by importing all the JavaScript modules you need:</p>
 
-<pre><code class="js">import h3 from "./h3.js";
+<pre><code class="js">import { h3, h } from "./h3.js";
 import marked from "./vendor/marked.js";
 import Prism from "./vendor/prism.js";
 </code></pre>
@@ -7654,14 +7658,11 @@ import Prism from "./vendor/prism.js";
 
 <p>We are going to store the HTML contents of each page in an Object, and we&rsquo;re going to need a simple function to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">fetch</a> the Markdown file and render it as HTML:</p>
 
-<pre><code class="js">const pages = {};
-
-const fetchPage = async (pages, id, md) =&gt; {
+<pre><code class="js">const fetchPage = async ({ pages, id, md }) =&gt; {
   if (!pages[id]) {
     const response = await fetch(md);
     const text = await response.text();
     pages[id] = marked(text);
-    h3.redraw();
   }
 };
 </code></pre>
@@ -7670,49 +7671,64 @@ const fetchPage = async (pages, id, md) =&gt; {
 
 <ol>
 <li>fetches the content of the requested file (<code>md</code>))</li>
-<li>renders the Markdown code into HTML using marked, and stores it in the <code>pages</code> object</li>
-<li>Triggers a redraw of the application</li>
+<li>renders the Markdown code into HTML using the <em>marked</em> library, and stores it in the <code>pages</code> object</li>
 </ol>
 
 
-<p>We are gonna use our <code>fetchPage</code> function inside the main component of our app, <code>Page</code>:</p>
+<p>We are gonna use our <code>fetchPage</code> function inside the <code>setup</code> of the main (and only) screen of our app, <code>Page</code>:</p>
 
-<pre><code class="js">const Page = () =&gt; {
-  const id = h3.route.path.slice(1);
-  const ids = Object.keys(labels);
-  const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
-  fetchPage(pages, id, md);
-  return h3("div.page", [
-    Header,
-    h3("div.row", [
-      h3("input#drawer-control.drawer", { type: "checkbox" }),
-      Navigation(id, ids),
-      Content(pages[id]),
-      Footer,
-    ]),
-  ]);
-};
+<pre><code class="js">const Page = h3.screen({
+  setup: async (state) =&gt; {
+    state.pages = {};
+    state.id = h3.route.path.slice(1);
+    state.ids = Object.keys(labels);
+    state.md = state.ids.includes(state.id)
+      ? `md/${state.id}.md`
+      : `md/overview.md`;
+    await fetchPage(state);
+  },
+  display: (state) =&gt; {
+    return h("div.page", [
+      Header,
+      h("div.row", [
+        h("input#drawer-control.drawer", { type: "checkbox" }),
+        Navigation(state.id, state.ids),
+        Content(state.pages[state.id]),
+        Footer,
+      ]),
+    ]);
+  },
+  teardown: (state) =&gt; state,
+});
 </code></pre>
 
-<p>The main responsibility of this component is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: <code>Header</code>, <code>Navigation</code>, <code>Content</code>, and <code>Footer</code>.</p>
+<p>Note that this screen has a <code>setup</code>, a <code>display</code> and a <code>teardown</code> method, both taking <code>state</code> as parameter. In H3, screens are nothing but stateful components that are used to render the whole page of the application, and are therefore typically redered when navigating to a new route.</p>
+
+<p>The <code>state</code> parameter is nothing but an empty object that can be used to store data that will be accessible to the <code>setup</code>, <code>display</code> and <code>teardown</code> methods, and (typically) will be destroyed when another screen is rendered.</p>
+
+<p>The <code>setup</code> function allows you to perform some operations that should take place <em>before</em> the screen is rendered. In this case, we want to fetch the page contents (if necessary) beforehand to avoid displaying a spinner while the content is being loaded. Note that the <code>setup</code> method can be asynchronous, and in this case the <code>display</code> method will not be called until all asynchronous operations have been completed (assuming you are <code>await</code>ing them).</p>
+
+<p>The <code>teardown</code> function in this case only makes sure that the existing screen state (in particular any loaded markdown page) will be passed on to the next screen during navigation (which, in this case, is still the <code>Page</code> screen), so that existing pages will not be fetched again.</p>
+
+<p>The main responsibility of this screen is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: <code>Header</code>, <code>Navigation</code>, <code>Content</code>, and <code>Footer</code>.</p>
 
 <p>The <code>Header</code> and <code>Footer</code> components are very simple: their only job is to render static content:</p>
 
 <pre><code class="js">const Header = () =&gt; {
-  return h3("header.row.sticky", [
-    h3("a.logo.col-sm-1", { href: "#/" }, [
-      h3("img", { alt: "H3", src: "images/h3.svg" }),
+  return h("header.row.sticky", [
+    h("a.logo.col-sm-1", { href: "#/" }, [
+      h("img", { alt: "H3", src: "images/h3.svg" }),
     ]),
-    h3("div.version.col-sm.col-md", [
-      h3("div.version-number", "v0.10.0"),
-      h3("div.version-label", "“Jittery Jem'Hadar“"),
+    h("div.version.col-sm.col-md", [
+      h("div.version-number", "v0.10.0"),
+      h("div.version-label", "“Jittery Jem'Hadar“"),
     ]),
-    h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
+    h("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
 };
 
 const Footer = () =&gt; {
-  return h3("footer", [h3("div", "© 2020 Fabio Cevasco")]);
+  return h("footer", [h("div", "© 2020 Fabio Cevasco")]);
 };
 </code></pre>
 
@@ -7728,23 +7744,24 @@ const Footer = () =&gt; {
 
 <pre><code class="js">const Navigation = (id, ids) =&gt; {
   const menu = ids.map((p) =&gt;
-    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
+    h(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
   );
-  return h3("nav#navigation.col-md-3", [
-    h3("label.drawer-close", { for: "drawer-control" }),
+  return h("nav#navigation.col-md-3", [
+    h("label.drawer-close", { for: "drawer-control" }),
     ...menu,
   ]);
 };
 </code></pre>
 
-<p>Finally, the <code>Content</code> component optionally takes a string containing the HTML of the page content to render. If no content is provided, it will display a loading spinner, otherwise it will render the content by using the special <code>$html</code> attribute that can be used to essentially set the <code>innerHTML</code> of an element:</p>
+<p>Finally, the <code>Content</code> component takes a string containing the HTML of the page content to render using the special <code>$html</code> attribute that can be used to essentially set the <code>innerHTML</code> property of an element:</p>
 
 <pre><code class="js">const Content = (html) =&gt; {
-  const content = html
-    ? h3("div.content", { $html: html })
-    : h3("div.spinner-container", h3("span.spinner"));
-  return h3("main.col-sm-12.col-md-9", [
-    h3("div.card.fluid", h3("div.section", content)),
+  const content = h("div.content", { $html: html });
+  return h("main.col-sm-12.col-md-9", [
+    h(
+      "div.card.fluid",
+      h("div.section", { $onrender: () =&gt; Prism.highlightAll() }, content)
+    ),
   ]);
 };
 </code></pre>
@@ -7757,27 +7774,24 @@ const Footer = () =&gt; {
 
 <p>This feature is also handy to automatically load the Overview when no fragment is specified.</p>
 
-<a name="Initialization-and-post-redraw-operations"></a>
-<h3>Initialization and post-redraw operations<a href="#document-top" title="Go to top"></a></h3>
+<p>What is that weird <code>$onrender</code> property you ask? Well, that&rsquo;s a H3-specific callback that will be executed whenever the corresponding DOM node is rendered&hellip; that&rsquo;s essentially the perfect place to for executing operations that must be perform when the DOM is fully available, like highlighting our code snippets using <em>Prism</em> in this case.</p>
+
+<a name="Initialization"></a>
+<h3>Initialization<a href="#document-top" title="Go to top"></a></h3>
 
 <p>Done? Not quite. We need to initialize the SPA by passing the <code>Page</code> component to the <code>h3.init()</code> method to trigger the first rendering:</p>
 
 <pre><code class="js">h3.init(Page);
 </code></pre>
 
-<p>And that&rsquo;s it. Noooo wait, what about syntax highlighting? That needs to be applied <em>after</em> the HTML markup is rendered. How can we manage that?</p>
-
-<p>Easy enough, add a handler to be executed whenever the SPA is redrawn:</p>
-
-<pre><code class="js">h3.on("$redraw", () =&gt; Prism.highlightAll());
-</code></pre>
+<p>And that&rsquo;s it. Now, keep in mind that this is the <em>short</em> version of initialization using a single component and a single route, but still, that&rsquo;s good enough for our use case.</p>
 
 <a name="Next-steps"></a>
 <h3>Next steps<a href="#document-top" title="Go to top"></a></h3>
 
 <p>Made it this far? Good. Wanna know more? Have a look at the code of the <a href="https://github.com/h3rald/h3/tree/master/docs/example">todo list example</a> and try it out <a href="https://h3.js.org/example/index.html">here</a>.</p>
 
-<p>Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, route components, forms, confirmation messages, plenty of third-party components etc., have a look at <a href="https://github.com/h3rald/litepad">LitePad</a>. You can see it in action here: <a href="https://litepad.h3rald.com/">litepad.h3rald.com</a>.</p>
+<p>Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, screens, forms, validation, confirmation messages, plenty of third-party components etc., have a look at <a href="https://github.com/h3rald/litepad">LitePad</a>. You can see it in action here: <a href="https://litepad.h3rald.com/">litepad.h3rald.com</a>.</p>
 
 <p>Note: the LitePad online demo will store all its data in localStorage.</p>
 
@@ -7786,10 +7800,10 @@ const Footer = () =&gt; {
 
 <p>The core of the H3 API is comprised of the following six methods and two properties.</p>
 
-<a name="h3(selector:-string,-attributes:-object,-children:-array)"></a>
-<h3>h3(selector: string, attributes: object, children: array)<a href="#document-top" title="Go to top"></a></h3>
+<a name="h(selector:-string,-attributes:-object,-children:-array)"></a>
+<h3>h(selector: string, attributes: object, children: array)<a href="#document-top" title="Go to top"></a></h3>
 
-<p>The <code>h3</code> object is also used as a constructor for Virtual DOM Nodes (VNodes). It can actually take from one to three arguments used to configure the resulting node.</p>
+<p>The <code>h</code> function is a constructor for Virtual DOM Nodes (VNodes). It can actually take from one to any number of arguments used to configure the resulting node.</p>
 
 <p>The best way to understand how it works is by providing a few different examples. Please note that in each example the corresponding <em>HTML</em> markup is provided, although such markup will actually be generated when the Virtual Node is rendered/redrawn.</p>
 
@@ -7798,9 +7812,13 @@ const Footer = () =&gt; {
 
 <p>This is a complete example showing how to create a link with an <code>href</code> attribute, an ID, two classes, and three child nodes.</p>
 
-<pre><code class="js">h3("a#test-link.btn.primary", {
-  href: "#/test"
-}, ["This is a ", h3("em", "test"), "link."]);
+<pre><code class="js">h(
+  "a#test-link.btn.primary",
+  {
+    href: "#/test",
+  },
+  ["This is a ", h("em", "test"), "link."]
+);
 </code></pre>
 
 <p>↓</p>
@@ -7813,7 +7831,7 @@ const Footer = () =&gt; {
 <a name="Create-an-empty-element"></a>
 <h4>Create an empty element<a href="#document-top" title="Go to top"></a></h4>
 
-<pre><code class="js">h3("div");
+<pre><code class="js">h("div");
 </code></pre>
 
 <p>↓</p>
@@ -7824,7 +7842,7 @@ const Footer = () =&gt; {
 <a name="Create-an-element-with-a-textual-child-node"></a>
 <h4>Create an element with a textual child node<a href="#document-top" title="Go to top"></a></h4>
 
-<pre><code class="js">h3("span", "This is a test");
+<pre><code class="js">h("span", "This is a test");
 </code></pre>
 
 <p>↓</p>
@@ -7835,11 +7853,21 @@ const Footer = () =&gt; {
 <a name="Create-an-element-with-child-nodes"></a>
 <h4>Create an element with child nodes<a href="#document-top" title="Go to top"></a></h4>
 
-<pre><code class="js">h3("ol", [
-  h3("li", "Do this first."),
-  h3("li", "Then this."),
-  h3("li", "And finally this.")
+<pre><code class="js">h("ol", [
+  h("li", "Do this first."),
+  h("li", "Then this."),
+  h("li", "And finally this."),
 ]);
+</code></pre>
+
+<p><em>or</em></p>
+
+<pre><code class="js">h(
+  "ol",
+  h("li", "Do this first."),
+  h("li", "Then this."),
+  h("li", "And finally this.")
+);
 </code></pre>
 
 <p>↓</p>
@@ -7855,11 +7883,15 @@ const Footer = () =&gt; {
 <h4>Render a component<a href="#document-top" title="Go to top"></a></h4>
 
 <pre><code class="js">const TestComponent = () =&gt; {
-  return h3("button.test", {
-      onclick: () =&gt; alert("Hello!")
-    }, "Show Alert");
+  return h(
+    "button.test",
+    {
+      onclick: () =&gt; alert("Hello!"),
+    },
+    "Show Alert"
+  );
 };
-h3(TestComponent);
+h(TestComponent);
 </code></pre>
 
 <p>↓</p>
@@ -7872,8 +7904,8 @@ h3(TestComponent);
 <a name="Render-child-components"></a>
 <h4>Render child components<a href="#document-top" title="Go to top"></a></h4>
 
-<pre><code class="js">const TestLi = (text) =&gt; h3("li.test", text);
-h3("ul", ["A", "B", "C"].map(TestLi));
+<pre><code class="js">const TestLi = (text) =&gt; h("li.test", text);
+h("ul", ["A", "B", "C"].map(TestLi));
 </code></pre>
 
 <p>↓</p>
@@ -7901,14 +7933,53 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
 <p>For example, consider the following code snippet that can be used to initialize the <a href="https://github.com/Inscryb/inscryb-markdown-editor">InscrybMDE</a> Markdown editor on a textarea element:</p>
 
-<pre><code class="js">h3("textarea", {
+<pre><code class="js">h("textarea", {
   $onrender: (element) =&gt; {
     const editor = new window.InscrybMDE({
-      element
+      element,
     });
-  }
+  },
 });
 </code></pre>
+
+<a name="h3.screen({setup,-display,-teardown})"></a>
+<h3>h3.screen({setup, display, teardown})<a href="#document-top" title="Go to top"></a></h3>
+
+<p>Creates a Screen by providing a (mandatory) <strong>display</strong> function used to render content, an an optional <strong>setup</strong> and <strong>teardown</strong> functions, executed before and after the display function respectively.</p>
+
+<p>Each of these functions takes a single <strong>screen</strong> parameter, which is initialized as an empty object before the setup, and is (optionally) returned by the teardown function should state be preserved across different screens.</p>
+
+<p>Consider the following example:</p>
+
+<pre><code class="js">h3.screen({
+  setup: await (state) =&gt; {
+    state.data = state.data || {};
+    state.id = h3.route.parts.id || 1;
+    const url = `http://dummy.restapiexample.com/api/v1/employee/${id}`;
+    state.data[id] = state.data[id] || await (await fetch(url)).json();
+  },
+  display(state) =&gt; {
+    const employee = state.data[state.id];
+    if (!employee) {
+      return h("div.error", "Invalid Employee ID.");
+    }
+    return h("div.employee",
+      h("h2", "Employee Profile"),
+      h("dl", [
+        h("dt", "Name:"),
+        h("dd", data.employee_name),
+        h("dt", "Salary:"),
+        h("dd", `${data.employee_salary} €`),
+        h("dt", "Age:"),
+        h("dd", data.employee_age),
+      ])
+    )
+  },
+  teardown: (state) =&gt; ({ data: state.data })
+})
+</code></pre>
+
+<p>This example shows how to implement a simple component that renders an employee profile in the <code>display</code> function, fetches data (if necessary) in the <code>setup</code> function, and preserves data in the <code>teardown</code> function.</p>
 
 <a name="h3.dispatch(event:-string,-data:-any)"></a>
 <h3>h3.dispatch(event: string, data: any)<a href="#document-top" title="Go to top"></a></h3>
@@ -7960,7 +8031,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
 <p>The following call causes the application to switch to the following URL: <code>#/posts/?orderBy=date&amp;direction=desc</code>.</p>
 
-<pre><code class="js">h3.navigateTo("/posts/", {orderBy: 'date', direction: 'desc'});
+<pre><code class="js">h3.navigateTo("/posts/", { orderBy: "date", direction: "desc" });
 </code></pre>
 
 <a name="h3.on(event:-string,-handler:-function)"></a>
@@ -8058,7 +8129,7 @@ h3("ul", ["A", "B", "C"].map(TestLi));
 
     </div>
     <div id="footer">
-      <p><span class="copy"></span> Fabio Cevasco &ndash; July 29, 2020</p>
+      <p><span class="copy"></span> Fabio Cevasco &ndash; August 1, 2020</p>
       <p><span>Powered by</span> <a href="https://h3rald.com/hastyscribe"><span class="hastyscribe"></span></a></p>
     </div>
   </div>

@@ -4,9 +4,9 @@
 
 H3 is also:
 
-- **tiny**, less than 4KB minified gzipped.
+- **tiny**, less than 4KB minified and gzipped.
 - **modern**, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
-- **easy** to learn, its API is comprised of only six methods and two properties.
+- **easy** to learn, its API is comprised of only seven methods and two properties.
 
 ### I'm sold! Where can I get it?
 
@@ -24,7 +24,7 @@ Here's an example of an extremely minimal SPA created with H3:
 
 ```js
 import h3 from "./h3.js";
-h3.init(() => h3("h1", "Hello, World!"));
+h3.init(() => h("h1", "Hello, World!"));
 ```
 
 This will render a `h1` tag within the document body, containing the text `"Hello, World!"`.

@@ -633,15 +633,17 @@ class Router {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
       // Old route component teardown
+      let state = {};
       if (oldRoute) {
         const oldRouteComponent = this.routes[oldRoute.def];
-        oldRouteComponent.state =
-          oldRouteComponent.teardown &&
-          (await oldRouteComponent.teardown(oldRouteComponent.state));
+        state =
+          (oldRouteComponent.teardown &&
+            (await oldRouteComponent.teardown(oldRouteComponent.state))) ||
+          state;
       }
       // New route component setup
       const newRouteComponent = this.routes[this.route.def];
-      newRouteComponent.state = {};
+      newRouteComponent.state = state;
       newRouteComponent.setup &&
         (await newRouteComponent.setup(newRouteComponent.state));
       // Redrawing...
