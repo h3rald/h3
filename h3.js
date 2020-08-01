@@ -54,14 +54,14 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  return checkProperties(obj1, obj2); // && checkProperties(obj2, obj1);
+  return checkProperties(obj1, obj2); 
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
 const [PATCH, INSERT, DELETE] = [-1, -2, -3];
 let $onrenderCallbacks = [];
 
-// Virtual Node Implementation with HyperScript-like syntax
+// Virtual DOM implementation with HyperScript syntax
 class VNode {
   constructor(...args) {
     this.type = undefined;
