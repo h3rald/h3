@@ -1,12 +1,12 @@
-## Tutorial 
+## Tutorial
 
 As a (meta) explanation of how to use H3, let's have a look at how the [H3 web site](https://h3.js.org) itself was created.
 
 The idea was to build a simple web site to display the documentation of the H3 microframework, so it must be able to:
 
-* Provide a simple way to navigate through page.
-* Render markdown content (via [marked.js](https://marked.js.org/#/README.md#README.md))
-* Apply syntax highlighting (via [Prism.js](https://prismjs.com/))
+- Provide a simple way to navigate through page.
+- Render markdown content (via [marked.js](https://marked.js.org/#/README.md#README.md))
+- Apply syntax highlighting (via [Prism.js](https://prismjs.com/))
 
 As far as look and feel is concerned, I wanted something minimal but functional, so [mini.css](https://minicss.org/) was more than enough.
 
@@ -14,20 +14,23 @@ The full source of the site is available [here](https://github.com/h3rald/h3/tre
 
 ### Create a simple HTML file
 
-Start by creating a simple HTML file. Place a script loading the entry point of your application within the `body` and set its type to `module`. 
+Start by creating a simple HTML file. Place a script loading the entry point of your application within the `body` and set its type to `module`.
 
 This will let you load an ES6 file containing imports to other files... it works in all major browsers, but it doesn't work in IE (but we don't care about that, do we?).
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>H3</title>
-    <meta name="description" content="A bare-bones client-side web microframework" />
+    <meta
+      name="description"
+      content="A bare-bones client-side web microframework"
+    />
     <meta name="author" content="Fabio Cevasco" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png">
+    <link rel="shortcut icon" href="favicon.png" type="image/png" />
     <link rel="stylesheet" href="css/mini-default.css" />
     <link rel="stylesheet" href="css/prism.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -47,7 +50,7 @@ Normally you'd have several components, at least one file containing modules to 
 Start by importing all the JavaScript modules you need:
 
 ```js
-import h3 from "./h3.js";
+import { h3, h } from "./h3.js";
 import marked from "./vendor/marked.js";
 import Prism from "./vendor/prism.js";
 ```
@@ -59,6 +62,7 @@ const labels = {
   overview: "Overview",
   "quick-start": "Quick Start",
   "key-concepts": "Key Concepts",
+  "best-practices": "Best Practices",
   tutorial: "Tutorial",
   api: "API",
   about: "About",
@@ -67,16 +71,12 @@ const labels = {
 
 We are going to store the HTML contents of each page in an Object, and we're going to need a simple function to [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) the Markdown file and render it as HTML:
 
-
 ```js
-const pages = {};
-
-const fetchPage = async (pages, id, md) => {
+const fetchPage = async ({ pages, id, md }) => {
   if (!pages[id]) {
     const response = await fetch(md);
     const text = await response.text();
     pages[id] = marked(text);
-    h3.redraw();
   }
 };
 ```
@@ -84,80 +84,96 @@ const fetchPage = async (pages, id, md) => {
 Basically this function is going to be called when you navigate to each page, and it:
 
 1. fetches the content of the requested file (`md`))
-2. renders the Markdown code into HTML using marked, and stores it in the `pages` object
-3. Triggers a redraw of the application
+2. renders the Markdown code into HTML using the _marked_ library, and stores it in the `pages` object
 
-We are gonna use our `fetchPage` function inside the main component of our app, `Page`:
+We are gonna use our `fetchPage` function inside the `setup` of the main (and only) screen of our app, `Page`:
 
 ```js
-const Page = () => {
-  const id = h3.route.path.slice(1);
-  const ids = Object.keys(labels);
-  const md = ids.includes(id) ? `md/${id}.md` : `md/overview.md`;
-  fetchPage(pages, id, md);
-  return h3("div.page", [
-    Header,
-    h3("div.row", [
-      h3("input#drawer-control.drawer", { type: "checkbox" }),
-      Navigation(id, ids),
-      Content(pages[id]),
-      Footer,
-    ]),
-  ]);
-};
+const Page = h3.screen({
+  setup: async (state) => {
+    state.pages = {};
+    state.id = h3.route.path.slice(1);
+    state.ids = Object.keys(labels);
+    state.md = state.ids.includes(state.id)
+      ? `md/${state.id}.md`
+      : `md/overview.md`;
+    await fetchPage(state);
+  },
+  display: (state) => {
+    return h("div.page", [
+      Header,
+      h("div.row", [
+        h("input#drawer-control.drawer", { type: "checkbox" }),
+        Navigation(state.id, state.ids),
+        Content(state.pages[state.id]),
+        Footer,
+      ]),
+    ]);
+  },
+  teardown: (state) => state,
+});
 ```
 
-The main responsibility of this component is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: `Header`, `Navigation`, `Content`, and `Footer`.
+Note that this screen has a `setup`, a `display` and a `teardown` method, both taking `state` as parameter. In H3, screens are nothing but stateful components that are used to render the whole page of the application, and are therefore typically redered when navigating to a new route.
+
+The `state` parameter is nothing but an empty object that can be used to store data that will be accessible to the `setup`, `display` and `teardown` methods, and (typically) will be destroyed when another screen is rendered.
+
+The `setup` function allows you to perform some operations that should take place _before_ the screen is rendered. In this case, we want to fetch the page contents (if necessary) beforehand to avoid displaying a spinner while the content is being loaded. Note that the `setup` method can be asynchronous, and in this case the `display` method will not be called until all asynchronous operations have been completed (assuming you are `await`ing them).
+
+The `teardown` function in this case only makes sure that the existing screen state (in particular any loaded markdown page) will be passed on to the next screen during navigation (which, in this case, is still the `Page` screen), so that existing pages will not be fetched again.
+
+The main responsibility of this screen is to fetch the Markdown content and render the whole page, but note how the rendering different portions of the page are delegated to different components: `Header`, `Navigation`, `Content`, and `Footer`.
 
 The `Header` and `Footer` components are very simple: their only job is to render static content:
 
 ```js
 const Header = () => {
-  return h3("header.row.sticky", [
-    h3("a.logo.col-sm-1", { href: "#/" }, [
-      h3("img", { alt: "H3", src: "images/h3.svg" }),
+  return h("header.row.sticky", [
+    h("a.logo.col-sm-1", { href: "#/" }, [
+      h("img", { alt: "H3", src: "images/h3.svg" }),
     ]),
-    h3("div.version.col-sm.col-md", [
-      h3("div.version-number", "v0.9.0"),
-      h3("div.version-label", "“Impeccable Iconian“"),
+    h("div.version.col-sm.col-md", [
+      h("div.version-number", "v0.10.0"),
+      h("div.version-label", "“Jittery Jem'Hadar“"),
     ]),
-    h3("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
+    h("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);
 };
 
 const Footer = () => {
-  return h3("footer", [h3("div", "© 2020 Fabio Cevasco")]);
+  return h("footer", [h("div", "© 2020 Fabio Cevasco")]);
 };
 ```
 
 The `Navigation` component is more interesting, as it takes two parameters:
 
-* The ID of the current page
-* The list of page IDs
+- The ID of the current page
+- The list of page IDs
 
 ...and it uses this information to create the site navigation menu dynamically:
 
 ```js
 const Navigation = (id, ids) => {
   const menu = ids.map((p) =>
-    h3(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
+    h(`a${p === id ? ".active" : ""}`, { href: `#/${p}` }, labels[p])
   );
-  return h3("nav#navigation.col-md-3", [
-    h3("label.drawer-close", { for: "drawer-control" }),
+  return h("nav#navigation.col-md-3", [
+    h("label.drawer-close", { for: "drawer-control" }),
     ...menu,
   ]);
 };
 ```
 
-Finally, the `Content` component optionally takes a string containing the HTML of the page content to render. If no content is provided, it will display a loading spinner, otherwise it will render the content by using the special `$html` attribute that can be used to essentially set the `innerHTML` of an element:
+Finally, the `Content` component takes a string containing the HTML of the page content to render using the special `$html` attribute that can be used to essentially set the `innerHTML` property of an element:
 
 ```js
 const Content = (html) => {
-  const content = html
-    ? h3("div.content", { $html: html })
-    : h3("div.spinner-container", h3("span.spinner"));
-  return h3("main.col-sm-12.col-md-9", [
-    h3("div.card.fluid", h3("div.section", content)),
+  const content = h("div.content", { $html: html });
+  return h("main.col-sm-12.col-md-9", [
+    h(
+      "div.card.fluid",
+      h("div.section", { $onrender: () => Prism.highlightAll() }, content)
+    ),
   ]);
 };
 ```
@@ -170,7 +186,9 @@ In a similar way, other well-known pages can easily be mapped to IDs, but it is 
 
 This feature is also handy to automatically load the Overview when no fragment is specified.
 
-### Initialization and post-redraw operations
+What is that weird `$onrender` property you ask? Well, that's a H3-specific callback that will be executed whenever the corresponding DOM node is rendered... that's essentially the perfect place to for executing operations that must be perform when the DOM is fully available, like highlighting our code snippets using _Prism_ in this case.
+
+### Initialization
 
 Done? Not quite. We need to initialize the SPA by passing the `Page` component to the `h3.init()` method to trigger the first rendering:
 
@@ -178,18 +196,12 @@ Done? Not quite. We need to initialize the SPA by passing the `Page` component t
 h3.init(Page);
 ```
 
-And that's it. Noooo wait, what about syntax highlighting? That needs to be applied _after_ the HTML markup is rendered. How can we manage that?
-
-Easy enough, add a handler to be executed whenever the SPA is redrawn:
-
-```js
-h3.on("$redraw", () => Prism.highlightAll());
-```
+And that's it. Now, keep in mind that this is the _short_ version of initialization using a single component and a single route, but still, that's good enough for our use case.
 
 ### Next steps
 
 Made it this far? Good. Wanna know more? Have a look at the code of the [todo list example](https://github.com/h3rald/h3/tree/master/docs/example) and try it out [here](https://h3.js.org/example/index.html).
 
-Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, route components, forms, confirmation messages, plenty of third-party components etc., have a look at [LitePad](https://github.com/h3rald/litepad). You can see it in action here: [litepad.h3rald.com](https://litepad.h3rald.com/).
+Once you feel more comfortable and you are ready to dive into a more complex application, featuring different routes, screens, forms, validation, confirmation messages, plenty of third-party components etc., have a look at [LitePad](https://github.com/h3rald/litepad). You can see it in action here: [litepad.h3rald.com](https://litepad.h3rald.com/).
 
 Note: the LitePad online demo will store all its data in localStorage.

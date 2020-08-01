@@ -8,16 +8,14 @@ Oh... and a solid understanding of HTML and JavaScript wouldn't hurt either ;)
 
 H3 uses a [HyperScript](https://openbase.io/js/hyperscript)-like syntax to create HTML elements in pure JavaScript. No, you are actually creating Virtual DOM nodes with it but it can be easier to think about them as HTML elements, or better, something that *eventually* will be rendered as an HTML element.
 
-The main difference between H3's HyperScript implementation and others is that it uses **h3** as the main constructor to create nodes. HyperScript uses **h**, Mithril uses **m**, ...kind of an obvious choice if you ask me. If you don't like it, you can rename it to *piripicchio* if you want, and it will *still* be used in the same way.
-
 How, you ask? Like this:
 
 ```js
-h3("div.test", [
-  h3("ul", [
-    h3("li", "This is..."),
-    h3("li", "...a simple..."),
-    h3("li", "unordered list.")
+h("div.test", [
+  h("ul", [
+    h("li", "This is..."),
+    h("li", "...a simple..."),
+    h("li", "unordered list.")
   ])
 ]);
 ```
@@ -36,7 +34,7 @@ h3("div.test", [
 
 Simple enough. Yes there are some quirks to it, but check the API or Usage docs for those.
 
-### Components
+### Component
 
 In H3, a component is a function that returns a Virtual Node or a string (that will be treated as a textual DOM node). 
 
@@ -45,11 +43,32 @@ Yes that's it. An example? here:
 ```js
 let count = 0;
 const CounterButton = () => {
-  return h3("button", {
+  return h("button", {
     onclick: () => count +=1 && h3.redraw()
   }, `You clicked me ${count} times.`);
 }
 ```
+
+### Router
+
+H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary `href` links or programmatically using the `h3.navigateTo` method.
+
+The current route is always accessible via the `h3.route` property.
+
+
+### Screen
+
+A screen is a top-level component that handles a route. Unlike ordinary components, screens:
+
+* may have a dedicated *setup* (after the screen is added to the DOM) and *teardown* phase (after the screen is removed from the DOM and before the new screen is loaded).
+* may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the screen when executed.
+
+Screens are typically created using the **h3.screen** shorthand method, but they can stll created using an ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (functions are objects in JavaScript after all...) to be executed during each corresponding phase.
+
+Note that:
+* Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during subsequent teardowns.
+* The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
+* Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
 
 ### Store
 
@@ -57,7 +76,7 @@ H3 essentially uses something very, *very* similar to [Storeon](https://github.c
 
 The current application state is accessible via the `h3.state` property.
 
-### Modules
+### Module
 
 The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific events are received. A simple module looks like this:
 
@@ -70,27 +89,6 @@ const error = () => {
 ```
 
 Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.
-
-### Router
-
-H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary `href` links or programmatically using the `h3.navigateTo` method.
-
-The current route is always accessible via the `h3.route` property.
-
-
-#### Route Components
-
-A route component is a top-level component that handles a route. Unlike ordinary components, route components:
-
-* may have a dedicated *setup* (after the route component is added to the DOM) and *teardown* phase (after the route component is removed from the DOM and before the new route component is loaded).
-* may have built-in local state, initialized during setup and (typically) destroyed during teardown. Such state is passed as the first (and only) parameter of the route component when executed.
-
-Route components are stll created using ordinary function returning a VNode, but you can optionally define a **setup** and a **teardown** async methods on them (functions are objects in JavaScript after all...) to be executed during each corresponding phase.
-
-Note that:
-* Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during subsequent teardowns.
-* The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
-* Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
 
 ### How everything works...
 
@@ -105,9 +103,9 @@ When the `h3.init()` method is called at application level, the following operat
 3. The **$init** event is dispatched.
 4. The *preStart* function (if specified when calling `h3.init()`) is executed.
 5. The *Router* is initialized and started.
-6. The **setup()** method of the matching Route Component is called (if any).
+6. The **setup()** method of the matching Screen is called (if any).
 8. The **$navigation** event is dispatched.
-9. The *Route Component* matching the current route and all its child components are rendered for the first time.
+9. The *Screen* matching the current route and all its child components are rendered for the first time.
 10. The **$redraw** event is dispatched.
 
 Then, whenever the `h3.redraw()` method is called (typically within a component):
@@ -118,12 +116,12 @@ Then, whenever the `h3.redraw()` method is called (typically within a component)
 Similarly, whenever the `h3.navigateTo()` method is called (typically within a component), or the URL fragment changes:
 
 1. The *Router* processes the new path and determine which component to render based on the routing configuration.
-2. The **teardow()** method of the current Route Component is called (if any).
-3. The **setup()** method of the new matching Route Component is called (if any).
+2. The **teardow()** method of the current Screen is called (if any).
+3. The **setup()** method of the new matching Screen is called (if any).
 4. All DOM nodes within the scope of the routing are removed, all components are removed.
 6. The **$navigation** event is dispatched.
 7. All DOM nodes are removed.
-8. The *Route Component* matching the new route and all its child components are rendered.
+8. The *Screen* matching the new route and all its child components are rendered.
 10. The **$redraw** event is dispatched.
 
 And that's it. The whole idea is to make the system extremely *simple* and *predictable* &mdash; which means everything should be very easy to debug, too.

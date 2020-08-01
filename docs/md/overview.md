@@ -4,15 +4,15 @@
 
 H3 is also:
 
-- **tiny**, less than 4KB minified gzipped.
+- **tiny**, less than 4KB minified and gzipped.
 - **modern**, in the sense that it runs only in modern browsers (latest versions of Chrome, Firefox, Edge & similar).
-- **easy** to learn, its API is comprised of only six methods and two properties.
+- **easy** to learn, its API is comprised of only seven methods and two properties.
 
 ### I'm sold! Where can I get it?
 
 Here, look, it's just one file:
 
-<a href="https://raw.githubusercontent.com/h3rald/h3/v0.9.0/h3.js" target="_blank" class="button primary">Download v0.9.0 (Impeccable Iconian)</a>
+<a href="https://raw.githubusercontent.com/h3rald/h3/v0.10.0/h3.js" target="_blank" class="button primary">Download v0.10.0 (Jittery Jem'Hadar)</a>
 
 <small>Or get the minified version [here](https://raw.githubusercontent.com/h3rald/h3/v0.9.0/h3.min.js).</small>
 
@@ -24,7 +24,7 @@ Here's an example of an extremely minimal SPA created with H3:
 
 ```js
 import h3 from "./h3.js";
-h3.init(() => h3("h1", "Hello, World!"));
+h3.init(() => h("h1", "Hello, World!"));
 ```
 
 This will render a `h1` tag within the document body, containing the text `"Hello, World!"`.

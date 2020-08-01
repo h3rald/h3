@@ -1,4 +1,6 @@
-const h3 = require("../h3.js").default;
+const mod = require("../h3.js");
+const h3 = mod.h3;
+const h = mod.h;
 
 describe("h3", () => {
   beforeEach(() => {
@@ -12,10 +14,10 @@ describe("h3", () => {
   });
 
   it("should support a way to discriminate functions and objects", () => {
-    const v1 = h3("div", { onclick: () => true });
-    const v2 = h3("div", { onclick: () => true });
-    const v3 = h3("div", { onclick: () => false });
-    const v4 = h3("div");
+    const v1 = h("div", { onclick: () => true });
+    const v2 = h("div", { onclick: () => true });
+    const v3 = h("div", { onclick: () => false });
+    const v4 = h("div");
     expect(v1.equal(v2)).toEqual(true);
     expect(v1.equal(v3)).toEqual(false);
     expect(v4.equal({ type: "div" })).toEqual(false);
@@ -24,10 +26,10 @@ describe("h3", () => {
   });
 
   it("should support the creation of empty virtual node elements", () => {
-    expect(h3("div")).toEqual({
+    expect(h("div")).toEqual({
       type: "div",
       children: [],
-      attributes: {},
+      props: {},
       classList: [],
       data: {},
       eventListeners: {},
@@ -39,17 +41,17 @@ describe("h3", () => {
   });
 
   it("should throw an error when invalid arguments are supplied", () => {
-    const empty = () => h3();
-    const invalid1st = () => h3(1);
-    const invalid1st2 = () => h3(1, {});
-    const invalid1st3 = () => h3(1, {}, []);
-    const invalid1st1 = () => h3(() => ({ type: "#text", value: "test" }));
-    const invalid1st1b = () => h3({ a: 2 });
-    const invalid2nd = () => h3("div", 1);
-    const invalid2nd2 = () => h3("div", true, []);
-    const invalid2nd3 = () => h3("div", null, []);
-    const invalidChildren = () => h3("div", ["test", 1, 2]);
-    const tooManyArgs = () => h3("div", { id: "test" }, "test", "aaa");
+    const empty = () => h();
+    const invalid1st = () => h(1);
+    const invalid1st2 = () => h(1, {});
+    const invalid1st3 = () => h(1, {}, []);
+    const invalid1st1 = () => h(() => ({ type: "#text", value: "test" }));
+    const invalid1st1b = () => h({ a: 2 });
+    const invalid2nd = () => h("div", 1);
+    const invalid2nd2 = () => h("div", true, []);
+    const invalid2nd3 = () => h("div", null, []);
+    const invalidChildren = () => h("div", ["test", 1, 2]);
+    const emptySelector = () => h("");
     expect(empty).toThrowError(/No arguments passed/);
     expect(invalid1st).toThrowError(/Invalid first argument/);
     expect(invalid1st2).toThrowError(/Invalid first argument/);
@@ -60,21 +62,30 @@ describe("h3", () => {
     expect(invalid2nd2).toThrowError(/Invalid second argument/);
     expect(invalid2nd3).toThrowError(/Invalid second argument/);
     expect(invalidChildren).toThrowError(/not a VNode: 1/);
-    expect(tooManyArgs).toThrowError(/Too many arguments/);
+    expect(emptySelector).toThrowError(/Invalid selector/);
+  });
+
+  it("should support several child arguments", () => {
+    let vnode = h("div", { test: "a" }, "a", "b", "c");
+    expect(vnode.children.length).toEqual(3);
+    vnode = h("div", "a", "b", "c");
+    expect(vnode.children.length).toEqual(3);
+    vnode = h("div", "a", "b");
+    expect(vnode.children.length).toEqual(2);
   });
 
   it("should support the creation of elements with a single, non-array child", () => {
-    const vnode1 = h3("div", () => "test");
-    const vnode2 = h3("div", () => h3("span"));
+    const vnode1 = h("div", () => "test");
+    const vnode2 = h("div", () => h("span"));
     expect(vnode1.children[0].value).toEqual("test");
     expect(vnode2.children[0].type).toEqual("span");
   });
 
   it("should remove null/false/undefined children", () => {
-    const v1 = h3("div", [false, "test", undefined, null, ""]);
+    const v1 = h("div", [false, "test", undefined, null, ""]);
     expect(v1.children).toEqual([
-      h3({ type: "#text", value: "test" }),
-      h3({ type: "#text", value: "" }),
+      h({ type: "#text", value: "test" }),
+      h({ type: "#text", value: "" }),
     ]);
   });
 
@@ -85,7 +96,7 @@ describe("h3", () => {
         {
           type: "#text",
           children: [],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},
@@ -95,7 +106,7 @@ describe("h3", () => {
           value: "test",
         },
       ],
-      attributes: {},
+      props: {},
       classList: [],
       data: {},
       eventListeners: {},
@@ -104,18 +115,18 @@ describe("h3", () => {
       style: undefined,
       value: undefined,
     };
-    expect(h3("div", "test")).toEqual(result);
-    const failing = () => h3("***");
+    expect(h("div", "test")).toEqual(result);
+    const failing = () => h("***");
     expect(failing).toThrowError(/Invalid selector/);
   });
 
   it("should support the creation of virtual node elements with classes", () => {
-    const a = h3("div.a.b.c");
-    const b = h3("div", { classList: ["a", "b", "c"] });
+    const a = h("div.a.b.c");
+    const b = h("div", { classList: ["a", "b", "c"] });
     expect(a).toEqual({
       type: "div",
       children: [],
-      attributes: {},
+      props: {},
       classList: ["a", "b", "c"],
       data: {},
       eventListeners: {},
@@ -128,13 +139,13 @@ describe("h3", () => {
     expect(a).toEqual(b);
   });
 
-  it("should support the creation of virtual node elements with attributes and classes", () => {
-    expect(h3("div.test1.test2", { id: "test" })).toEqual({
+  it("should support the creation of virtual node elements with props and classes", () => {
+    expect(h("div.test1.test2", { id: "test" })).toEqual({
       type: "div",
       children: [],
       classList: ["test1", "test2"],
       data: {},
-      attributes: {},
+      props: {},
       eventListeners: {},
       id: "test",
       $html: undefined,
@@ -145,11 +156,11 @@ describe("h3", () => {
   });
 
   it("should support the creation of virtual node elements with text children and classes", () => {
-    expect(h3("div.test", ["a", "b"])).toEqual({
+    expect(h("div.test", ["a", "b"])).toEqual({
       type: "div",
       children: [
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -161,7 +172,7 @@ describe("h3", () => {
           value: "a",
         },
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -173,7 +184,7 @@ describe("h3", () => {
           value: "b",
         },
       ],
-      attributes: {},
+      props: {},
       classList: ["test"],
       data: {},
       eventListeners: {},
@@ -184,50 +195,50 @@ describe("h3", () => {
     });
   });
 
-  it("should support the creation of virtual node elements with text children, attributes, and classes", () => {
-    expect(
-      h3("div.test", { title: "Test...", id: "test" }, ["a", "b"])
-    ).toEqual({
-      type: "div",
-      children: [
-        {
-          attributes: {},
-          children: [],
-          classList: [],
-          data: {},
-          eventListeners: {},
-          id: undefined,
-          $html: undefined,
-          style: undefined,
-          type: "#text",
-          value: "a",
-        },
-        {
-          attributes: {},
-          children: [],
-          classList: [],
-          data: {},
-          eventListeners: {},
-          id: undefined,
-          $html: undefined,
-          style: undefined,
-          type: "#text",
-          value: "b",
-        },
-      ],
-      data: {},
-      eventListeners: {},
-      id: "test",
-      $html: undefined,
-      style: undefined,
-      value: undefined,
-      attributes: { title: "Test..." },
-      classList: ["test"],
-    });
+  it("should support the creation of virtual node elements with text children, props, and classes", () => {
+    expect(h("div.test", { title: "Test...", id: "test" }, ["a", "b"])).toEqual(
+      {
+        type: "div",
+        children: [
+          {
+            props: {},
+            children: [],
+            classList: [],
+            data: {},
+            eventListeners: {},
+            id: undefined,
+            $html: undefined,
+            style: undefined,
+            type: "#text",
+            value: "a",
+          },
+          {
+            props: {},
+            children: [],
+            classList: [],
+            data: {},
+            eventListeners: {},
+            id: undefined,
+            $html: undefined,
+            style: undefined,
+            type: "#text",
+            value: "b",
+          },
+        ],
+        data: {},
+        eventListeners: {},
+        id: "test",
+        $html: undefined,
+        style: undefined,
+        value: undefined,
+        props: { title: "Test..." },
+        classList: ["test"],
+      }
+    );
   });
 
-  it("should support the creation of virtual node elements with attributes", () => {
-    expect(h3("input", { type: "text", value: "AAA" })).toEqual({
+  it("should support the creation of virtual node elements with props", () => {
+    expect(h("input", { type: "text", value: "AAA" })).toEqual({
       type: "input",
       children: [],
       data: {},
@@ -236,14 +247,14 @@ describe("h3", () => {
       $html: undefined,
       style: undefined,
       value: "AAA",
-      attributes: { type: "text" },
+      props: { type: "text" },
       classList: [],
     });
   });
 
   it("should support the creation of virtual node elements with event handlers", () => {
     const fn = () => true;
-    expect(h3("button", { onclick: fn })).toEqual({
+    expect(h("button", { onclick: fn })).toEqual({
       type: "button",
       children: [],
       data: {},
@@ -254,23 +265,23 @@ describe("h3", () => {
       $html: undefined,
       style: undefined,
       value: undefined,
-      attributes: {},
+      props: {},
       classList: [],
     });
-    expect(() => h3("span", { onclick: "something" })).toThrowError(
+    expect(() => h("span", { onclick: "something" })).toThrowError(
       /onclick event is not a function/
     );
   });
 
   it("should support the creation of virtual node elements with element children and classes", () => {
     expect(
-      h3("div.test", ["a", h3("span", ["test1"]), () => h3("span", ["test2"])])
+      h("div.test", ["a", h("span", ["test1"]), () => h("span", ["test2"])])
     ).toEqual({
-      attributes: {},
+      props: {},
       type: "div",
       children: [
         {
-          attributes: {},
+          props: {},
           children: [],
           classList: [],
           data: {},
@@ -285,7 +296,7 @@ describe("h3", () => {
           type: "span",
           children: [
             {
-              attributes: {},
+              props: {},
               children: [],
               classList: [],
               data: {},
@@ -297,7 +308,7 @@ describe("h3", () => {
               value: "test1",
             },
           ],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},
@@ -310,7 +321,7 @@ describe("h3", () => {
           type: "span",
           children: [
             {
-              attributes: {},
+              props: {},
               children: [],
               classList: [],
               data: {},
@@ -322,7 +333,7 @@ describe("h3", () => {
               value: "test2",
             },
           ],
-          attributes: {},
+          props: {},
           classList: [],
           data: {},
           eventListeners: {},
@@ -358,7 +369,7 @@ describe("h3", () => {
   });
 
   it("should provide an init method to initialize a SPA with a single component", async () => {
-    const c = () => h3("div", "Hello, World!");
+    const c = () => h("div", "Hello, World!");
     const body = document.body;
     const appendChild = jest.spyOn(body, "appendChild");
     await h3.init(c);
@@ -385,7 +396,7 @@ describe("h3", () => {
   });
 
   it("should expose a redraw method", async () => {
-    const vnode = h3("div");
+    const vnode = h("div");
     await h3.init(() => vnode);
     jest.spyOn(vnode, "redraw");
     h3.redraw();
@@ -397,15 +408,34 @@ describe("h3", () => {
   });
 
   it("should not redraw while a other redraw is in progress", async () => {
-    const vnode = h3("div");
+    const vnode = h("div");
     await h3.init({
       routes: {
-        "/": () => vnode
+        "/": () => vnode,
       },
     });
     jest.spyOn(vnode, "redraw");
     h3.redraw(true);
-    h3.redraw()
+    h3.redraw();
     expect(vnode.redraw).toHaveBeenCalledTimes(1);
+  });
+
+  it("should expose a screen method to define screen-level components with (optional) setup and teardown", async () => {
+    expect(() => h3.screen({})).toThrowError(/No display property specified/);
+    expect(() => h3.screen({ setup: 1, display: () => "" })).toThrowError(
+      /setup property is not a function/
+    );
+    expect(() => h3.screen({ teardown: 1, display: () => "" })).toThrowError(
+      /teardown property is not a function/
+    );
+    let s = h3.screen({ display: () => "test" });
+    expect(typeof s).toEqual("function");
+    s = h3.screen({
+      display: () => "test",
+      setup: (state) => state,
+      teardown: (state) => state,
+    });
+    expect(typeof s.setup).toEqual("function");
+    expect(typeof s.teardown).toEqual("function");
   });
 });

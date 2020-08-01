@@ -1,7 +1,7 @@
 /**
- * H3 v0.9.0 "Impeccable Iconian"
+ * H3 v0.10.0 "Jittery Jem'Hadar"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
- * 
+ *
  * @license MIT
  * For the full license, see: https://github.com/h3rald/h3/blob/master/LICENSE
  */
@@ -41,8 +41,6 @@ const equal = (obj1, obj2) => {
     }
   }
   if ([String, Number, Boolean].includes(obj1.constructor)) {
-    if (obj1 !== obj2) {
-    }
     return obj1 === obj2;
   }
   if (obj1.constructor === Array) {
@@ -60,14 +58,14 @@ const equal = (obj1, obj2) => {
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
-
+const [PATCH, INSERT, DELETE] = [-1, -2, -3];
 let $onrenderCallbacks = [];
 
 // Virtual Node Implementation with HyperScript-like syntax
 class VNode {
   constructor(...args) {
     this.type = undefined;
-    this.attributes = {};
+    this.props = {};
     this.data = {};
     this.id = undefined;
     this.$html = undefined;
@@ -133,25 +131,34 @@ class VNode {
           this.processProperties(data);
         }
       }
-    } else if (args.length === 3) {
+    } else {
       let [selector, props, children] = args;
+      if (args.length > 3) {
+        children = args.slice(2);
+      }
+      children = Array.isArray(children) ? children : [children];
       if (typeof selector !== "string") {
         throw new Error(
           "[VNode] Invalid first argument passed to VNode constructor."
         );
       }
       this.processSelector(selector);
-      if (typeof props !== "object" || props === null) {
-        throw new Error(
-          "[VNode] Invalid second argument passed to VNode constructor."
-        );
+      if (
+        props instanceof Function ||
+        props instanceof VNode ||
+        typeof props === "string"
+      ) {
+        // 2nd argument is a child
+        children = [props].concat(children);
+      } else {
+        if (typeof props !== "object" || props === null) {
+          throw new Error(
+            "[VNode] Invalid second argument passed to VNode constructor."
+          );
+        }
+        this.processProperties(props);
       }
-      this.processProperties(props);
       this.processChildren(children);
-    } else {
-      throw new Error(
-        "[VNode] Too many arguments passed to VNode constructor."
-      );
     }
   }
 
@@ -166,7 +173,7 @@ class VNode {
     this.value = data.value;
     this.eventListeners = data.eventListeners;
     this.children = data.children;
-    this.attributes = data.attributes;
+    this.props = data.props;
     this.classList = data.classList;
   }
 
@@ -185,7 +192,7 @@ class VNode {
       attrs.classList && attrs.classList.length > 0
         ? attrs.classList
         : this.classList;
-    this.attributes = attrs;
+    this.props = attrs;
     Object.keys(attrs)
       .filter((a) => a.startsWith("on") && attrs[a])
       .forEach((key) => {
@@ -195,19 +202,19 @@ class VNode {
           );
         }
         this.eventListeners[key.slice(2)] = attrs[key];
-        delete this.attributes[key];
+        delete this.props[key];
       });
-    delete this.attributes.value;
-    delete this.attributes.$html;
-    delete this.attributes.$onrender;
-    delete this.attributes.id;
-    delete this.attributes.data;
-    delete this.attributes.style;
-    delete this.attributes.classList;
+    delete this.props.value;
+    delete this.props.$html;
+    delete this.props.$onrender;
+    delete this.props.id;
+    delete this.props.data;
+    delete this.props.style;
+    delete this.props.classList;
   }
 
   processSelector(selector) {
-    if (!selector.match(selectorRegex)) {
+    if (!selector.match(selectorRegex) || selector.length === 0) {
       throw new Error(`[VNode] Invalid selector: ${selector}`);
     }
     const [, type, id, classes] = selector.match(selectorRegex);
@@ -263,17 +270,16 @@ class VNode {
     if (this.id) {
       node.id = this.id;
     }
-    Object.keys(this.attributes).forEach((attr) => {
-      // Set attributes (only if non-empty strings)
-      if (this.attributes[attr] && typeof this.attributes[attr] === "string") {
-        const a = document.createAttribute(attr);
-        a.value = this.attributes[attr];
-        node.setAttributeNode(a);
+    Object.keys(this.props).forEach((p) => {
+      // Set attributes
+      if (typeof this.props[p] === "boolean") {
+        this.props[p] ? node.setAttribute(p, "") : node.removeAttribute(p);
+      }
+      if (["string", "number"].includes(typeof this.props[p])) {
+        node.setAttribute(p, this.props[p]);
       }
       // Set properties
-      if (typeof this.attributes[attr] !== "string" || !node[attr]) {
-        node[attr] = this.attributes[attr];
-      }
+      node[p] = this.props[p];
     });
     // Event Listeners
     Object.keys(this.eventListeners).forEach((event) => {
@@ -281,7 +287,11 @@ class VNode {
     });
     // Value
     if (this.value) {
-      node.value = this.value;
+      if (["textarea", "input"].includes(this.type)) {
+        node.value = this.value;
+      } else {
+        node.setAttribute("value", this.value);
+      }
     }
     // Style
     if (this.style) {
@@ -332,8 +342,12 @@ class VNode {
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
-      node.value = newvnode.value || "";
       oldvnode.value = newvnode.value;
+      if (["textarea", "input"].includes(oldvnode.type)) {
+        node.value = newvnode.value || "";
+      } else {
+        node.setAttribute("value", newvnode.value || "");
+      }
     }
     // Classes
     if (!equal(oldvnode.classList, newvnode.classList)) {
@@ -370,27 +384,34 @@ class VNode {
       });
       oldvnode.data = newvnode.data;
     }
-    // Attributes
-    if (!equal(oldvnode.attributes, newvnode.attributes)) {
-      Object.keys(oldvnode.attributes).forEach((a) => {
-        if (newvnode.attributes[a] === false) {
-          node[a] = false;
-        }
-        if (!newvnode.attributes[a]) {
+    // Properties & Attributes
+    if (!equal(oldvnode.props, newvnode.props)) {
+      Object.keys(oldvnode.props).forEach((a) => {
+        node[a] = newvnode.props[a];
+        if (typeof newvnode.props[a] === "boolean") {
+          oldvnode.props[a] = newvnode.props[a];
+          newvnode.props[a]
+            ? node.setAttribute(a, "")
+            : node.removeAttribute(a);
+        } else if (!newvnode.props[a]) {
+          delete oldvnode.props[a];
           node.removeAttribute(a);
         } else if (
-          newvnode.attributes[a] &&
-          newvnode.attributes[a] !== oldvnode.attributes[a]
+          newvnode.props[a] &&
+          newvnode.props[a] !== oldvnode.props[a]
         ) {
-          node.setAttribute(a, newvnode.attributes[a]);
+          oldvnode.props[a] = newvnode.props[a];
+          if (["string", "number"].includes(typeof newvnode.props[a])) {
+            node.setAttribute(a, newvnode.props[a]);
+          }
         }
       });
-      Object.keys(newvnode.attributes).forEach((a) => {
-        if (!oldvnode.attributes[a] && newvnode.attributes[a]) {
-          node.setAttribute(a, newvnode.attributes[a]);
+      Object.keys(newvnode.props).forEach((a) => {
+        if (!oldvnode.props[a] && newvnode.props[a]) {
+          oldvnode.props[a] = newvnode.props[a];
+          node.setAttribute(a, newvnode.props[a]);
         }
       });
-      oldvnode.attributes = newvnode.attributes;
     }
     // Event listeners
     if (!equal(oldvnode.eventListeners, newvnode.eventListeners)) {
@@ -412,113 +433,48 @@ class VNode {
       oldvnode.eventListeners = newvnode.eventListeners;
     }
     // Children
-    function mapChildren(oldvnode, newvnode) {
-      let map = [];
-      let oldNodesFound = 0;
-      let newNodesFound = 0;
-      // First look for existing nodes
-      for (let oldIndex = 0; oldIndex < oldvnode.children.length; oldIndex++) {
-        let found = -1;
-        for (let index = 0; index < newvnode.children.length; index++) {
-          if (
-            equal(oldvnode.children[oldIndex], newvnode.children[index]) &&
-            !map.includes(index)
-          ) {
-            found = index;
-            newNodesFound++;
-            oldNodesFound++;
-            break;
-          }
-        }
-        map.push(found);
-      }
-      if (
-        newNodesFound === oldNodesFound &&
-        newvnode.children.length === oldvnode.children.length
-      ) {
-        // something changed but everything else is the same
-        return map;
-      }
-      if (newNodesFound === newvnode.children.length) {
-        // All children in newvnode exist in oldvnode
-        // All nodes that are not found must be removed
-        for (let i = 0; i < map.length; i++) {
-          if (map[i] === -1) {
-            map[i] = -3;
-          }
-        }
-      }
-      if (oldNodesFound === oldvnode.children.length) {
-        // All children in oldvnode exist in newvnode
-        // Check where the missing newvnodes children need to be added
-        for (
-          let newIndex = 0;
-          newIndex < newvnode.children.length;
-          newIndex++
-        ) {
-          if (!map.includes(newIndex)) {
-            map.splice(newIndex, 0, -2);
-          }
-        }
-      }
-      // Check if nodes needs to be removed (if there are fewer children)
-      if (newvnode.children.length < oldvnode.children.length) {
-        for (let i = 0; i < map.length; i++) {
-          if (map[i] === -1 && !newvnode.children[i]) {
-            map[i] = -3;
-          }
-        }
-      }
-      return map;
-    }
     let childMap = mapChildren(oldvnode, newvnode);
-    let resultMap = [...Array(childMap.filter((i) => i !== -3).length).keys()];
+    let resultMap = [...Array(newvnode.children.length).keys()];
     while (!equal(childMap, resultMap)) {
       let count = -1;
-      for (let i of childMap) {
+      checkmap: for (const i of childMap) {
         count++;
-        let breakFor = false;
         if (i === count) {
           // Matching nodes;
           continue;
         }
         switch (i) {
-          case -1:
-            // different node, check
+          case PATCH: {
             oldvnode.children[count].redraw({
               node: node.childNodes[count],
               vnode: newvnode.children[count],
             });
-            break;
-          case -2:
-            // add node
+            break checkmap;
+          }
+          case INSERT: {
             oldvnode.children.splice(count, 0, newvnode.children[count]);
             const renderedNode = newvnode.children[count].render();
             node.insertBefore(renderedNode, node.childNodes[count]);
             newvnode.children[count].$onrender &&
               newvnode.children[count].$onrender(renderedNode);
-            breakFor = true;
-            break;
-          case -3:
-            // remove node
+            break checkmap;
+          }
+          case DELETE: {
             oldvnode.children.splice(count, 1);
             node.removeChild(node.childNodes[count]);
-            breakFor = true;
-            break;
-          default:
-            // Node found, move nodes and remap
+            break checkmap;
+          }
+          default: {
             const vtarget = oldvnode.children.splice(i, 1)[0];
             oldvnode.children.splice(count, 0, vtarget);
-            node.insertBefore(node.childNodes[i], node.childNodes[count]);
-            breakFor = true;
-            break;
-        }
-        if (breakFor) {
-          break;
+            const target = node.removeChild(node.childNodes[i]);
+            node.insertBefore(target, node.childNodes[count]);
+            break checkmap;
+          }
         }
       }
       childMap = mapChildren(oldvnode, newvnode);
-      resultMap = [...Array(childMap.length).keys()];
+      resultMap = [...Array(newvnode.children.length).keys()];
     }
     // $onrender
     if (!equal(oldvnode.$onrender, newvnode.$onrender)) {
@@ -532,6 +488,40 @@ class VNode {
     }
   }
 }
+
+const mapChildren = (oldvnode, newvnode) => {
+  const newList = newvnode.children;
+  const oldList = oldvnode.children;
+  let map = [];
+  for (let nIdx = 0; nIdx < newList.length; nIdx++) {
+    let op = PATCH;
+    for (let oIdx = 0; oIdx < oldList.length; oIdx++) {
+      if (equal(newList[nIdx], oldList[oIdx]) && !map.includes(oIdx)) {
+        op = oIdx; // Same node found
+        break;
+      }
+    }
+    if (
+      op < 0 &&
+      newList.length >= oldList.length &&
+      map.length >= oldList.length
+    ) {
+      op = INSERT;
+    }
+    map.push(op);
+  }
+  const oldNodesFound = map.filter((c) => c >= 0);
+  if (oldList.length > newList.length) {
+    // Remove remaining nodes
+    [...Array(oldList.length - newList.length).keys()].forEach(() =>
+      map.push(DELETE)
+    );
+  } else if (oldNodesFound.length === oldList.length) {
+    // All nodes not found are insertions
+    map = map.map((c) => (c < 0 ? INSERT : c));
+  }
+  return map;
+};
 
 /**
  * The code of the following class is heavily based on Storeon
@@ -643,15 +633,17 @@ class Router {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
       // Old route component teardown
+      let state = {};
       if (oldRoute) {
         const oldRouteComponent = this.routes[oldRoute.def];
-        oldRouteComponent.state =
-          oldRouteComponent.teardown &&
-          (await oldRouteComponent.teardown(oldRouteComponent.state));
+        state =
+          (oldRouteComponent.teardown &&
+            (await oldRouteComponent.teardown(oldRouteComponent.state))) ||
+          state;
       }
       // New route component setup
       const newRouteComponent = this.routes[this.route.def];
-      newRouteComponent.state = {};
+      newRouteComponent.state = state;
       newRouteComponent.setup &&
         (await newRouteComponent.setup(newRouteComponent.state));
       // Redrawing...
@@ -685,9 +677,12 @@ class Router {
 }
 
 // High Level API
-const h3 = (...args) => {
+
+export const h = (...args) => {
   return new VNode(...args);
 };
+
+export const h3 = {};
 
 let store = null;
 let router = null;
@@ -782,6 +777,26 @@ h3.redraw = (setRedrawing) => {
   redrawing = true;
   router.redraw();
   redrawing = setRedrawing || false;
+};
+
+h3.screen = ({ setup, display, teardown }) => {
+  if (!display || typeof display !== "function") {
+    throw new Error("[h3.screen] No display property specified.");
+  }
+  if (setup && typeof setup !== "function") {
+    throw new Error("[h3.screen] setup property is not a function.");
+  }
+  if (teardown && typeof teardown !== "function") {
+    throw new Error("[h3.screen] teardown property is not a function.");
+  }
+  const fn = display;
+  if (setup) {
+    fn.setup = setup;
+  }
+  if (teardown) {
+    fn.teardown = teardown;
+  }
+  return fn;
 };
 
 export default h3;

@@ -43,10 +43,10 @@ After importing the `h3` object, you can start developing your SPA. A bare minim
 // Pressig the Refresh button causes the application to redraw
 // And updates the displayed date/dime.
 const Page = () => {
-  return h3("main", [
-    h3("h1", "Welcome!"),
-    h3("p", `The current date and time is ${new Date()}`),
-    h3("button", {
+  return h("main", [
+    h("h1", "Welcome!"),
+    h("p", `The current date and time is ${new Date()}`),
+    h("button", {
       onclick: () => h3.redraw()
     }, "Refresh")
   ]);
