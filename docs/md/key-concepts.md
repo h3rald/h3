@@ -8,8 +8,6 @@ Oh... and a solid understanding of HTML and JavaScript wouldn't hurt either ;)
 
 H3 uses a [HyperScript](https://openbase.io/js/hyperscript)-like syntax to create HTML elements in pure JavaScript. No, you are actually creating Virtual DOM nodes with it but it can be easier to think about them as HTML elements, or better, something that *eventually* will be rendered as an HTML element.
 
-The main difference between H3's HyperScript implementation and others is that it uses **h3** as the main constructor to create nodes. HyperScript uses **h**, Mithril uses **m**, ...kind of an obvious choice if you ask me. If you don't like it, you can rename it to *piripicchio* if you want, and it will *still* be used in the same way.
-
 How, you ask? Like this:
 
 ```js
@@ -36,7 +34,7 @@ h("div.test", [
 
 Simple enough. Yes there are some quirks to it, but check the API or Usage docs for those.
 
-### Components
+### Component
 
 In H3, a component is a function that returns a Virtual Node or a string (that will be treated as a textual DOM node). 
 
@@ -51,26 +49,6 @@ const CounterButton = () => {
 }
 ```
 
-### Store
-
-H3 essentially uses something very, *very* similar to [Storeon](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side event dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to events.
-
-The current application state is accessible via the `h3.state` property.
-
-### Modules
-
-The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific events are received. A simple module looks like this:
-
-```js
-const error = () => {
-  h3.on("$init", () => ({ displayEmptyTodoError: false }));
-  h3.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
-  h3.on("error/set", (state) => ({ displayEmptyTodoError: true }));
-};
-```
-
-Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.
-
 ### Router
 
 H3 comes with a very minimal but fully functional URL fragment router. You create your application routes when initializing your application, and you can navigate to them using ordinary `href` links or programmatically using the `h3.navigateTo` method.
@@ -78,7 +56,7 @@ H3 comes with a very minimal but fully functional URL fragment router. You creat
 The current route is always accessible via the `h3.route` property.
 
 
-#### Screen
+### Screen
 
 A screen is a top-level component that handles a route. Unlike ordinary components, screens:
 
@@ -91,6 +69,26 @@ Note that:
 * Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during subsequent teardowns.
 * The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
 * Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
+
+### Store
+
+H3 essentially uses something very, *very* similar to [Storeon](https://github.com/storeon/storeon) for state management *and* also as a very simple client-side event dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you'll only use the default store created by H3 upon initialization, and you'll use the `h3.dispatch()` and `h3.on()` methods to dispatch and subscribe to events.
+
+The current application state is accessible via the `h3.state` property.
+
+### Module
+
+The `h3.init()` method takes an array of *modules* that can be used to manipulate the application state when specific events are received. A simple module looks like this:
+
+```js
+const error = () => {
+  h3.on("$init", () => ({ displayEmptyTodoError: false }));
+  h3.on("error/clear", (state) => ({ displayEmptyTodoError: false }));
+  h3.on("error/set", (state) => ({ displayEmptyTodoError: true }));
+};
+```
+
+Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.
 
 ### How everything works...
 

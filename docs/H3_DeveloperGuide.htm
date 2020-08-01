@@ -7259,14 +7259,11 @@ div .terminal {
   <li><a href="#Key-Concepts">Key Concepts</a>
   <ul>
    <li><a href="#HyperScript">HyperScript</a></li>
-   <li><a href="#Components">Components</a></li>
+   <li><a href="#Component">Component</a></li>
+   <li><a href="#Router">Router</a></li>
+   <li><a href="#Screen">Screen</a></li>
    <li><a href="#Store">Store</a></li>
-   <li><a href="#Modules">Modules</a></li>
-   <li><a href="#Router">Router</a>
-   <ul>
-    <li><a href="#Screen">Screen</a></li>
-   </ul>
-   </li>
+   <li><a href="#Module">Module</a></li>
    <li><a href="#How-everything-works...">How everything works...</a></li>
   </ul>
   </li>
@@ -7450,8 +7447,6 @@ h3.init(Page);
 
 <p>H3 uses a <a href="https://openbase.io/js/hyperscript">HyperScript</a>-like syntax to create HTML elements in pure JavaScript. No, you are actually creating Virtual DOM nodes with it but it can be easier to think about them as HTML elements, or better, something that <em>eventually</em> will be rendered as an HTML element.</p>
 
-<p>The main difference between H3&rsquo;s HyperScript implementation and others is that it uses <strong>h3</strong> as the main constructor to create nodes. HyperScript uses <strong>h</strong>, Mithril uses <strong>m</strong>, &hellip;kind of an obvious choice if you ask me. If you don&rsquo;t like it, you can rename it to <em>piripicchio</em> if you want, and it will <em>still</em> be used in the same way.</p>
-
 <p>How, you ask? Like this:</p>
 
 <pre><code class="js">h("div.test", [
@@ -7476,8 +7471,8 @@ h3.init(Page);
 
 <p>Simple enough. Yes there are some quirks to it, but check the API or Usage docs for those.</p>
 
-<a name="Components"></a>
-<h3>Components<a href="#document-top" title="Go to top"></a></h3>
+<a name="Component"></a>
+<h3>Component<a href="#document-top" title="Go to top"></a></h3>
 
 <p>In H3, a component is a function that returns a Virtual Node or a string (that will be treated as a textual DOM node).</p>
 
@@ -7491,27 +7486,6 @@ const CounterButton = () =&gt; {
 }
 </code></pre>
 
-<a name="Store"></a>
-<h3>Store<a href="#document-top" title="Go to top"></a></h3>
-
-<p>H3 essentially uses something very, <em>very</em> similar to <a href="https://github.com/storeon/storeon">Storeon</a> for state management <em>and</em> also as a very simple client-side event dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you&rsquo;ll only use the default store created by H3 upon initialization, and you&rsquo;ll use the <code>h3.dispatch()</code> and <code>h3.on()</code> methods to dispatch and subscribe to events.</p>
-
-<p>The current application state is accessible via the <code>h3.state</code> property.</p>
-
-<a name="Modules"></a>
-<h3>Modules<a href="#document-top" title="Go to top"></a></h3>
-
-<p>The <code>h3.init()</code> method takes an array of <em>modules</em> that can be used to manipulate the application state when specific events are received. A simple module looks like this:</p>
-
-<pre><code class="js">const error = () =&gt; {
-  h3.on("$init", () =&gt; ({ displayEmptyTodoError: false }));
-  h3.on("error/clear", (state) =&gt; ({ displayEmptyTodoError: false }));
-  h3.on("error/set", (state) =&gt; ({ displayEmptyTodoError: true }));
-};
-</code></pre>
-
-<p>Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.</p>
-
 <a name="Router"></a>
 <h3>Router<a href="#document-top" title="Go to top"></a></h3>
 
@@ -7520,7 +7494,7 @@ const CounterButton = () =&gt; {
 <p>The current route is always accessible via the <code>h3.route</code> property.</p>
 
 <a name="Screen"></a>
-<h4>Screen<a href="#document-top" title="Go to top"></a></h4>
+<h3>Screen<a href="#document-top" title="Go to top"></a></h3>
 
 <p>A screen is a top-level component that handles a route. Unlike ordinary components, screens:</p>
 
@@ -7536,6 +7510,27 @@ const CounterButton = () =&gt; {
 * Both the <strong>setup</strong> method take an object as a parameter, representing the component state. Such object will be empty the first time the <strong>setup</strong> method is called for a given component, but it may contain properties not removed during subsequent teardowns.
 * The <strong>teardown</strong> method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
 * Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.</p>
+
+<a name="Store"></a>
+<h3>Store<a href="#document-top" title="Go to top"></a></h3>
+
+<p>H3 essentially uses something very, <em>very</em> similar to <a href="https://github.com/storeon/storeon">Storeon</a> for state management <em>and</em> also as a very simple client-side event dispatcher/subscriber (seriously, it is virtually the same code as Storeon). Typically you&rsquo;ll only use the default store created by H3 upon initialization, and you&rsquo;ll use the <code>h3.dispatch()</code> and <code>h3.on()</code> methods to dispatch and subscribe to events.</p>
+
+<p>The current application state is accessible via the <code>h3.state</code> property.</p>
+
+<a name="Module"></a>
+<h3>Module<a href="#document-top" title="Go to top"></a></h3>
+
+<p>The <code>h3.init()</code> method takes an array of <em>modules</em> that can be used to manipulate the application state when specific events are received. A simple module looks like this:</p>
+
+<pre><code class="js">const error = () =&gt; {
+  h3.on("$init", () =&gt; ({ displayEmptyTodoError: false }));
+  h3.on("error/clear", (state) =&gt; ({ displayEmptyTodoError: false }));
+  h3.on("error/set", (state) =&gt; ({ displayEmptyTodoError: true }));
+};
+</code></pre>
+
+<p>Essentially a module is just a function that typically is meant to run only once to define one or more event subscriptions. Modules are the place where you should handle state changes in your application.</p>
 
 <a name="How-everything-works..."></a>
 <h3>How everything works&hellip;<a href="#document-top" title="Go to top"></a></h3>
@@ -7650,6 +7645,7 @@ import Prism from "./vendor/prism.js";
   overview: "Overview",
   "quick-start": "Quick Start",
   "key-concepts": "Key Concepts",
+  "best-practices": "Best Practices",
   tutorial: "Tutorial",
   api: "API",
   about: "About",
@@ -8124,7 +8120,7 @@ h("ul", ["A", "B", "C"].map(TestLi));
 
 <ul>
 <li><strong>Leo Horie</strong>, author of the awesome <a href="https://mithril.js.org/">Mithril</a> framework that inspired me to write the H3 microframework in a moment of need.</li>
-<li><strong>Andrey Sitnik</strong>, author of the beatiful <a href="https://evilmartians.com/chronicles/storeon-redux-in-173-bytes">Storeon</a> state management library, that is used (with minor modification) as the H3 store.</li>
+<li><strong>Andrey Sitnik</strong>, author of the beatiful <a href="https://evilmartians.com/chronicles/storeon-redux-in-173-bytes">Storeon</a> state management library, that is used (with minor modifications) as the H3 store.</li>
 </ul>
 
     </div>

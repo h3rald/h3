@@ -62,6 +62,7 @@ const labels = {
   overview: "Overview",
   "quick-start": "Quick Start",
   "key-concepts": "Key Concepts",
+  "best-practices": "Best Practices",
   tutorial: "Tutorial",
   api: "API",
   about: "About",
