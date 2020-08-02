@@ -23,7 +23,7 @@ Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if y
 Here's an example of an extremely minimal SPA created with H3:
 
 ```js
-import h3 from "./h3.js";
+import { h3, h } from "./h3.js";
 h3.init(() => h("h1", "Hello, World!"));
 ```
 
