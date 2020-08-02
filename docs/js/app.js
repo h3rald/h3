@@ -50,8 +50,8 @@ const Header = () => {
       h("img", { alt: "H3", src: "images/h3.svg" }),
     ]),
     h("div.version.col-sm.col-md", [
-      h("div.version-number", "v0.10.0"),
-      h("div.version-label", "“Jittery Jem'Hadar“"),
+      h("div.version-number", "v0.11.0"),
+      h("div.version-label", "“Keen Klingon“"),
     ]),
     h("label.drawer-toggle.button.col-sm-last", { for: "drawer-control" }),
   ]);

@@ -1,5 +1,5 @@
 /**
- * H3 v0.10.0 "Jittery Jem'Hadar"
+ * H3 v0.11.0 "Keen Klingon"
  * Copyright 2020 Fabio Cevasco <h3rald@h3rald.com>
  *
  * @license MIT

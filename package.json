@@ -1,7 +1,7 @@
 {
   "name": "@h3rald/h3",
   "version": "0.11.0",
-  "versionName": "Jittery Jem'Hadar",
+  "versionName": "Keen Klingon",
   "description": "A tiny, extremely minimalist JavaScript microframework.",
   "main": "h3.js",
   "scripts": {
