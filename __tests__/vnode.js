@@ -77,6 +77,16 @@ describe("VNode", () => {
         expect(node.checked).toEqual(false);
     });
 
+    it("should handle falsy props when redrawing", () => {
+        const vnode1 = h("test-element", { q: 1});
+        const node = vnode1.render();
+        expect(node.q).toEqual(1);
+        const vnode = h("test-element", { q: 0});
+        vnode1.redraw({ node, vnode });
+        expect(node.q).toEqual(0);
+        expect(vnode1.props.q).toEqual(0);
+    });
+
     it("should handle non-string props as properties and not create attributes", () => {
         const v = h("div", {
             test: true,

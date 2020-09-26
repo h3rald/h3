@@ -393,11 +393,10 @@ class VNode {
           newvnode.props[a]
             ? node.setAttribute(a, "")
             : node.removeAttribute(a);
-        } else if (!newvnode.props[a]) {
+        } else if ([null, undefined].includes(newvnode.props[a])) {
           delete oldvnode.props[a];
           node.removeAttribute(a);
         } else if (
-          newvnode.props[a] &&
           newvnode.props[a] !== oldvnode.props[a]
         ) {
           oldvnode.props[a] = newvnode.props[a];
