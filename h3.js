@@ -6,6 +6,9 @@
  * For the full license, see: https://github.com/h3rald/h3/blob/master/LICENSE
  */
 const checkProperties = (obj1, obj2) => {
+  if (Object.keys(obj1).length !== Object.keys(obj2).length) {
+    return false;
+  }
   for (const key in obj1) {
     if (!(key in obj2)) {
       return false;
@@ -18,24 +21,16 @@ const checkProperties = (obj1, obj2) => {
 };
 
 const equal = (obj1, obj2) => {
-  if (
-    (obj1 === null && obj2 === null) ||
-    (obj1 === undefined && obj2 === undefined)
-  ) {
+  if ((obj1 === null && obj2 === null) || (obj1 === undefined && obj2 === undefined)) {
     return true;
   }
-  if (
-    (obj1 === undefined && obj2 !== undefined) ||
-    (obj1 !== undefined && obj2 === undefined) ||
-    (obj1 === null && obj2 !== null) ||
-    (obj1 !== null && obj2 === null)
-  ) {
+  if ((obj1 === undefined && obj2 !== undefined) || (obj1 !== undefined && obj2 === undefined) || (obj1 === null && obj2 !== null) || (obj1 !== null && obj2 === null)) {
     return false;
   }
   if (obj1.constructor !== obj2.constructor) {
     return false;
   }
-  if (typeof obj1 === "function") {
+  if (typeof obj1 === 'function') {
     if (obj1.toString() !== obj2.toString()) {
       return false;
     }
@@ -54,7 +49,7 @@ const equal = (obj1, obj2) => {
     }
     return true;
   }
-  return checkProperties(obj1, obj2); 
+  return checkProperties(obj1, obj2);
 };
 
 const selectorRegex = /^([a-z][a-z0-9:_=-]*)?(#[a-z0-9:_=-]+)?(\.[^ ]+)*$/i;
@@ -76,49 +71,37 @@ class VNode {
     this.classList = [];
     this.eventListeners = {};
     if (args.length === 0) {
-      throw new Error("[VNode] No arguments passed to VNode constructor.");
+      throw new Error('[VNode] No arguments passed to VNode constructor.');
     }
     if (args.length === 1) {
       let vnode = args[0];
-      if (typeof vnode === "string") {
+      if (typeof vnode === 'string') {
         // Assume empty element
         this.processSelector(vnode);
-      } else if (
-        typeof vnode === "function" ||
-        (typeof vnode === "object" && vnode !== null)
-      ) {
+      } else if (typeof vnode === 'function' || (typeof vnode === 'object' && vnode !== null)) {
         // Text node
-        if (vnode.type === "#text") {
-          this.type = "#text";
+        if (vnode.type === '#text') {
+          this.type = '#text';
           this.value = vnode.value;
         } else {
           this.from(this.processVNodeObject(vnode));
         }
       } else {
-        throw new Error(
-          "[VNode] Invalid first argument passed to VNode constructor."
-        );
+        throw new Error('[VNode] Invalid first argument passed to VNode constructor.');
       }
     } else if (args.length === 2) {
       let [selector, data] = args;
-      if (typeof selector !== "string") {
-        throw new Error(
-          "[VNode] Invalid first argument passed to VNode constructor."
-        );
+      if (typeof selector !== 'string') {
+        throw new Error('[VNode] Invalid first argument passed to VNode constructor.');
       }
       this.processSelector(selector);
-      if (typeof data === "string") {
+      if (typeof data === 'string') {
         // Assume single child text node
-        this.children = [new VNode({ type: "#text", value: data })];
+        this.children = [new VNode({ type: '#text', value: data })];
         return;
       }
-      if (
-        typeof data !== "function" &&
-        (typeof data !== "object" || data === null)
-      ) {
-        throw new Error(
-          "[VNode] The second argument of a VNode constructor must be an object, an array or a string."
-        );
+      if (typeof data !== 'function' && (typeof data !== 'object' || data === null)) {
+        throw new Error('[VNode] The second argument of a VNode constructor must be an object, an array or a string.');
       }
       if (Array.isArray(data)) {
         // Assume 2nd argument as children
@@ -137,24 +120,16 @@ class VNode {
         children = args.slice(2);
       }
       children = Array.isArray(children) ? children : [children];
-      if (typeof selector !== "string") {
-        throw new Error(
-          "[VNode] Invalid first argument passed to VNode constructor."
-        );
+      if (typeof selector !== 'string') {
+        throw new Error('[VNode] Invalid first argument passed to VNode constructor.');
       }
       this.processSelector(selector);
-      if (
-        props instanceof Function ||
-        props instanceof VNode ||
-        typeof props === "string"
-      ) {
+      if (props instanceof Function || props instanceof VNode || typeof props === 'string') {
         // 2nd argument is a child
         children = [props].concat(children);
       } else {
-        if (typeof props !== "object" || props === null) {
-          throw new Error(
-            "[VNode] Invalid second argument passed to VNode constructor."
-          );
+        if (typeof props !== 'object' || props === null) {
+          throw new Error('[VNode] Invalid second argument passed to VNode constructor.');
         }
         this.processProperties(props);
       }
@@ -188,18 +163,13 @@ class VNode {
     this.style = attrs.style;
     this.value = attrs.value;
     this.data = attrs.data || {};
-    this.classList =
-      attrs.classList && attrs.classList.length > 0
-        ? attrs.classList
-        : this.classList;
+    this.classList = attrs.classList && attrs.classList.length > 0 ? attrs.classList : this.classList;
     this.props = attrs;
     Object.keys(attrs)
-      .filter((a) => a.startsWith("on") && attrs[a])
+      .filter((a) => a.startsWith('on') && attrs[a])
       .forEach((key) => {
-        if (typeof attrs[key] !== "function") {
-          throw new Error(
-            `[VNode] Event handler specified for ${key} event is not a function.`
-          );
+        if (typeof attrs[key] !== 'function') {
+          throw new Error(`[VNode] Event handler specified for ${key} event is not a function.`);
         }
         this.eventListeners[key.slice(2)] = attrs[key];
         delete this.props[key];
@@ -222,7 +192,7 @@ class VNode {
     if (id) {
       this.id = id.slice(1);
     }
-    this.classList = (classes && classes.split(".").slice(1)) || [];
+    this.classList = (classes && classes.split('.').slice(1)) || [];
   }
 
   processVNodeObject(arg) {
@@ -231,27 +201,25 @@ class VNode {
     }
     if (arg instanceof Function) {
       let vnode = arg();
-      if (typeof vnode === "string") {
-        vnode = new VNode({ type: "#text", value: vnode });
+      if (typeof vnode === 'string') {
+        vnode = new VNode({ type: '#text', value: vnode });
       }
       if (!(vnode instanceof VNode)) {
-        throw new Error("[VNode] Function argument does not return a VNode");
+        throw new Error('[VNode] Function argument does not return a VNode');
       }
       return vnode;
     }
-    throw new Error(
-      "[VNode] Invalid first argument provided to VNode constructor."
-    );
+    throw new Error('[VNode] Invalid first argument provided to VNode constructor.');
   }
 
   processChildren(arg) {
     const children = Array.isArray(arg) ? arg : [arg];
     this.children = children
       .map((c) => {
-        if (typeof c === "string") {
-          return new VNode({ type: "#text", value: c });
+        if (typeof c === 'string') {
+          return new VNode({ type: '#text', value: c });
         }
-        if (typeof c === "function" || (typeof c === "object" && c !== null)) {
+        if (typeof c === 'function' || (typeof c === 'object' && c !== null)) {
           return this.processVNodeObject(c);
         }
         if (c) {
@@ -263,7 +231,7 @@ class VNode {
 
   // Renders the actual DOM Node corresponding to the current Virtual Node
   render() {
-    if (this.type === "#text") {
+    if (this.type === '#text') {
       return document.createTextNode(this.value);
     }
     const node = document.createElement(this.type);
@@ -272,10 +240,10 @@ class VNode {
     }
     Object.keys(this.props).forEach((p) => {
       // Set attributes
-      if (typeof this.props[p] === "boolean") {
-        this.props[p] ? node.setAttribute(p, "") : node.removeAttribute(p);
+      if (typeof this.props[p] === 'boolean') {
+        this.props[p] ? node.setAttribute(p, '') : node.removeAttribute(p);
       }
-      if (["string", "number"].includes(typeof this.props[p])) {
+      if (['string', 'number'].includes(typeof this.props[p])) {
         node.setAttribute(p, this.props[p]);
       }
       // Set properties
@@ -287,10 +255,10 @@ class VNode {
     });
     // Value
     if (this.value) {
-      if (["textarea", "input"].includes(this.type)) {
+      if (['textarea', 'input'].includes(this.type)) {
         node.value = this.value;
       } else {
-        node.setAttribute("value", this.value);
+        node.setAttribute('value', this.value);
       }
     }
     // Style
@@ -325,9 +293,7 @@ class VNode {
     if (
       oldvnode.constructor !== newvnode.constructor ||
       oldvnode.type !== newvnode.type ||
-      (oldvnode.type === newvnode.type &&
-        oldvnode.type === "#text" &&
-        oldvnode !== newvnode)
+      (oldvnode.type === newvnode.type && oldvnode.type === '#text' && oldvnode !== newvnode)
     ) {
       const renderedNode = newvnode.render();
       node.parentNode.replaceChild(renderedNode, node);
@@ -337,16 +303,16 @@ class VNode {
     }
     // ID
     if (oldvnode.id !== newvnode.id) {
-      node.id = newvnode.id || "";
+      node.id = newvnode.id || '';
       oldvnode.id = newvnode.id;
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
       oldvnode.value = newvnode.value;
-      if (["textarea", "input"].includes(oldvnode.type)) {
-        node.value = newvnode.value || "";
+      if (['textarea', 'input'].includes(oldvnode.type)) {
+        node.value = newvnode.value || '';
       } else {
-        node.setAttribute("value", newvnode.value || "");
+        node.setAttribute('value', newvnode.value || '');
       }
     }
     // Classes
@@ -365,7 +331,7 @@ class VNode {
     }
     // Style
     if (oldvnode.style !== newvnode.style) {
-      node.style.cssText = newvnode.style || "";
+      node.style.cssText = newvnode.style || '';
       oldvnode.style = newvnode.style;
     }
     // Data
@@ -388,19 +354,15 @@ class VNode {
     if (!equal(oldvnode.props, newvnode.props)) {
       Object.keys(oldvnode.props).forEach((a) => {
         node[a] = newvnode.props[a];
-        if (typeof newvnode.props[a] === "boolean") {
+        if (typeof newvnode.props[a] === 'boolean') {
           oldvnode.props[a] = newvnode.props[a];
-          newvnode.props[a]
-            ? node.setAttribute(a, "")
-            : node.removeAttribute(a);
+          newvnode.props[a] ? node.setAttribute(a, '') : node.removeAttribute(a);
         } else if ([null, undefined].includes(newvnode.props[a])) {
           delete oldvnode.props[a];
           node.removeAttribute(a);
-        } else if (
-          newvnode.props[a] !== oldvnode.props[a]
-        ) {
+        } else if (newvnode.props[a] !== oldvnode.props[a]) {
           oldvnode.props[a] = newvnode.props[a];
-          if (["string", "number"].includes(typeof newvnode.props[a])) {
+          if (['string', 'number'].includes(typeof newvnode.props[a])) {
             node.setAttribute(a, newvnode.props[a]);
           }
         }
@@ -408,7 +370,9 @@ class VNode {
       Object.keys(newvnode.props).forEach((a) => {
         if (!oldvnode.props[a] && newvnode.props[a]) {
           oldvnode.props[a] = newvnode.props[a];
-          node.setAttribute(a, newvnode.props[a]);
+          if (['string', 'number'].includes(typeof newvnode.props[a])) {
+            node.setAttribute(a, newvnode.props[a]);
+          }
         }
       });
     }
@@ -417,9 +381,7 @@ class VNode {
       Object.keys(oldvnode.eventListeners).forEach((a) => {
         if (!newvnode.eventListeners[a]) {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
-        } else if (
-          !equal(newvnode.eventListeners[a], oldvnode.eventListeners[a])
-        ) {
+        } else if (!equal(newvnode.eventListeners[a], oldvnode.eventListeners[a])) {
           node.removeEventListener(a, oldvnode.eventListeners[a]);
           node.addEventListener(a, newvnode.eventListeners[a]);
         }
@@ -454,8 +416,7 @@ class VNode {
             oldvnode.children.splice(count, 0, newvnode.children[count]);
             const renderedNode = newvnode.children[count].render();
             node.insertBefore(renderedNode, node.childNodes[count]);
-            newvnode.children[count].$onrender &&
-              newvnode.children[count].$onrender(renderedNode);
+            newvnode.children[count].$onrender && newvnode.children[count].$onrender(renderedNode);
             break checkmap;
           }
           case DELETE: {
@@ -500,11 +461,7 @@ const mapChildren = (oldvnode, newvnode) => {
         break;
       }
     }
-    if (
-      op < 0 &&
-      newList.length >= oldList.length &&
-      map.length >= oldList.length
-    ) {
+    if (op < 0 && newList.length >= oldList.length && map.length >= oldList.length) {
       op = INSERT;
     }
     map.push(op);
@@ -512,9 +469,7 @@ const mapChildren = (oldvnode, newvnode) => {
   const oldNodesFound = map.filter((c) => c >= 0);
   if (oldList.length > newList.length) {
     // Remove remaining nodes
-    [...Array(oldList.length - newList.length).keys()].forEach(() =>
-      map.push(DELETE)
-    );
+    [...Array(oldList.length - newList.length).keys()].forEach(() => map.push(DELETE));
   } else if (oldNodesFound.length === oldList.length) {
     // All nodes not found are insertions
     map = map.map((c) => (c < 0 ? INSERT : c));
@@ -534,7 +489,7 @@ class Store {
     this.state = {};
   }
   dispatch(event, data) {
-    if (event !== "$log") this.dispatch("$log", { event, data });
+    if (event !== '$log') this.dispatch('$log', { event, data });
     if (this.events[event]) {
       let changes = {};
       let changed;
@@ -561,9 +516,9 @@ class Route {
     this.parts = parts;
     this.params = {};
     if (this.query) {
-      const rawParams = this.query.split("&");
+      const rawParams = this.query.split('&');
       rawParams.forEach((p) => {
-        const [name, value] = p.split("=");
+        const [name, value] = p.split('=');
         this.params[decodeURIComponent(name)] = decodeURIComponent(value);
       });
     }
@@ -577,7 +532,7 @@ class Router {
     this.store = store;
     this.location = location || window.location;
     if (!routes || Object.keys(routes).length === 0) {
-      throw new Error("[Router] No routes defined.");
+      throw new Error('[Router] No routes defined.');
     }
     const defs = Object.keys(routes);
     this.routes = routes;
@@ -589,34 +544,29 @@ class Router {
         node: this.element.childNodes[0],
         vnode: this.routes[this.route.def](state),
       });
-      this.store.dispatch("$redraw");
+      this.store.dispatch('$redraw');
     };
   }
 
   async start() {
     const processPath = async (data) => {
       const oldRoute = this.route;
-      const fragment =
-        (data &&
-          data.newURL &&
-          data.newURL.match(/(#.+)$/) &&
-          data.newURL.match(/(#.+)$/)[1]) ||
-        this.location.hash;
-      const path = fragment.replace(/\?.+$/, "").slice(1);
+      const fragment = (data && data.newURL && data.newURL.match(/(#.+)$/) && data.newURL.match(/(#.+)$/)[1]) || this.location.hash;
+      const path = fragment.replace(/\?.+$/, '').slice(1);
       const rawQuery = fragment.match(/\?(.+)$/);
-      const query = rawQuery && rawQuery[1] ? rawQuery[1] : "";
-      const pathParts = path.split("/").slice(1);
+      const query = rawQuery && rawQuery[1] ? rawQuery[1] : '';
+      const pathParts = path.split('/').slice(1);
 
       let parts = {};
       for (let def of Object.keys(this.routes)) {
-        let routeParts = def.split("/").slice(1);
+        let routeParts = def.split('/').slice(1);
         let match = true;
         let index = 0;
         parts = {};
         while (match && routeParts[index]) {
           const rP = routeParts[index];
           const pP = pathParts[index];
-          if (rP.startsWith(":") && pP) {
+          if (rP.startsWith(':') && pP) {
             parts[rP.slice(1)] = pP;
           } else {
             match = rP === pP;
@@ -635,19 +585,15 @@ class Router {
       let state = {};
       if (oldRoute) {
         const oldRouteComponent = this.routes[oldRoute.def];
-        state =
-          (oldRouteComponent.teardown &&
-            (await oldRouteComponent.teardown(oldRouteComponent.state))) ||
-          state;
+        state = (oldRouteComponent.teardown && (await oldRouteComponent.teardown(oldRouteComponent.state))) || state;
       }
       // New route component setup
       const newRouteComponent = this.routes[this.route.def];
       newRouteComponent.state = state;
-      newRouteComponent.setup &&
-        (await newRouteComponent.setup(newRouteComponent.state));
+      newRouteComponent.setup && (await newRouteComponent.setup(newRouteComponent.state));
       // Redrawing...
       redrawing = true;
-      this.store.dispatch("$navigation", this.route);
+      this.store.dispatch('$navigation', this.route);
       while (this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
       }
@@ -660,17 +606,17 @@ class Router {
       $onrenderCallbacks.forEach((cbk) => cbk());
       $onrenderCallbacks = [];
       window.scrollTo(0, 0);
-      this.store.dispatch("$redraw");
+      this.store.dispatch('$redraw');
     };
-    window.addEventListener("hashchange", processPath);
+    window.addEventListener('hashchange', processPath);
     await processPath();
   }
 
   navigateTo(path, params) {
     let query = Object.keys(params || {})
       .map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(params[p])}`)
-      .join("&");
-    query = query ? `?${query}` : "";
+      .join('&');
+    query = query ? `?${query}` : '';
     this.location.hash = `#${path}${query}`;
   }
 }
@@ -691,23 +637,21 @@ h3.init = (config) => {
   let { element, routes, modules, preStart, postStart, location } = config;
   if (!routes) {
     // Assume config is a component object, define default route
-    if (typeof config !== "function") {
-      throw new Error(
-        "[h3.init] The specified argument is not a valid configuration object or component function"
-      );
+    if (typeof config !== 'function') {
+      throw new Error('[h3.init] The specified argument is not a valid configuration object or component function');
     }
-    routes = { "/": config };
+    routes = { '/': config };
   }
   element = element || document.body;
   if (!(element && element instanceof Element)) {
-    throw new Error("[h3.init] Invalid element specified.");
+    throw new Error('[h3.init] Invalid element specified.');
   }
   // Initialize store
   store = new Store();
   (modules || []).forEach((i) => {
     i(store);
   });
-  store.dispatch("$init");
+  store.dispatch('$init');
   // Initialize router
   router = new Router({ element, routes, store, location });
   return Promise.resolve(preStart && preStart())
@@ -717,30 +661,24 @@ h3.init = (config) => {
 
 h3.navigateTo = (path, params) => {
   if (!router) {
-    throw new Error(
-      "[h3.navigateTo] No application initialized, unable to navigate."
-    );
+    throw new Error('[h3.navigateTo] No application initialized, unable to navigate.');
   }
   return router.navigateTo(path, params);
 };
 
-Object.defineProperty(h3, "route", {
+Object.defineProperty(h3, 'route', {
   get: () => {
     if (!router) {
-      throw new Error(
-        "[h3.route] No application initialized, unable to retrieve current route."
-      );
+      throw new Error('[h3.route] No application initialized, unable to retrieve current route.');
     }
     return router.route;
   },
 });
 
-Object.defineProperty(h3, "state", {
+Object.defineProperty(h3, 'state', {
   get: () => {
     if (!store) {
-      throw new Error(
-        "[h3.state] No application initialized, unable to retrieve current state."
-      );
+      throw new Error('[h3.state] No application initialized, unable to retrieve current state.');
     }
     return store.state;
   },
@@ -748,27 +686,21 @@ Object.defineProperty(h3, "state", {
 
 h3.on = (event, cb) => {
   if (!store) {
-    throw new Error(
-      "[h3.on] No application initialized, unable to listen to events."
-    );
+    throw new Error('[h3.on] No application initialized, unable to listen to events.');
   }
   return store.on(event, cb);
 };
 
 h3.dispatch = (event, data) => {
   if (!store) {
-    throw new Error(
-      "[h3.dispatch] No application initialized, unable to dispatch events."
-    );
+    throw new Error('[h3.dispatch] No application initialized, unable to dispatch events.');
   }
   return store.dispatch(event, data);
 };
 
 h3.redraw = (setRedrawing) => {
   if (!router || !router.redraw) {
-    throw new Error(
-      "[h3.redraw] No application initialized, unable to redraw."
-    );
+    throw new Error('[h3.redraw] No application initialized, unable to redraw.');
   }
   if (redrawing) {
     return;
@@ -779,14 +711,14 @@ h3.redraw = (setRedrawing) => {
 };
 
 h3.screen = ({ setup, display, teardown }) => {
-  if (!display || typeof display !== "function") {
-    throw new Error("[h3.screen] No display property specified.");
+  if (!display || typeof display !== 'function') {
+    throw new Error('[h3.screen] No display property specified.');
   }
-  if (setup && typeof setup !== "function") {
-    throw new Error("[h3.screen] setup property is not a function.");
+  if (setup && typeof setup !== 'function') {
+    throw new Error('[h3.screen] setup property is not a function.');
   }
-  if (teardown && typeof teardown !== "function") {
-    throw new Error("[h3.screen] teardown property is not a function.");
+  if (teardown && typeof teardown !== 'function') {
+    throw new Error('[h3.screen] teardown property is not a function.');
   }
   const fn = display;
   if (setup) {
