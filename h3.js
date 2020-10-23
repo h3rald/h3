@@ -590,7 +590,11 @@ class Router {
       // New route component setup
       const newRouteComponent = this.routes[this.route.def];
       newRouteComponent.state = state;
-      newRouteComponent.setup && (await newRouteComponent.setup(newRouteComponent.state));
+      if (newRouteComponent.setup) {
+        if ((await newRouteComponent.setup(newRouteComponent.state)) === false) {
+          return;
+        }
+      }
       // Redrawing...
       redrawing = true;
       this.store.dispatch('$navigation', this.route);
