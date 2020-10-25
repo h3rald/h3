@@ -597,8 +597,11 @@ class Router {
       const newRouteComponent = this.routes[newRoute.def];
       newRouteComponent.state = state;
       if (newRouteComponent.setup) {
+        this.route = newRoute;
         if ((await newRouteComponent.setup(newRouteComponent.state)) === false) {
           // Abort navigation
+          this.route = oldRoute;
+          this.store.dispatch('$navigation', null);
           return;
         }
       }
@@ -718,8 +721,10 @@ h3.redraw = (setRedrawing) => {
     return;
   }
   redrawing = true;
-  router.redraw();
-  redrawing = setRedrawing || false;
+  requestAnimationFrame(() => {
+    router.redraw();
+    redrawing = setRedrawing || false;
+  });
 };
 
 h3.screen = ({ setup, display, teardown }) => {

@@ -126,13 +126,17 @@ describe('h3 (Router)', () => {
     h3.navigateTo('/c1/a/b/c');
   });
 
-  it('should not navigate if setup method returns false', () => {
+  it('should not navigate if setup method returns false', (done) => {
     let redraws = 0;
     const oldroute = h3.route;
     C1.setup = () => {
       return false;
     };
+    h3.on('$navigation', (state, data) => {
+      expect(data).toEqual(null);
+      expect(h3.route).toEqual(oldroute);
+      done();
+    });
     h3.navigateTo('/c1/a/b/c');
-    expect(h3.route).toEqual(oldroute);
   });
 });
