@@ -20,6 +20,8 @@ const checkProperties = (obj1, obj2) => {
   return true;
 };
 
+const blank = (v) => [undefined, null].includes(v);
+
 const equal = (obj1, obj2) => {
   if ((obj1 === null && obj2 === null) || (obj1 === undefined && obj2 === undefined)) {
     return true;
@@ -235,7 +237,7 @@ class VNode {
       return document.createTextNode(this.value);
     }
     const node = document.createElement(this.type);
-    if (this.id) {
+    if (!blank(this.id)) {
       node.id = this.id;
     }
     Object.keys(this.props).forEach((p) => {
@@ -255,10 +257,10 @@ class VNode {
     });
     // Value
     if (this.value) {
-      if (['textarea', 'input'].includes(this.type)) {
+      if (['textarea', 'input', 'option', 'button'].includes(this.type)) {
         node.value = this.value;
       } else {
-        node.setAttribute('value', this.value);
+        node.setAttribute('value', this.value.toString());
       }
     }
     // Style
@@ -267,7 +269,7 @@ class VNode {
     }
     // Classes
     this.classList.forEach((c) => {
-      node.classList.add(c);
+      c && node.classList.add(c);
     });
     // Data
     Object.keys(this.data).forEach((key) => {
@@ -303,16 +305,16 @@ class VNode {
     }
     // ID
     if (oldvnode.id !== newvnode.id) {
-      node.id = newvnode.id || '';
+      node.id = newvnode.id;
       oldvnode.id = newvnode.id;
     }
     // Value
     if (oldvnode.value !== newvnode.value) {
       oldvnode.value = newvnode.value;
-      if (['textarea', 'input'].includes(oldvnode.type)) {
-        node.value = newvnode.value || '';
+      if (['textarea', 'input', 'option', 'button'].includes(oldvnode.type)) {
+        node.value = blank(newvnode.value) ? '' : newvnode.value.toString();
       } else {
-        node.setAttribute('value', newvnode.value || '');
+        node.setAttribute('value', blank(newvnode.value) ? '' : newvnode.value.toString());
       }
     }
     // Classes
@@ -323,7 +325,7 @@ class VNode {
         }
       });
       newvnode.classList.forEach((c) => {
-        if (!oldvnode.classList.includes(c)) {
+        if (c && !oldvnode.classList.includes(c)) {
           node.classList.add(c);
         }
       });
@@ -368,9 +370,12 @@ class VNode {
         }
       });
       Object.keys(newvnode.props).forEach((a) => {
-        if (!oldvnode.props[a] && newvnode.props[a]) {
+        if (blank(oldvnode.props[a]) && !blank(newvnode.props[a])) {
           oldvnode.props[a] = newvnode.props[a];
-          if (['string', 'number'].includes(typeof newvnode.props[a])) {
+          node[a] = newvnode.props[a];
+          if (typeof newvnode.props[a] === 'boolean') {
+            node.setAttribute(a, '');
+          } else if (['string', 'number'].includes(typeof newvnode.props[a])) {
             node.setAttribute(a, newvnode.props[a]);
           }
         }
@@ -558,6 +563,7 @@ class Router {
       const pathParts = path.split('/').slice(1);
 
       let parts = {};
+      let newRoute;
       for (let def of Object.keys(this.routes)) {
         let routeParts = def.split('/').slice(1);
         let match = true;
@@ -574,11 +580,11 @@ class Router {
           index++;
         }
         if (match) {
-          this.route = new Route({ query, path, def, parts });
+          newRoute = new Route({ query, path, def, parts });
           break;
         }
       }
-      if (!this.route) {
+      if (!newRoute) {
         throw new Error(`[Router] No route matches '${fragment}'`);
       }
       // Old route component teardown
@@ -588,13 +594,15 @@ class Router {
         state = (oldRouteComponent.teardown && (await oldRouteComponent.teardown(oldRouteComponent.state))) || state;
       }
       // New route component setup
-      const newRouteComponent = this.routes[this.route.def];
+      const newRouteComponent = this.routes[newRoute.def];
       newRouteComponent.state = state;
       if (newRouteComponent.setup) {
         if ((await newRouteComponent.setup(newRouteComponent.state)) === false) {
+          // Abort navigation
           return;
         }
       }
+      this.route = newRoute;
       // Redrawing...
       redrawing = true;
       this.store.dispatch('$navigation', this.route);
