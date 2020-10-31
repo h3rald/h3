@@ -8,7 +8,7 @@ No, that's not a mistake. Although you should understand [why immutability is im
 
 In H3, changes only occur when needed. Most notably, when re-rendering the Virtual DOM tree of the application will be *mutated in place*, but only where necessary. Functions as well are considered equal if their source code (i.e. string representation) is equal. While this can cause problems in some situations if you are not aware of it, it can be beneficial and actually simplify things most of the time.
 
-When managing state, if something is different you should typically _just change it_, unless it's shared across the whole application through the Store, in which case (but only in that case) you should try to manage change without side effects and following basic immutability rules. As a rule of thumb, Modules should manage shared application state in an immutable way.
+When managing state, if something is different you should typically *just change it*, unless it's shared across the whole application through the Store, in which case (but only in that case) you should try to manage change without side effects and following basic immutability rules. As a rule of thumb, Modules should manage shared application state in an immutable way.
 
 ### Components
 

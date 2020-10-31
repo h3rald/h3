@@ -186,6 +186,8 @@ h3.screen({
 
 This example shows how to implement a simple component that renders an employee profile in the `display` function, fetches data (if necessary) in the `setup` function, and preserves data in the `teardown` function.
 
+**Tip** To interrupt navigation or perform redirects, return **false** in the **setup** method.
+
 ### h3.dispatch(event: string, data: any)
 
 Dispatches a event and optionally some data. Messages are typically handled centrally by modules.

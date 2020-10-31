@@ -67,6 +67,7 @@ Screens are typically created using the **h3.screen** shorthand method, but they
 
 Note that:
 * Both the **setup** method take an object as a parameter, representing the component state. Such object will be empty the first time the **setup** method is called for a given component, but it may contain properties not removed during subsequent teardowns.
+* If the **setup** method returns **false**, the **display** method of the screen (or the main screen function if you created it manually) will not be executed (and a **$navigation** event will be dispatched with **null** as data parameter). This can be useful in certain situations to interrupt navigation or perform redirects.
 * The **teardown** method can return an object, which will be retained as component state. If however nothing is returned, the component state object is emptied.
 * Both methods can be asynchronous, in which case H3 will wait for their completion before proceeding.
 
