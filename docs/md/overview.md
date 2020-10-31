@@ -14,7 +14,7 @@ Here, look, it's just one file:
 
 <a href="https://raw.githubusercontent.com/h3rald/h3/v0.11.0/h3.js" target="_blank" class="button primary">Download v0.11.0 (Keen Klingon)</a>
 
-<small>Or get the minified version [here](https://raw.githubusercontent.com/h3rald/h3/v0.9.0/h3.min.js).</small>
+<small>Or get the minified version <a href="https://raw.githubusercontent.com/h3rald/h3/v0.11.0/h3.min.js" target="_blank">here</a>.</small>
 
 Yes there is also a [NPM package](https://www.npmjs.com/package/@h3rald/h3) if you want to use it with WebPack and similar, but let me repeat: _it's just one file_.
 
