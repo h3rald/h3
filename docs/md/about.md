@@ -2,10 +2,6 @@
 
 Or: _everything you wanted to know about H3, but you were afraid to ask_.
 
-### Why the name?
-
-Well, because I typically use [H3RALD](https://h3rald.com) as my handle online... **h** was already used by [HyperScript](https://github.com/hyperhype/hyperscript) so... **h3** was the next best thing to use as a constructor for Virtual DOM Nodes.
-
 ### Why the weird release labels?
 
 Ubuntu started [naming their releases after animals](https://wiki.ubuntu.com/DevelopmentCodeNames) in alphabetical order... In a similar way, H3 releases are named after [Star Trek species](https://memory-alpha.fandom.com/wiki/Species).
