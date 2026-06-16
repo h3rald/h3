@@ -1,3 +1,5 @@
+**Important** This project was moved to [sourcehut](https://git.sr.ht/~h3rald/h3) on 2026-06-16.
+
 <a href="https://www.npmjs.com/package/@h3rald/h3" target="_blank" class="badge"><img src="https://img.shields.io/npm/v/@h3rald/h3"></a>
 <a href="https://github.com/h3rald/h3/blob/master/LICENSE" target="_blank" class="badge"><img src="https://img.shields.io/github/license/h3rald/h3"></a>
 <a href="https://travis-ci.org/github/h3rald/h3" target="_blank" class="badge"><img src="https://img.shields.io/travis/h3rald/h3"></a>
